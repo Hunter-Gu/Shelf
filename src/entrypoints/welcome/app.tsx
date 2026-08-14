@@ -1,7 +1,7 @@
 import { Button } from "@astryxdesign/core/Button"
 import { Theme as AstryxTheme } from "@astryxdesign/core/theme"
 import { neutralTheme } from "@astryxdesign/theme-neutral/built"
-import { PanelRightOpen, PuzzleIcon } from "lucide-react"
+import { KeyboardIcon, PanelRightOpen, PuzzleIcon } from "lucide-react"
 import { useState } from "react"
 import { browser } from "wxt/browser"
 
@@ -65,6 +65,27 @@ function WelcomeContent() {
           <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
             Click the puzzle-piece icon next to your address bar, then the
             pin next to Markit.
+          </p>
+        </div>
+
+        <div className="mt-6 border-t border-black/5 pt-6 text-left dark:border-white/10">
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+            <KeyboardIcon className="h-4 w-4" />
+            Or open it with a keyboard shortcut
+          </p>
+          <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
+            <kbd className="rounded border border-black/10 bg-black/5 px-1.5 py-0.5 font-mono text-xs dark:border-white/10 dark:bg-white/10">
+              Ctrl+Shift+K
+            </kbd>{" "}
+            opens Markit and jumps straight to search.{" "}
+            <button
+              type="button"
+              className="underline underline-offset-2 hover:no-underline"
+              onClick={() =>
+                void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
+              }>
+              Change the shortcut
+            </button>
           </p>
         </div>
       </div>

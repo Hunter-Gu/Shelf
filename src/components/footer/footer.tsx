@@ -1,7 +1,8 @@
 import { cn } from "common/lib/utils"
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { Reorder } from "framer-motion"
-import { Plus } from "lucide-react"
+import { Keyboard, Plus } from "lucide-react"
+import { browser } from "wxt/browser"
 
 import { useAppContext } from "~/app/app-context"
 
@@ -28,7 +29,14 @@ export function Footer({
   return (
     <FooterContainer
       className={cn(isEditingWorkspace ? "mt-0" : "mt-auto", styles.container)}>
-      <div></div>
+      <AstryxIconButton
+        label="Keyboard shortcuts"
+        variant="ghost"
+        icon={<Keyboard size={18} className="text-gray-500 dark:text-gray-400" />}
+        onClick={() => {
+          void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
+        }}
+      />
 
       <Reorder.Group
         className="flex gap-1 items-center"
