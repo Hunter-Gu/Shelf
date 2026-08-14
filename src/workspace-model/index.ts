@@ -1,3 +1,3 @@
-export * from './workspace-model';
 export * from './workspace';
-export * from './types';
+export * from './workspace-name';
+export * from './proof-workspaces';

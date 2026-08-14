@@ -10,7 +10,7 @@ export type Bookmark = TreeNode & {
 };
 
 export type RootTree = TreeNode & {
-	children: [Folder, Folder];
+  children: [Folder, Folder];
 };
 
 export type Folder = TreeNode & {

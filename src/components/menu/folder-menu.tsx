@@ -4,13 +4,11 @@ import { type MouseEventHandler } from 'react';
 
 import { useSetEditableId } from '~/context/editable-context';
 import { useVirtualTree } from '~/context/virtual-tree-context';
+import { useAppContext } from '~/app/app-context';
 import { useNextTick } from '~/hooks/use-next-tick';
-import { tag, TagEvent } from '~/tag';
 
 import { isFolder, type Bookmark, type Folder } from '../../bookmark-model';
-import { useBookmarkModel, useWorkspaceModel } from '../../context/manager-context';
-import { useCompute } from '../../state';
-import { tabManager } from '../../tab-manager';
+import { tabManager } from '~/tabs/actions';
 import { Menu } from './menu';
 import { MenubarCheckboxItem, MenubarSubContent, Text } from './styled';
 
@@ -24,12 +22,10 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
 	const updateFolderState = useUpdateFolderState();
 	const { scrollToId } = useVirtualTree();
 	const nextTick = useNextTick();
-	const { currentWorkspace, workspaces: workspacesState, turnToSpace } = useWorkspaceModel();
-	const { create, move, removeTree } = useBookmarkModel();
+	const { bookmarks, workspace } = useAppContext();
+	const { create, move, removeTree } = bookmarks;
+	const { currentWorkspace: current, workspaces, turnToSpace } = workspace;
 	const setEditableId = useSetEditableId();
-
-	const workspaces = useCompute(workspacesState);
-	const current = useCompute(currentWorkspace);
 
 	const turnToSpaceTitle = `Turn '${title}' into Space`;
 
@@ -88,7 +84,6 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
 
 			<MenubarItem
 				onClick={async () => {
-					tag.event(TagEvent.CreateFolder);
 					const folder = await create({
 						parentId: id,
 						title: 'Untitled',
@@ -131,7 +126,6 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
 								move(id, {
 									parentId: space.id,
 								});
-								tag.event(TagEvent.MoveToSpace);
 							}}
 						>
 							{space.title}
@@ -145,7 +139,6 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
 			<MenubarItem
 				onClick={() => {
 					removeTree(id);
-					tag.event(TagEvent.Delete);
 				}}
 			>
 				Delete

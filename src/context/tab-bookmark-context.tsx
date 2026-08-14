@@ -1,88 +1,47 @@
-import { createContext, useContext, useEffect, useMemo, type PropsWithChildren } from 'react';
+import { createContext, useContext, useMemo, type PropsWithChildren } from "react"
 
-import type { AttachAPI, ChannelAttachAPI } from '~/message-channel';
-import { TabEvents } from '~/tab-manager/tab-events';
+import { useAppContext } from "~/app/app-context"
+import type { Bookmark, Folder, RootTree } from "~/bookmark-model"
 
-import {
-	BookmarkModel,
-	isFolder,
-	type Bookmark,
-	type Folder,
-	type RootTree,
-} from '../bookmark-model';
-import { State, useCompute, useReactive } from '../state';
-
-type CurrentTab = AttachAPI[ChannelAttachAPI.OnTabActivatedOrUpdated]['Res'] | null;
-type CurrentTabStateValue = {
-	currentTab: CurrentTab;
-	bookmark: Bookmark | null;
-};
-
-const DEFAULT_TAB_BOOKMARK: CurrentTabStateValue = {
-	currentTab: null,
-	bookmark: null,
-};
-
-const CurrentTabBookmarkContext = createContext(DEFAULT_TAB_BOOKMARK);
-
-function findDescendantBookmark(folder: Folder | RootTree, url: string): Bookmark | null {
-	const children = folder.children || [];
-
-	let searchResult: Bookmark | null = null;
-	for (let i = 0; i < children.length; i++) {
-		const child = children[i];
-		if (isFolder(child)) {
-			searchResult = findDescendantBookmark(child, url);
-		} else if (child.url === url) {
-			searchResult = child;
-		}
-
-		if (searchResult) {
-			return searchResult;
-		}
-	}
-
-	return searchResult;
+type CurrentTabBookmark = {
+  currentTab: chrome.tabs.Tab | null
+  bookmark: Bookmark | null
 }
 
-export function CurrentTabBookmarkProvider({
-	bookmarkManager,
-	children,
-}: PropsWithChildren<{
-	bookmarkManager: BookmarkModel;
-}>) {
-	const { state: currentTabState, value: currentTab } = useReactive<CurrentTab>(null);
+const CurrentTabBookmarkContext = createContext<CurrentTabBookmark>({
+  currentTab: null,
+  bookmark: null
+})
 
-	const { url } = currentTab || {};
-	const tree = useCompute(bookmarkManager.state);
-	const bookmark = tree && url ? findDescendantBookmark(tree, url) : null;
+function findDescendantBookmark(folder: Folder | RootTree, url: string): Bookmark | null {
+  for (const child of folder.children ?? []) {
+    if ("url" in child) {
+      if (child.url === url) return child
+    } else {
+      const result = findDescendantBookmark(child, url)
+      if (result) return result
+    }
+  }
+  return null
+}
 
-	useTabEvents(currentTabState);
+export function CurrentTabBookmarkProvider({ children }: PropsWithChildren) {
+  const { bookmarks, tabs } = useAppContext()
+  const value = useMemo(() => {
+    const url = tabs.activeTab?.url
+    return {
+      currentTab: tabs.activeTab,
+      bookmark: bookmarks.tree && url ? findDescendantBookmark(bookmarks.tree, url) : null
+    }
+  }, [bookmarks.tree, tabs.activeTab])
 
-	return (
-		<CurrentTabBookmarkContext.Provider
-			value={{
-				bookmark,
-				currentTab,
-			}}
-		>
-			{children}
-		</CurrentTabBookmarkContext.Provider>
-	);
+  return (
+    <CurrentTabBookmarkContext.Provider value={value}>
+      {children}
+    </CurrentTabBookmarkContext.Provider>
+  )
 }
 
 export function useCurrentTabBookmark() {
-	return useContext(CurrentTabBookmarkContext);
-}
-
-function useTabEvents(state: State<CurrentTab>) {
-	const tabEvents = useMemo(() => new TabEvents(state), [state]);
-
-	useEffect(() => {
-		const disposer = tabEvents.onActivatedAndUpdated();
-
-		return disposer;
-	}, [tabEvents]);
-
-	return tabEvents;
+  return useContext(CurrentTabBookmarkContext)
 }

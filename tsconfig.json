@@ -1,14 +1,19 @@
 {
-	"extends": "plasmo/templates/tsconfig.base",
-	"exclude": ["node_modules"],
-	"include": [".plasmo/index.d.ts", "./**/*.ts", "./**/*.tsx", "./index.d.ts"],
-	"compilerOptions": {
-		"strict": true,
-		"strictNullChecks": true,
-		"paths": {
-			"~/*": ["./src/*"],
-			"common/*": ["../common/src/*"]
-		},
-		"baseUrl": "."
-	}
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "strictNullChecks": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "~": ["./src"],
+      "~/*": ["./src/*"],
+      "common/*": ["./src/common/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
 }

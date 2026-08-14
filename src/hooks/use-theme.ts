@@ -1,36 +1,15 @@
-import { useLayoutEffect, useState } from 'react';
-
-import { getDarkModeMatcher } from '../contents/theme';
-import { isExtensionEnv } from '../env';
-import { ChannelEvent, contentChannel } from '../message-channel';
-
-enum Theme {
-	Dark = 'dark',
-	Light = 'light',
-}
+import { useEffect, useState } from "react"
 
 export function useTheme() {
-	const [theme, setTheme] = useState(Theme.Light);
+  const [theme, setTheme] = useState<"light" | "dark">("light")
 
-	useLayoutEffect(() => {
-		const handleTheme = (isDark: boolean) => {
-			setTheme(isDark ? Theme.Dark : Theme.Light);
-		};
-		if (isExtensionEnv) {
-			return contentChannel.on(ChannelEvent.Theme, handleTheme);
-		} else {
-			const modeMatcher = getDarkModeMatcher();
-			handleTheme(modeMatcher.matches);
+  useEffect(() => {
+    const matcher = window.matchMedia("(prefers-color-scheme: dark)")
+    const update = () => setTheme(matcher.matches ? "dark" : "light")
+    update()
+    matcher.addEventListener("change", update)
+    return () => matcher.removeEventListener("change", update)
+  }, [])
 
-			const handler = () => {
-				const modeMatcher = getDarkModeMatcher();
-				handleTheme(modeMatcher.matches);
-			};
-			modeMatcher.addEventListener('change', handler);
-
-			return () => modeMatcher.removeEventListener('change', handler);
-		}
-	}, []);
-
-	return theme;
+  return theme
 }

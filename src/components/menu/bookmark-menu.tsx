@@ -1,12 +1,10 @@
 import { MenubarItem, MenubarSeparator, MenubarSub, MenubarSubTrigger } from 'common/ui/menubar';
 import { type MouseEventHandler } from 'react';
 
-import { tag, TagEvent } from '~/tag';
 
 import { type Bookmark } from '../../bookmark-model';
-import { useBookmarkModel, useWorkspaceModel } from '../../context/manager-context';
-import { useCompute } from '../../state';
-import { tabManager } from '../../tab-manager';
+import { useAppContext } from '~/app/app-context';
+import { tabManager } from '~/tabs/actions';
 import { Menu } from './menu';
 import { MenubarCheckboxItem, MenubarSubContent } from './styled';
 
@@ -18,11 +16,9 @@ type BookmarkMenuProps = {
 export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
 	const { id } = item;
 
-	const { currentWorkspace, workspaces: workspacesState } = useWorkspaceModel();
-	const { remove, move } = useBookmarkModel();
-
-	const workspaces = useCompute(workspacesState);
-	const current = useCompute(currentWorkspace);
+	const { bookmarks, workspace } = useAppContext();
+	const { remove, move } = bookmarks;
+	const { workspaces, currentWorkspace: current } = workspace;
 
 	return (
 		<Menu>
@@ -48,7 +44,6 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
 			<MenubarItem
 				onClick={() => {
 					navigator.clipboard.writeText(item.url);
-					tag.event(TagEvent.CopyLink);
 				}}
 			>
 				Copy Link
@@ -70,7 +65,6 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
 								move(id, {
 									parentId: space.id,
 								});
-								tag.event(TagEvent.MoveToSpace);
 							}}
 						>
 							{space.title}
@@ -84,7 +78,6 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
 			<MenubarItem
 				onClick={() => {
 					remove(id);
-					tag.event(TagEvent.Delete);
 				}}
 			>
 				Delete

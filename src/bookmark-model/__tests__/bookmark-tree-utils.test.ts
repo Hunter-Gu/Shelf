@@ -1,36 +1,36 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest"
 
-import type { Bookmark, Folder } from '~/bookmark-model/types';
+import type { Bookmark, Folder } from "~/bookmark-model/types"
 
-import { BookmarkTreeUtils } from '../bookmark-tree-utils';
+import { BookmarkTreeUtils } from "../bookmark-tree-utils"
 
-describe('BookmarkTreeUtils', () => {
-	it('#add', () => {
-		const root: Folder = {
-			id: '0',
-			parentId: '0',
-			index: 0,
-			title: 'root',
-			children: [
-				{
-					id: '1',
-					parentId: '0',
-					index: 0,
-					title: 'node',
-					url: '',
-				},
-			],
-		};
-		const node: Bookmark = {
-			id: '2',
-			parentId: '0',
-			index: 0,
-			title: 'bookmark',
-			url: '',
-		};
-		BookmarkTreeUtils.add(root, node);
+describe("BookmarkTreeUtils", () => {
+  it("#add", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "0",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          url: ""
+        }
+      ]
+    }
+    const node: Bookmark = {
+      id: "2",
+      parentId: "0",
+      index: 0,
+      title: "bookmark",
+      url: ""
+    }
+    BookmarkTreeUtils.add(root, node)
 
-		expect(root).toMatchInlineSnapshot(`
+    expect(root).toMatchInlineSnapshot(`
 			{
 			  "children": [
 			    {
@@ -53,38 +53,38 @@ describe('BookmarkTreeUtils', () => {
 			  "parentId": "0",
 			  "title": "root",
 			}
-		`);
-	});
+		`)
+  })
 
-	it('#change for folder and bookmark', () => {
-		const root: Folder = {
-			id: '0',
-			parentId: '-1',
-			index: 0,
-			title: 'root',
-			children: [
-				{
-					id: '1',
-					parentId: '0',
-					index: 0,
-					title: 'node',
-					url: '',
-				},
-			],
-		};
+  it("#change for folder and bookmark", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          url: ""
+        }
+      ]
+    }
 
-		BookmarkTreeUtils.change(root, {
-			id: '0',
-			title: 'root folder',
-		});
+    BookmarkTreeUtils.change(root, {
+      id: "0",
+      title: "root folder"
+    })
 
-		BookmarkTreeUtils.change(root, {
-			id: '1',
-			title: 'node',
-			url: 'http://',
-		});
+    BookmarkTreeUtils.change(root, {
+      id: "1",
+      title: "node",
+      url: "http://"
+    })
 
-		expect(root).toMatchInlineSnapshot(`
+    expect(root).toMatchInlineSnapshot(`
 			{
 			  "children": [
 			    {
@@ -100,50 +100,50 @@ describe('BookmarkTreeUtils', () => {
 			  "parentId": "-1",
 			  "title": "root folder",
 			}
-		`);
-	});
+		`)
+  })
 
-	it('#move', () => {
-		const root: Folder = {
-			id: '0',
-			parentId: '-1',
-			index: 0,
-			title: 'root',
-			children: [
-				{
-					id: '1',
-					parentId: '0',
-					index: 0,
-					title: 'node',
-					children: [
-						{
-							id: '2',
-							parentId: '1',
-							index: 0,
-							title: 'bookmark 1',
-							url: '',
-						},
-						{
-							id: '3',
-							parentId: '1',
-							index: 0,
-							title: 'bookmark 2',
-							url: '',
-						},
-					],
-				},
-			],
-		};
+  it("#move", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          children: [
+            {
+              id: "2",
+              parentId: "1",
+              index: 0,
+              title: "bookmark 1",
+              url: ""
+            },
+            {
+              id: "3",
+              parentId: "1",
+              index: 0,
+              title: "bookmark 2",
+              url: ""
+            }
+          ]
+        }
+      ]
+    }
 
-		BookmarkTreeUtils.move(root, {
-			id: '2',
-			index: 0,
-			parentId: '0',
-			oldIndex: 0,
-			oldParentId: '1',
-		});
+    BookmarkTreeUtils.move(root, {
+      id: "2",
+      index: 0,
+      parentId: "0",
+      oldIndex: 0,
+      oldParentId: "1"
+    })
 
-		expect(root).toMatchInlineSnapshot(`
+    expect(root).toMatchInlineSnapshot(`
 			{
 			  "children": [
 			    {
@@ -174,39 +174,39 @@ describe('BookmarkTreeUtils', () => {
 			  "parentId": "-1",
 			  "title": "root",
 			}
-		`);
-	});
+		`)
+  })
 
-	it('#remove', () => {
-		const root: Folder = {
-			id: '0',
-			parentId: '-1',
-			index: 0,
-			title: 'root',
-			children: [
-				{
-					id: '1',
-					parentId: '0',
-					index: 0,
-					title: 'node',
-					url: '',
-				},
-				{
-					id: '2',
-					parentId: '0',
-					index: 1,
-					title: 'bookmark',
-					url: '',
-				},
-			],
-		};
+  it("#remove", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          url: ""
+        },
+        {
+          id: "2",
+          parentId: "0",
+          index: 1,
+          title: "bookmark",
+          url: ""
+        }
+      ]
+    }
 
-		BookmarkTreeUtils.remove(root, {
-			index: 0,
-			parentId: '0',
-		});
+    BookmarkTreeUtils.remove(root, {
+      index: 0,
+      parentId: "0"
+    })
 
-		expect(root).toMatchInlineSnapshot(`
+    expect(root).toMatchInlineSnapshot(`
 			{
 			  "children": [
 			    {
@@ -222,46 +222,74 @@ describe('BookmarkTreeUtils', () => {
 			  "parentId": "-1",
 			  "title": "root",
 			}
-		`);
-	});
+		`)
+  })
 
-	it('#reorder', () => {
-		const root: Folder = {
-			id: '0',
-			parentId: '-1',
-			index: 0,
-			title: 'root',
-			children: [
-				{
-					id: '1',
-					parentId: '0',
-					index: 0,
-					title: 'node',
-					url: '',
-				},
-				{
-					id: '2',
-					parentId: '0',
-					index: 1,
-					title: 'bookmark 1',
-					url: '',
-				},
-				{
-					id: '3',
-					parentId: '0',
-					index: 2,
-					title: 'bookmark 2',
-					url: '',
-				},
-			],
-		};
+  it("#remove reindexes nested siblings", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "folder",
+          children: [
+            { id: "2", parentId: "1", index: 0, title: "first", url: "" },
+            { id: "3", parentId: "1", index: 1, title: "second", url: "" }
+          ]
+        }
+      ]
+    }
 
-		BookmarkTreeUtils.reorder(root, {
-			id: '0',
-			childIds: ['3', '1', '2'],
-		});
+    BookmarkTreeUtils.remove(root, { index: 0, parentId: "1" })
 
-		expect(root).toMatchInlineSnapshot(`
+    const folder = root.children?.[0]
+    expect(
+      folder && "children" in folder ? folder.children?.[0] : undefined
+    ).toMatchObject({ id: "3", index: 0 })
+  })
+
+  it("#reorder", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          url: ""
+        },
+        {
+          id: "2",
+          parentId: "0",
+          index: 1,
+          title: "bookmark 1",
+          url: ""
+        },
+        {
+          id: "3",
+          parentId: "0",
+          index: 2,
+          title: "bookmark 2",
+          url: ""
+        }
+      ]
+    }
+
+    BookmarkTreeUtils.reorder(root, {
+      id: "0",
+      childIds: ["3", "1", "2"]
+    })
+
+    expect(root).toMatchInlineSnapshot(`
 			{
 			  "children": [
 			    {
@@ -291,6 +319,6 @@ describe('BookmarkTreeUtils', () => {
 			  "parentId": "-1",
 			  "title": "root",
 			}
-		`);
-	});
-});
+		`)
+  })
+})

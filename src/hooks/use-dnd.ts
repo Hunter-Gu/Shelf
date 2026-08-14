@@ -8,12 +8,13 @@ import {
 } from 'react-dnd';
 
 type Identifier = string | symbol;
+type Handler = (...args: any[]) => void;
 
 export function useDrop<Data>(
 	accept: Identifier | Identifier[],
 	handleHover: (target: Data, monitor: DropTargetMonitor) => void,
 ) {
-	const handlerRef = useRef<Func>(noop);
+	const handlerRef = useRef<Handler>(noop);
 
 	if (handlerRef.current) {
 		handlerRef.current = handleHover;
