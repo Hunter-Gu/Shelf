@@ -1,0 +1,70 @@
+{
+	"name": "extension",
+	"displayName": "Markit",
+	"version": "0.0.1",
+	"description": "Bookmarks, organized your way.",
+	"author": "Neil Gu. <nail.gu.hunter@gmail.com>",
+	"scripts": {
+		"dev": "plasmo dev",
+		"build": "plasmo build",
+		"package": "plasmo package",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@emoji-mart/data": "^1.2.1",
+		"@emoji-mart/react": "^1.1.1",
+		"@plasmohq/storage": "^1.12.0",
+		"@tanstack/react-virtual": "^3.10.8",
+		"common": "workspace:*",
+		"emoji-mart": "^5.6.0",
+		"framer-motion": "^11.11.1",
+		"immer": "^10.1.1",
+		"lucide-react": "^0.446.0",
+		"plasmo": "0.89.3",
+		"re-resizable": "^6.10.0",
+		"react": "18.2.0",
+		"react-dnd": "^16.0.1",
+		"react-dnd-html5-backend": "^16.0.1",
+		"react-dom": "18.2.0"
+	},
+	"devDependencies": {
+		"@ianvs/prettier-plugin-sort-imports": "4.1.1",
+		"@types/chrome": "0.0.258",
+		"@types/node": "20.11.5",
+		"@types/react": "18.2.48",
+		"@types/react-dom": "18.2.18",
+		"autoprefixer": "^10.4.19",
+		"postcss": "^8.1.0",
+		"prettier": "3.2.4",
+		"tailwindcss": "^3.4.4",
+		"tailwindcss-animate": "^1.0.7",
+		"typescript": "5.3.3",
+		"vitest": "^2.1.1"
+	},
+	"manifest": {
+		"host_permissions": [
+			"<all_urls>"
+		],
+		"permissions": [
+			"sidePanel",
+			"bookmarks",
+			"favicon",
+			"storage",
+			"tabs",
+			"tabGroups"
+		],
+		"web_accessible_resources": [
+			{
+				"resources": [
+					"_favicon/*"
+				],
+				"matches": [
+					"<all_urls>"
+				],
+				"extension_ids": [
+					"*"
+				]
+			}
+		]
+	}
+}
