@@ -36,6 +36,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
     return (
       <IconButton
         label="Save current page"
+        tooltip="Save current page"
         variant="ghost"
         icon={<BookmarkPlusIcon className={cn("text-gray-500 dark:text-gray-400")} />}
         onClick={async (evt: MouseEvent<HTMLButtonElement>) => {
@@ -59,6 +60,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
     return (
       <IconButton
         label="Remove current page"
+        tooltip="Remove current page"
         variant="ghost"
         icon={<BookmarkCheckIcon className={cn("text-amber-500")} />}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
@@ -72,6 +74,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
   return (
     <IconButton
       label="Move current page"
+      tooltip="Move current page"
       variant="ghost"
       icon={<FileInputIcon className={cn("text-amber-500")} />}
       onClick={(evt: MouseEvent<HTMLButtonElement>) => {

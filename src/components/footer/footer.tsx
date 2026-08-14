@@ -31,6 +31,7 @@ export function Footer({
       className={cn(isEditingWorkspace ? "mt-0" : "mt-auto", styles.container)}>
       <AstryxIconButton
         label="Keyboard shortcuts"
+        tooltip="Keyboard shortcuts"
         variant="ghost"
         icon={<Keyboard size={18} className="text-gray-500 dark:text-gray-400" />}
         onClick={() => {
@@ -53,6 +54,7 @@ export function Footer({
               <AstryxIconButton
                 key={space.id}
                 label={space.title}
+                tooltip={space.title}
                 variant="ghost"
                 className="h-7 w-7 rounded-full transition-colors duration-200"
                 style={
@@ -88,6 +90,7 @@ export function Footer({
 
       <AstryxIconButton
         label="Create workspace"
+        tooltip="Create workspace"
         variant="ghost"
         isDisabled={!ready}
         icon={<Plus size={20} className="text-gray-600 dark:text-gray-300" />}
