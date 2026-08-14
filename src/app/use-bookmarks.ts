@@ -33,16 +33,37 @@ export function useBookmarks() {
   }, [])
 
   // Patch the in-memory tree instead of re-fetching it from the browser.
-  // Clones first so the previous tree (still referenced by whatever last
-  // rendered) is never mutated in place.
+  // Bookmark events can arrive in bursts (multi-select delete/move in
+  // chrome://bookmarks fires one event per item) — queuing patches and
+  // cloning once per burst avoids paying for a full-tree structuredClone
+  // per event. The 30ms window is short enough that a single, isolated
+  // change still feels instant.
+  const pendingPatchesRef = useRef<Array<(draft: RootTree) => void>>([])
+  const patchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const applyPatch = useCallback((patch: (draft: RootTree) => void) => {
-    setTree((prev) => {
-      if (!prev) return prev
-      const draft = structuredClone(prev)
-      patch(draft)
-      return draft
-    })
+    pendingPatchesRef.current.push(patch)
+    if (patchTimeoutRef.current !== null) return
+
+    patchTimeoutRef.current = setTimeout(() => {
+      patchTimeoutRef.current = null
+      const patches = pendingPatchesRef.current
+      pendingPatchesRef.current = []
+      setTree((prev) => {
+        if (!prev) return prev
+        const draft = structuredClone(prev)
+        patches.forEach((applyOne) => applyOne(draft))
+        return draft
+      })
+    }, 30)
   }, [])
+
+  useEffect(
+    () => () => {
+      if (patchTimeoutRef.current !== null) clearTimeout(patchTimeoutRef.current)
+    },
+    []
+  )
 
   useEffect(() => {
     void reload()
@@ -54,12 +75,16 @@ export function useBookmarks() {
     // and unreliable, so everything is ignored until it ends, then resolved
     // with one full reload.
     let isImporting = false
+    const whenNotImporting =
+      <Args extends unknown[]>(handler: (...args: Args) => void) =>
+      (...args: Args) => {
+        if (!isImporting) handler(...args)
+      }
 
     const handleCreated = (
       _id: string,
       bookmark: chrome.bookmarks.BookmarkTreeNode
     ) => {
-      if (isImporting) return
       if (bookmark.parentId === undefined || bookmark.index === undefined) return
       const node: Bookmark | Folder =
         bookmark.url !== undefined
@@ -83,7 +108,6 @@ export function useBookmarks() {
       id: string,
       changeInfo: chrome.bookmarks.BookmarkChangeInfo
     ) => {
-      if (isImporting) return
       const node =
         changeInfo.url !== undefined
           ? { id, title: changeInfo.title, url: changeInfo.url }
@@ -95,7 +119,6 @@ export function useBookmarks() {
       id: string,
       moveInfo: chrome.bookmarks.BookmarkMoveInfo
     ) => {
-      if (isImporting) return
       applyPatch((draft) =>
         BookmarkTreeUtils.move(draft, {
           id,
@@ -111,7 +134,6 @@ export function useBookmarks() {
       id: string,
       removeInfo: chrome.bookmarks.BookmarkRemoveInfo
     ) => {
-      if (isImporting) return
       applyPatch((draft) =>
         BookmarkTreeUtils.remove(draft, {
           id,
@@ -125,7 +147,6 @@ export function useBookmarks() {
       id: string,
       reorderInfo: chrome.bookmarks.BookmarkReorderInfo
     ) => {
-      if (isImporting) return
       applyPatch((draft) =>
         BookmarkTreeUtils.reorder(draft, { id, childIds: reorderInfo.childIds })
       )
@@ -139,20 +160,26 @@ export function useBookmarks() {
       void reload()
     }
 
-    browser.bookmarks.onCreated.addListener(handleCreated)
-    browser.bookmarks.onChanged.addListener(handleChanged)
-    browser.bookmarks.onMoved.addListener(handleMoved)
-    browser.bookmarks.onRemoved.addListener(handleRemoved)
-    browser.bookmarks.onChildrenReordered.addListener(handleReordered)
+    const guardedCreated = whenNotImporting(handleCreated)
+    const guardedChanged = whenNotImporting(handleChanged)
+    const guardedMoved = whenNotImporting(handleMoved)
+    const guardedRemoved = whenNotImporting(handleRemoved)
+    const guardedReordered = whenNotImporting(handleReordered)
+
+    browser.bookmarks.onCreated.addListener(guardedCreated)
+    browser.bookmarks.onChanged.addListener(guardedChanged)
+    browser.bookmarks.onMoved.addListener(guardedMoved)
+    browser.bookmarks.onRemoved.addListener(guardedRemoved)
+    browser.bookmarks.onChildrenReordered.addListener(guardedReordered)
     browser.bookmarks.onImportBegan.addListener(handleImportBegan)
     browser.bookmarks.onImportEnded.addListener(handleImportEnded)
 
     return () => {
-      browser.bookmarks.onCreated.removeListener(handleCreated)
-      browser.bookmarks.onChanged.removeListener(handleChanged)
-      browser.bookmarks.onMoved.removeListener(handleMoved)
-      browser.bookmarks.onRemoved.removeListener(handleRemoved)
-      browser.bookmarks.onChildrenReordered.removeListener(handleReordered)
+      browser.bookmarks.onCreated.removeListener(guardedCreated)
+      browser.bookmarks.onChanged.removeListener(guardedChanged)
+      browser.bookmarks.onMoved.removeListener(guardedMoved)
+      browser.bookmarks.onRemoved.removeListener(guardedRemoved)
+      browser.bookmarks.onChildrenReordered.removeListener(guardedReordered)
       browser.bookmarks.onImportBegan.removeListener(handleImportBegan)
       browser.bookmarks.onImportEnded.removeListener(handleImportEnded)
     }
