@@ -1,7 +1,7 @@
 import { Divider } from "@astryxdesign/core/Divider"
 import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core/DropdownMenu"
 import { EllipsisIcon } from "lucide-react"
-import { type MouseEvent } from "react"
+import { useState, type MouseEvent } from "react"
 
 import { useSetFocus } from "~/context/focus-context"
 
@@ -61,6 +61,12 @@ function renderItems(items: MenuItems) {
 
 export function Menu({ items }: MenuProps) {
   const setFocus = useSetFocus()
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    setFocus(open)
+  }
 
   return (
     <div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
@@ -73,7 +79,8 @@ export function Menu({ items }: MenuProps) {
         }}
         hasChevron={false}
         menuWidth={224}
-        onOpenChange={setFocus}>
+        isMenuOpen={isOpen}
+        onOpenChange={handleOpenChange}>
         {renderItems(items)}
       </DropdownMenu>
     </div>
