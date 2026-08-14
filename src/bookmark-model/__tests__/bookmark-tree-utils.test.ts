@@ -103,6 +103,31 @@ describe("BookmarkTreeUtils", () => {
 		`)
   })
 
+  it("#change clears the title when renamed to an empty string", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        {
+          id: "1",
+          parentId: "0",
+          index: 0,
+          title: "node",
+          url: ""
+        }
+      ]
+    }
+
+    // Chrome's onChanged always includes the bookmark's current url in
+    // changeInfo (even for a title-only edit) — omitting it here would look
+    // like a folder-shaped payload and trip the isFolder mismatch guard.
+    BookmarkTreeUtils.change(root, { id: "1", title: "", url: "" })
+
+    expect((root.children?.[0] as Bookmark).title).toBe("")
+  })
+
   it("#move", () => {
     const root: Folder = {
       id: "0",
@@ -202,6 +227,7 @@ describe("BookmarkTreeUtils", () => {
     }
 
     BookmarkTreeUtils.remove(root, {
+      id: "1",
       index: 0,
       parentId: "0"
     })
@@ -245,12 +271,47 @@ describe("BookmarkTreeUtils", () => {
       ]
     }
 
-    BookmarkTreeUtils.remove(root, { index: 0, parentId: "1" })
+    BookmarkTreeUtils.remove(root, { id: "2", index: 0, parentId: "1" })
 
     const folder = root.children?.[0]
     expect(
       folder && "children" in folder ? folder.children?.[0] : undefined
     ).toMatchObject({ id: "3", index: 0 })
+  })
+
+  it("#remove falls back to locating by id when the reported index is stale", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [
+        { id: "1", parentId: "0", index: 0, title: "first", url: "" },
+        { id: "2", parentId: "0", index: 1, title: "second", url: "" },
+        { id: "3", parentId: "0", index: 2, title: "third", url: "" }
+      ]
+    }
+
+    // Index 0 actually points at "first", but we're asking to remove "third" —
+    // as if a prior patch had drifted. It should still remove the right node
+    // by id instead of deleting whatever sits at index 0.
+    BookmarkTreeUtils.remove(root, { id: "3", index: 0, parentId: "0" })
+
+    expect(root.children?.map((child) => child.id)).toEqual(["1", "2"])
+  })
+
+  it("#remove is a no-op when the id isn't found under the given parent", () => {
+    const root: Folder = {
+      id: "0",
+      parentId: "-1",
+      index: 0,
+      title: "root",
+      children: [{ id: "1", parentId: "0", index: 0, title: "first", url: "" }]
+    }
+
+    BookmarkTreeUtils.remove(root, { id: "missing", index: 0, parentId: "0" })
+
+    expect(root.children?.map((child) => child.id)).toEqual(["1"])
   })
 
   it("#reorder", () => {

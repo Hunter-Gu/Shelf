@@ -65,7 +65,7 @@ export class BookmarkTreeUtils {
       return
     }
 
-    data.title = node.title || data.title
+    data.title = node.title
 
     if (!isFolder(data) && "url" in node) {
       data.url = node.url
@@ -96,6 +96,7 @@ export class BookmarkTreeUtils {
 
     // remove from old
     this.remove(draft, {
+      id: node.id,
       index: oldIndex,
       parentId: oldParentId
     })
@@ -108,14 +109,28 @@ export class BookmarkTreeUtils {
     })
   }
 
-  static remove(draft: Folder, node: { index: number; parentId: string }) {
+  static remove(
+    draft: Folder,
+    node: { id: string; index: number; parentId: string }
+  ) {
     const parentNode = this.findNodeById(draft, node.parentId)
 
-    if (parentNode && isFolder(parentNode)) {
-      parentNode.children = parentNode.children || []
-      parentNode.children.splice(node.index, 1)
-      this.updateIndexFrom(node.index, parentNode)
-    }
+    if (!parentNode || !isFolder(parentNode)) return
+
+    const children = parentNode.children || []
+    // The reported index is only trustworthy if it still points at the
+    // expected item — if an earlier patch ever drifted, fall back to
+    // locating it by id rather than splicing out whatever sits there now.
+    const removedIndex =
+      children[node.index]?.id === node.id
+        ? node.index
+        : children.findIndex((child) => child.id === node.id)
+
+    if (removedIndex === -1) return
+
+    children.splice(removedIndex, 1)
+    parentNode.children = children
+    this.updateIndexFrom(removedIndex, parentNode)
   }
 
   static reorder(

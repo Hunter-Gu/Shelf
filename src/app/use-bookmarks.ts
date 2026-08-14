@@ -108,12 +108,13 @@ export function useBookmarks() {
     }
 
     const handleRemoved = (
-      _id: string,
+      id: string,
       removeInfo: chrome.bookmarks.BookmarkRemoveInfo
     ) => {
       if (isImporting) return
       applyPatch((draft) =>
         BookmarkTreeUtils.remove(draft, {
+          id,
           index: removeInfo.index,
           parentId: removeInfo.parentId
         })
