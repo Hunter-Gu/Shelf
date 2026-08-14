@@ -14,7 +14,8 @@ import {
   createWorkspace,
   WorkspaceType,
   type IWorkspace,
-  type Workspace
+  type Workspace,
+  type WorkspaceHue
 } from "~/workspace-model/workspace"
 import { workspaceName } from "~/workspace-model/workspace-name"
 
@@ -31,7 +32,7 @@ function sameWorkspaces(left: Workspace[], right: Workspace[]) {
         workspace.id === other?.id &&
         workspace.title === other.title &&
         workspace.logo === other.logo &&
-        workspace.theme === other.theme &&
+        workspace.color === other.color &&
         workspace.windowId === other.windowId &&
         workspace.type === other.type
       )
@@ -267,12 +268,12 @@ export function useWorkspaces({
       id,
       parentId,
       title,
-      theme = ""
+      color
     }: {
       id: string
       parentId: string
       title: string
-      theme?: string
+      color?: WorkspaceHue
     }) => {
       if (!initializedRef.current) return
 
@@ -284,7 +285,7 @@ export function useWorkspaces({
       if (workspacesRef.current.some((workspace) => workspace.id === id)) {
         await update(id, (workspace) => {
           workspace.title = nextTitle
-          workspace.theme = theme
+          workspace.color = color
           workspace.type = WorkspaceType.Normal
         })
       } else {
@@ -292,7 +293,7 @@ export function useWorkspaces({
           id,
           title: nextTitle,
           logo: "",
-          theme,
+          color,
           type: WorkspaceType.Normal
         })
         const next = [...workspacesRef.current, workspace]

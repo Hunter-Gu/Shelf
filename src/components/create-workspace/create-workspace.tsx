@@ -5,8 +5,9 @@ import { TextInput } from "@astryxdesign/core/TextInput"
 import { lazy, Suspense, useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
-import type { Workspace } from "~/workspace-model"
+import type { Workspace, WorkspaceHue } from "~/workspace-model"
 
+import { ColorPicker } from "./color-picker"
 import styles from "./create-workspace.module.css"
 import {
   ActionButtonsContainer,
@@ -90,7 +91,7 @@ export function CreateWorkspace({
   const isUpdating = !!workspace?.id
   const [name, setName] = useState(workspace?.title || "")
   const [emoji, setEmoji] = useState(workspace?.logo || "")
-  const [theme, setTheme] = useState(workspace?.theme || "")
+  const [color, setColor] = useState<WorkspaceHue | undefined>(workspace?.color)
 
   const { update, create } = useAppContext().workspace
 
@@ -100,13 +101,13 @@ export function CreateWorkspace({
         await update(workspace.id, (item) => {
           item.title = name
           item.logo = emoji
-          item.theme = theme
+          item.color = color
         })
       } else {
         const created = await create({
           title: name,
           logo: emoji,
-          theme
+          color
         })
         if (!created) return
       }
@@ -144,7 +145,7 @@ export function CreateWorkspace({
           className="pl-2"
         />
 
-        {/* <Theme /> */}
+        <ColorPicker value={color} onChange={setColor} />
       </Form>
 
       <ActionButtonsContainer>

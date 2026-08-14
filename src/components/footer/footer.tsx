@@ -37,33 +37,45 @@ export function Footer({
           reorder(newOrder)
         }}
         values={workspaces}>
-        {workspaces.map((space) => (
-          <SpaceItem key={space.id} workspace={space}>
-            <AstryxIconButton
-              key={space.id}
-              label={space.title}
-              variant="ghost"
-              className="h-7 w-7 rounded-md"
-              icon={
-                <span
-                  className={cn(
-                    !space.logo && "h-2 w-2 rounded-full",
-                    !space.logo &&
-                      (space.id === current.id
-                        ? "bg-black/30 dark:bg-white/30"
-                        : "bg-black/10 dark:bg-white/10"),
-                    space.logo &&
-                      (space.id === current.id ? "grayscale-0" : "grayscale")
-                  )}>
-                  {space.logo}
-                </span>
-              }
-              onClick={() => {
-                switchTo(space.id)
-                onSwitchSpace()
-              }} />
-          </SpaceItem>
-        ))}
+        {workspaces.map((space) => {
+          const isActive = space.id === current.id
+          const hue = space.color ?? "gray"
+          return (
+            <SpaceItem key={space.id} workspace={space}>
+              <AstryxIconButton
+                key={space.id}
+                label={space.title}
+                variant="ghost"
+                className="h-7 w-7 rounded-full transition-colors duration-200"
+                style={
+                  isActive
+                    ? { backgroundColor: `var(--color-background-${hue})` }
+                    : undefined
+                }
+                icon={
+                  <span
+                    className={cn(
+                      !space.logo && "h-2 w-2 rounded-full",
+                      space.logo && (isActive ? "grayscale-0" : "grayscale opacity-60")
+                    )}
+                    style={
+                      !space.logo
+                        ? {
+                            backgroundColor: `var(--color-icon-${hue})`,
+                            opacity: isActive ? 1 : 0.45
+                          }
+                        : undefined
+                    }>
+                    {space.logo}
+                  </span>
+                }
+                onClick={() => {
+                  switchTo(space.id)
+                  onSwitchSpace()
+                }} />
+            </SpaceItem>
+          )
+        })}
       </Reorder.Group>
 
       <AstryxIconButton
