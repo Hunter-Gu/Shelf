@@ -15,6 +15,15 @@ export default defineConfig({
     action: {
       default_title: "Open Markit"
     },
+    commands: {
+      "open-panel": {
+        suggested_key: {
+          default: "Ctrl+Shift+K",
+          mac: "Command+Shift+K"
+        },
+        description: "Open Markit and focus search"
+      }
+    },
     permissions: ["bookmarks", "favicon", "storage", "tabs", "tabGroups"]
   },
   vite: () => ({

@@ -1,5 +1,6 @@
 import { cn } from "common/lib/utils"
 import { TextInput } from "@astryxdesign/core/TextInput"
+import { useRef } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { BookmarkButton } from "~/components/bookmark-button/bookmark-button"
@@ -8,6 +9,7 @@ import { Editable, useEditable } from "~/components/editable"
 import { FolderTree } from "~/components/folder-tree"
 import { SpaceMenu } from "~/components/menu/space-menu"
 import { PinHint } from "~/components/pin-hint"
+import { useFocusSearchShortcut } from "~/hooks/use-focus-search-shortcut"
 import { useSearch } from "~/hooks/use-search"
 import type { Workspace } from "~/workspace-model"
 
@@ -27,6 +29,8 @@ export function Sidebar({ onEdit }: SidebarProps) {
   const { bookmarks, workspace } = useAppContext()
   const currentSpace = workspace.currentWorkspace
   const { searchText, handleSearch } = useSearch()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  useFocusSearchShortcut(searchInputRef)
   const { isEditing, setEditing, handleChange } = useEditable((event) => {
     void workspace.update(currentSpace.id, (nextWorkspace) => {
       nextWorkspace.title = (event.target as HTMLInputElement).value
@@ -45,6 +49,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
     <>
       <div className="mx-3 my-4">
         <TextInput
+          ref={searchInputRef}
           label="Search bookmarks"
           isLabelHidden
           placeholder="Hinted search text"
