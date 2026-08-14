@@ -1,34 +1,55 @@
-import { MenubarMenu } from "common/ui/menubar"
-import { EllipsisIcon as _EllipsisIcon } from "lucide-react"
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu"
+import { EllipsisIcon } from "lucide-react"
 import { type MouseEvent, type PropsWithChildren } from "react"
 
 import { useSetFocus } from "~/context/focus-context"
 
-import { withClsx } from "../clsx"
-import { Menubar, MenubarContent, MenubarTrigger } from "./styled"
+export type MenuItem = {
+  label: string
+  onClick?: () => void
+  isDisabled?: boolean
+}
 
-type MenuProps = {}
+export type MenuItems = Array<
+  | MenuItem
+  | { type: "divider" }
+  | { type: "section"; title?: string; items: MenuItem[] }
+>
 
-const EllipsisIcon = withClsx(
-  _EllipsisIcon,
-  "h-4 w-4 text-gray-500 dark:text-gray-400"
-)
+type MenuProps = PropsWithChildren<{ items?: MenuItems }>
 
-export function Menu({ children }: PropsWithChildren<MenuProps>) {
+export function Menu({ items, children }: MenuProps) {
   const setFocus = useSetFocus()
 
   return (
-    <Menubar
-      onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}
-      onValueChange={(v: string) => setFocus(!!v)}>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <span>
-            <EllipsisIcon />
-          </span>
-        </MenubarTrigger>
-        <MenubarContent>{children}</MenubarContent>
-      </MenubarMenu>
-    </Menubar>
+    <div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+      {items ? (
+        <DropdownMenu
+          button={{
+            label: "More actions",
+            variant: "ghost",
+            icon: <EllipsisIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />,
+            isIconOnly: true
+          }}
+          items={items}
+          hasChevron={false}
+          menuWidth={224}
+          onOpenChange={setFocus}
+        />
+      ) : (
+        <DropdownMenu
+          button={{
+            label: "More actions",
+            variant: "ghost",
+            icon: <EllipsisIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />,
+            isIconOnly: true
+          }}
+          hasChevron={false}
+          menuWidth={224}
+          onOpenChange={setFocus}>
+          {children}
+        </DropdownMenu>
+      )}
+    </div>
   )
 }

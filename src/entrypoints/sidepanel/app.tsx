@@ -1,4 +1,6 @@
 import { AppProvider, useAppContext } from "~/app/app-context"
+import { Theme as AstryxTheme } from "@astryxdesign/core/theme"
+import { neutralTheme } from "@astryxdesign/theme-neutral/built"
 import { CreateWorkspace } from "~/components/create-workspace"
 import { Footer } from "~/components/footer/footer"
 import { EditableProvider } from "~/context/editable-context"
@@ -23,7 +25,7 @@ function AppContent() {
           onCancel={() => setEditingWorkspace(undefined)}
         />
       ) : (
-        <Sidebar onEdit={(_, nextWorkspace) => setEditingWorkspace(nextWorkspace)} />
+        <Sidebar onEdit={(nextWorkspace) => setEditingWorkspace(nextWorkspace)} />
       )}
 
       <Footer
@@ -48,14 +50,16 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <CurrentTabBookmarkProvider>
-        <VirtualTreeProvider>
-          <EditableProvider>
-            <AppContent />
-          </EditableProvider>
-        </VirtualTreeProvider>
-      </CurrentTabBookmarkProvider>
-    </AppProvider>
+    <AstryxTheme theme={neutralTheme} mode="system">
+      <AppProvider>
+        <CurrentTabBookmarkProvider>
+          <VirtualTreeProvider>
+            <EditableProvider>
+              <AppContent />
+            </EditableProvider>
+          </VirtualTreeProvider>
+        </CurrentTabBookmarkProvider>
+      </AppProvider>
+    </AstryxTheme>
   )
 }

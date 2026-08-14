@@ -1,5 +1,5 @@
 import { cn } from "common/lib/utils"
-import type { MouseEvent } from "react"
+import { TextInput } from "@astryxdesign/core/TextInput"
 
 import { useAppContext } from "~/app/app-context"
 import { BookmarkButton } from "~/components/bookmark-button/bookmark-button"
@@ -7,7 +7,6 @@ import { clsx } from "~/components/clsx"
 import { Editable, useEditable } from "~/components/editable"
 import { FolderTree } from "~/components/folder-tree"
 import { SpaceMenu } from "~/components/menu/space-menu"
-import { Input } from "~/components/styled"
 import { useSearch } from "~/hooks/use-search"
 import type { Workspace } from "~/workspace-model"
 
@@ -20,7 +19,7 @@ const Title = clsx.span(
 const ActionsContainer = clsx.div("flex items-center gap-2")
 
 type SidebarProps = {
-  onEdit?: (event: MouseEvent, workspace: Workspace) => void
+  onEdit?: (workspace: Workspace) => void
 }
 
 export function Sidebar({ onEdit }: SidebarProps) {
@@ -44,8 +43,9 @@ export function Sidebar({ onEdit }: SidebarProps) {
   return (
     <>
       <div className="mx-3 my-4">
-        <Input
-          type="text"
+        <TextInput
+          label="Search bookmarks"
+          isLabelHidden
           placeholder="Hinted search text"
           onChange={handleSearch}
           value={searchText}
@@ -69,10 +69,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
           {tree ? (
             <SpaceMenu
               item={tree}
-              onRename={(event) => {
-                event.stopPropagation()
-                setEditing(true)
-              }}
+              onRename={() => setEditing(true)}
               onEdit={onEdit}
             />
           ) : null}

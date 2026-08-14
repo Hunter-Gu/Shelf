@@ -1,4 +1,4 @@
-import { type ChangeEvent, useCallback } from "react"
+import { useCallback } from "react"
 
 import { useAppContext } from "~/app/app-context"
 
@@ -6,8 +6,7 @@ export function useSearch() {
   const { bookmarks } = useAppContext()
 
   const handleSearch = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const text = event.target.value
+    (text: string) => {
       void bookmarks.search(text)
     },
     [bookmarks]

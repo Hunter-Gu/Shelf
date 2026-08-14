@@ -80,10 +80,7 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
             <ItemActionsContainer className={cn(isFocused && "visible")}>
               <BookmarkMenu
                 item={props}
-                onRename={(e) => {
-                  e.stopPropagation()
-                  setEditing(true)
-                }}></BookmarkMenu>
+                onRename={() => setEditing(true)}></BookmarkMenu>
             </ItemActionsContainer>
           </>
         }

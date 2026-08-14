@@ -1,17 +1,8 @@
-import { Button } from "common/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "common/ui/dialog"
-import { MenubarItem, MenubarSeparator } from "common/ui/menubar"
+import { Button } from "@astryxdesign/core/Button"
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog"
+import { Layout, LayoutContent, LayoutFooter } from "@astryxdesign/core/Layout"
 import {
   useState,
-  type MouseEvent,
-  type MouseEventHandler,
   type PropsWithChildren
 } from "react"
 
@@ -23,11 +14,11 @@ import { tabManager } from "~/tabs/actions"
 import type { Workspace } from "~/workspace-model"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
-import { Menu } from "./menu"
+import { Menu, type MenuItems } from "./menu"
 
 type MenuItemProps = {
-  onRename?: MouseEventHandler
-  onEdit?: (evt: MouseEvent, workspace: Workspace) => void
+  onRename?: () => void
+  onEdit?: (workspace: Workspace) => void
   item: Pick<Folder, "id" | "title" | "children">
 }
 
@@ -47,87 +38,74 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
     remove(item.id)
   }
 
+  const menuItems: MenuItems = [
+    {
+      label: "Open All",
+      onClick: () =>
+        tabManager.create(
+          (children || [])
+            .filter((item) => !isFolder(item))
+            .map((item) => (item as Bookmark).url)
+        )
+    },
+    {
+      label: "Open All in New Tab Group",
+      onClick: () =>
+        tabManager.createInGroup(
+          currentSpace.title,
+          (item.children || [])
+            .filter((item) => !isFolder(item))
+            .map((item) => (item as Bookmark).url)
+        )
+    },
+    {
+      label: "Open All in New Window",
+      onClick: () =>
+        tabManager.createInNewWindow(
+          (item.children || [])
+            .filter((item) => !isFolder(item))
+            .map((item) => (item as Bookmark).url)
+        )
+    },
+    {
+      label: "Open All in Incognito Window",
+      onClick: () =>
+        tabManager.createInNewWindow(
+          (item.children || [])
+            .filter((item) => !isFolder(item))
+            .map((item) => (item as Bookmark).url),
+          true
+        )
+    },
+    { type: "divider" },
+    { label: "Rename", onClick: onRename },
+    {
+      label: "Edit Workspace Profile",
+      onClick: () => onEdit?.(currentSpace)
+    },
+    {
+      label: "New Nested Folder",
+      onClick: async () => {
+        const folder = await create({ title: "Untitled", parentId: id })
+        nextTick(() => {
+          scrollToId(folder.id)
+          setEditableId(folder.id)
+        })
+      }
+    },
+    { type: "divider" },
+    {
+      label: "Delete",
+      onClick: () => {
+        if (item.children?.length) setOpen(true)
+        else handleDelete()
+      }
+    }
+  ]
+
   return (
     <>
-      <Menu>
-        <MenubarItem
-          onClick={() => {
-            tabManager.create(
-              (children || [])
-                .filter((item) => !isFolder(item))
-                .map((item) => (item as Bookmark).url)
-            )
-          }}>
-          Open All
-        </MenubarItem>
-        <MenubarItem
-          onClick={() => {
-            tabManager.createInGroup(
-              currentSpace.title,
-              (item.children || [])
-                .filter((item) => !isFolder(item))
-                .map((item) => (item as Bookmark).url)
-            )
-          }}>
-          Open All in New Tab Group
-        </MenubarItem>
-        <MenubarItem
-          onClick={() => {
-            tabManager.createInNewWindow(
-              (item.children || [])
-                .filter((item) => !isFolder(item))
-                .map((item) => (item as Bookmark).url)
-            )
-          }}>
-          Open All in New Window
-        </MenubarItem>
-        <MenubarItem
-          onClick={() => {
-            tabManager.createInNewWindow(
-              (item.children || [])
-                .filter((item) => !isFolder(item))
-                .map((item) => (item as Bookmark).url),
-              true
-            )
-          }}>
-          Open All in Incognito Window
-        </MenubarItem>
-
-        <MenubarSeparator />
-
-        <MenubarItem onClick={onRename}>Rename</MenubarItem>
-        <MenubarItem onClick={(e) => onEdit?.(e, currentSpace)}>
-          Edit Workspace Profile
-        </MenubarItem>
-
-        <MenubarItem
-          onClick={async () => {
-            const folder = await create({
-              title: "Untitled",
-              // spaceId is also folderId
-              parentId: id
-            })
-            nextTick(() => {
-              scrollToId(folder.id)
-              setEditableId(folder.id)
-            })
-          }}>
-          New Nested Folder
-        </MenubarItem>
-
-        <MenubarSeparator />
-
-        <MenubarItem
-          onClick={() => {
-            if (item.children?.length) {
-              setOpen(true)
-            } else {
-              handleDelete()
-            }
-          }}>
-          Delete
-        </MenubarItem>
-      </Menu>
+      <Menu items={menuItems} />
 
       <ConfirmDelete
         open={open}
@@ -147,27 +125,23 @@ function ConfirmDelete({
   onConfirm?: () => void
 }>) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Workspace?</DialogTitle>
-          <DialogDescription>
-            This can't be undone. This will permanently delete folders and
-            bookmarks in this workspace.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onOpenChange?.(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="destructive" onClick={onConfirm}>
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+    <Dialog isOpen={open} onOpenChange={onOpenChange ?? (() => {})} purpose="form" width={360}>
+      <Layout
+        header={<DialogHeader title="Delete Workspace?" onOpenChange={onOpenChange} />}
+        content={
+          <LayoutContent>
+            This can't be undone. This will permanently delete folders and bookmarks in this workspace.
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter>
+            <div className="flex justify-end gap-2">
+              <Button label="Cancel" variant="ghost" onClick={() => onOpenChange?.(false)} />
+              <Button label="Delete" variant="destructive" onClick={onConfirm} />
+            </div>
+          </LayoutFooter>
+        }
+      />
     </Dialog>
   )
 }

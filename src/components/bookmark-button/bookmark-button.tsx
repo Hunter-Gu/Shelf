@@ -1,4 +1,5 @@
 import { cn } from "common/lib/utils"
+import { IconButton } from "@astryxdesign/core/IconButton"
 import type { MouseEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -8,7 +9,6 @@ import { useAutoAbort } from "~/hooks/use-auto-abort"
 import {
   BookmarkCheckIcon,
   BookmarkPlusIcon,
-  Button,
   FileInputIcon
 } from "./styled"
 
@@ -34,8 +34,10 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
 
   if (!bookmark) {
     return (
-      <Button
-        title="Save current page"
+      <IconButton
+        label="Save current page"
+        variant="ghost"
+        icon={<BookmarkPlusIcon className={cn("text-gray-500 dark:text-gray-400")} />}
         onClick={async (evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
           const { url, title = "" } = currentTab || {}
@@ -49,29 +51,29 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
               parentId: id
             })
           )
-        }}>
-        <BookmarkPlusIcon className={cn("text-gray-500 dark:text-gray-400")} />
-      </Button>
+        }} />
     )
   }
 
   if (bookmark.parentId === id) {
     return (
-      <Button
-        title="Remove current page"
+      <IconButton
+        label="Remove current page"
+        variant="ghost"
+        icon={<BookmarkCheckIcon className={cn("text-amber-500")} />}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
 
           switchFn(() => remove(bookmark.id))
-        }}>
-        <BookmarkCheckIcon className={cn("text-amber-500")} />
-      </Button>
+        }} />
     )
   }
 
   return (
-    <Button
-      title="Move current page"
+    <IconButton
+      label="Move current page"
+      variant="ghost"
+      icon={<FileInputIcon className={cn("text-amber-500")} />}
       onClick={(evt: MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation()
 
@@ -80,8 +82,6 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
             parentId: id
           })
         )
-      }}>
-      <FileInputIcon className={cn("text-amber-500")} />
-    </Button>
+      }} />
   )
 }

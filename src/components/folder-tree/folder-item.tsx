@@ -91,10 +91,7 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
                 <BookmarkButton id={id} />
                 <FolderMenu
                   item={props}
-                  onRename={(e) => {
-                    e.stopPropagation()
-                    setEditing(true)
-                  }}></FolderMenu>
+                  onRename={() => setEditing(true)}></FolderMenu>
               </ItemActionsContainer>
             </>
           }

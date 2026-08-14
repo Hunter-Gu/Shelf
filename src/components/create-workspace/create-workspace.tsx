@@ -1,11 +1,12 @@
 import { cn } from "common/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "common/ui/popover"
-import { lazy, Suspense, useState, type ChangeEvent } from "react"
+import { Button } from "@astryxdesign/core/Button"
+import { Popover } from "@astryxdesign/core/Popover"
+import { TextInput } from "@astryxdesign/core/TextInput"
+import { lazy, Suspense, useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import type { Workspace } from "~/workspace-model"
 
-import { Input } from "../styled"
 import styles from "./create-workspace.module.css"
 import {
   ActionButtonsContainer,
@@ -55,23 +56,28 @@ function EmojiButton({ className, emoji, onEmojiSelect }: EmojiButtonProps) {
     setOpen(false)
   }
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {/* <Button variant="outline">Open popover</Button> */}
-        <button className={className}>
+    <Popover
+      isOpen={open}
+      onOpenChange={setOpen}
+      label="Choose workspace emoji"
+      width="min(20rem, calc(100vw - 1rem))"
+      content={
+        <div className={cn("w-full p-0", styles.picker)}>
+          <Suspense fallback={<div className="h-80 w-full" />}>
+            <EmojiPicker onEmojiSelect={handleSelect} />
+          </Suspense>
+        </div>
+      }>
+      <Button
+        label="Choose workspace emoji"
+        variant="ghost"
+        className={className}>
           {emoji ? (
             <EmojiText style={{ fontSize: "1em" }}>{emoji}</EmojiText>
           ) : (
             <EmojiPlaceholder />
           )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        className={cn("w-[min(20rem,calc(100vw-1rem))] p-0", styles.picker)}>
-        <Suspense fallback={<div className="h-80 w-full" />}>
-          <EmojiPicker onEmojiSelect={handleSelect} />
-        </Suspense>
-      </PopoverContent>
+      </Button>
     </Popover>
   )
 }
@@ -126,16 +132,15 @@ export function CreateWorkspace({
 
       <Form>
         {/* workspace */}
-        <Input
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus
+        <TextInput
+          label="Workspace name"
+          isLabelHidden
+          hasAutoFocus
           type="text"
           placeholder="Space name..."
-          defaultValue={name}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setName(e.target.value)
-          }
-          required
+          value={name}
+          onChange={(value) => setName(value)}
+          isRequired
           className="pl-2"
         />
 
@@ -143,12 +148,13 @@ export function CreateWorkspace({
       </Form>
 
       <ActionButtonsContainer>
-        <ConfirmButton type="submit" onClick={handleSubmit} disabled={!name}>
-          {isUpdating ? "Update Space" : "Create Space"}
-        </ConfirmButton>
-        <CancelButton variant="ghost" onClick={onCancel}>
-          Cancel
-        </CancelButton>
+        <ConfirmButton
+          type="submit"
+          label={isUpdating ? "Update Space" : "Create Space"}
+          onClick={handleSubmit}
+          isDisabled={!name}
+        />
+        <CancelButton label="Cancel" variant="ghost" onClick={onCancel} />
       </ActionButtonsContainer>
     </>
   )
