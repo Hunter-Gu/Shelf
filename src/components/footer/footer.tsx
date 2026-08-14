@@ -27,12 +27,12 @@ export function Footer({
   const switchTo = workspace.switch
 
   return (
-    <FooterContainer
-      className={cn(isEditingWorkspace ? "mt-0" : "mt-auto", styles.container)}>
+    <FooterContainer className={cn(isEditingWorkspace ? "mt-0" : "mt-auto")}>
       <AstryxIconButton
         label="Keyboard shortcuts"
         tooltip="Keyboard shortcuts"
         variant="ghost"
+        className="shrink-0"
         icon={<Keyboard size={18} className="text-gray-500 dark:text-gray-400" />}
         onClick={() => {
           void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
@@ -40,7 +40,10 @@ export function Footer({
       />
 
       <Reorder.Group
-        className="flex gap-1 items-center"
+        className={cn(
+          "flex min-w-0 flex-1 items-center justify-center gap-1 px-3",
+          styles.dock
+        )}
         axis="x"
         onReorder={(newOrder) => {
           reorder(newOrder)
@@ -50,7 +53,7 @@ export function Footer({
           const isActive = space.id === current.id
           const hue = space.color ?? "gray"
           return (
-            <SpaceItem key={space.id} workspace={space}>
+            <SpaceItem key={space.id} workspace={space} className="shrink-0">
               <AstryxIconButton
                 key={space.id}
                 label={space.title}
@@ -92,6 +95,7 @@ export function Footer({
         label="Create workspace"
         tooltip="Create workspace"
         variant="ghost"
+        className="shrink-0"
         isDisabled={!ready}
         icon={<Plus size={20} className="text-gray-600 dark:text-gray-300" />}
         onClick={onCreateNewSpace}

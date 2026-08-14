@@ -1,5 +1,25 @@
-.container {
+/* The dock scrolls independently so the keyboard-shortcut and "+" buttons
+   on either side stay put once there are enough workspaces to overflow. */
+.dock {
 	overflow-x: auto;
 	overflow-y: hidden;
-	scrollbar-width: thin;
+	scrollbar-width: none;
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black 12px,
+		black calc(100% - 12px),
+		transparent 100%
+	);
+	mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		black 12px,
+		black calc(100% - 12px),
+		transparent 100%
+	);
+}
+
+.dock::-webkit-scrollbar {
+	display: none;
 }
