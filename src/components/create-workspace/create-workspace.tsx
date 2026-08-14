@@ -119,7 +119,7 @@ export function CreateWorkspace({
     <>
       <EmojiContainer>
         <EmojiButton
-          className="w-10 h-10 mt-8  text-5xl"
+          className="w-14 h-14 mt-8 text-4xl"
           emoji={emoji}
           onEmojiSelect={setEmoji}
         />
