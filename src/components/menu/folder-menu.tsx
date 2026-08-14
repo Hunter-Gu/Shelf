@@ -51,6 +51,7 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
       type: "section",
       title: "Move to",
       items: workspaces.map((space) => ({
+        id: space.id,
         label: space.title,
         isDisabled: current.id === space.id,
         onClick: () => {

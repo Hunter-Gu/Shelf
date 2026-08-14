@@ -151,6 +151,7 @@ export function CreateWorkspace({
         <ConfirmButton
           type="submit"
           label={isUpdating ? "Update Space" : "Create Space"}
+          variant="primary"
           onClick={handleSubmit}
           isDisabled={!name}
         />
