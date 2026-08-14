@@ -30,7 +30,9 @@ function renderItems(items: MenuItems) {
       return (
         <div key={`section-${index}`} role="group" aria-label={item.title}>
           {item.title ? (
-            <div className="px-3 py-1 text-xs text-gray-500 dark:text-gray-400">
+            <div
+              aria-hidden="true"
+              className="px-3 py-1 text-xs text-gray-500 dark:text-gray-400">
               {item.title}
             </div>
           ) : null}

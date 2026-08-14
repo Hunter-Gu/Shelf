@@ -10,7 +10,7 @@ type Clsx = Record<(typeof NODES)[number], (className: string) => ComponentType<
 export const clsx = NODES.reduce((acc, node) => {
 	const Node = forwardRef<any, any>((props, ref) => createElement(node, { ...props, ref }));
 	Node.displayName = `clsx.${node}`;
-	return { ...acc, [node]: withClsx(Node) };
+	return { ...acc, [node]: (className: string) => withClsx(Node, className) };
 }, {} as Clsx);
 
 export function withClsx(Comp: ComponentType<any>, presetClassName = '') {
