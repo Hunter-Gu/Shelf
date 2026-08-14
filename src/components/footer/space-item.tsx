@@ -1,5 +1,5 @@
 import { Reorder, useMotionValue, type MotionStyle } from 'framer-motion';
-import type { PropsWithChildren } from 'react';
+import type { ReactElement } from 'react';
 
 import type { Workspace } from '~/workspace-model';
 
@@ -8,7 +8,7 @@ export function SpaceItem({
 	children,
 	className,
 	style,
-}: PropsWithChildren<{ workspace: Workspace; className?: string; style?: MotionStyle }>) {
+}: { workspace: Workspace; children?: ReactElement; className?: string; style?: MotionStyle }) {
 	const x = useMotionValue(0);
 
 	return (
