@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "wxt/browser"
 
 import {
+  BookmarkTreeUtils,
   buildSearchTree,
   toAllBookmarks,
   toBaseFolder,
@@ -31,35 +32,140 @@ export function useBookmarks() {
     setTree(nextTree as unknown as RootTree)
   }, [])
 
+  // Patch the in-memory tree instead of re-fetching it from the browser.
+  // Clones first so the previous tree (still referenced by whatever last
+  // rendered) is never mutated in place.
+  const applyPatch = useCallback((patch: (draft: RootTree) => void) => {
+    setTree((prev) => {
+      if (!prev) return prev
+      const draft = structuredClone(prev)
+      patch(draft)
+      return draft
+    })
+  }, [])
+
   useEffect(() => {
     void reload()
 
-    // Bookmark events often arrive in bursts (drag-reordering several items,
-    // a sync batch landing) — each one used to trigger its own full getTree()
-    // round trip. Coalesce a burst into a single reload, fired once events
-    // stop for a beat.
-    let reloadTimeout: ReturnType<typeof setTimeout> | null = null
-    const scheduleReload = () => {
-      if (reloadTimeout !== null) clearTimeout(reloadTimeout)
-      reloadTimeout = setTimeout(() => {
-        reloadTimeout = null
-        void reload()
-      }, 120)
+    // Chrome suppresses per-item events during a bulk import and fires
+    // onImportBegan/onImportEnded around it instead — the API docs say as
+    // much ("expensive observers should ignore onCreated until onImportEnded
+    // fires"). Patching per-event during an import would be both wasted work
+    // and unreliable, so everything is ignored until it ends, then resolved
+    // with one full reload.
+    let isImporting = false
+
+    const handleCreated = (
+      _id: string,
+      bookmark: chrome.bookmarks.BookmarkTreeNode
+    ) => {
+      if (isImporting) return
+      if (bookmark.parentId === undefined || bookmark.index === undefined) return
+      const node: Bookmark | Folder =
+        bookmark.url !== undefined
+          ? {
+              id: bookmark.id,
+              parentId: bookmark.parentId,
+              index: bookmark.index,
+              title: bookmark.title,
+              url: bookmark.url
+            }
+          : {
+              id: bookmark.id,
+              parentId: bookmark.parentId,
+              index: bookmark.index,
+              title: bookmark.title
+            }
+      applyPatch((draft) => BookmarkTreeUtils.add(draft, node))
     }
 
-    const listeners = [
-      browser.bookmarks.onCreated,
-      browser.bookmarks.onChanged,
-      browser.bookmarks.onMoved,
-      browser.bookmarks.onRemoved,
-      browser.bookmarks.onChildrenReordered
-    ]
+    const handleChanged = (
+      id: string,
+      changeInfo: chrome.bookmarks.BookmarkChangeInfo
+    ) => {
+      if (isImporting) return
+      const node =
+        changeInfo.url !== undefined
+          ? { id, title: changeInfo.title, url: changeInfo.url }
+          : { id, title: changeInfo.title }
+      applyPatch((draft) => BookmarkTreeUtils.change(draft, node))
+    }
 
-    listeners.forEach((event) => event.addListener(scheduleReload))
+    const handleMoved = (
+      id: string,
+      moveInfo: chrome.bookmarks.BookmarkMoveInfo
+    ) => {
+      if (isImporting) return
+      applyPatch((draft) =>
+        BookmarkTreeUtils.move(draft, {
+          id,
+          index: moveInfo.index,
+          parentId: moveInfo.parentId,
+          oldIndex: moveInfo.oldIndex,
+          oldParentId: moveInfo.oldParentId
+        })
+      )
+    }
+
+    const handleRemoved = (
+      _id: string,
+      removeInfo: chrome.bookmarks.BookmarkRemoveInfo
+    ) => {
+      if (isImporting) return
+      applyPatch((draft) =>
+        BookmarkTreeUtils.remove(draft, {
+          index: removeInfo.index,
+          parentId: removeInfo.parentId
+        })
+      )
+    }
+
+    const handleReordered = (
+      id: string,
+      reorderInfo: chrome.bookmarks.BookmarkReorderInfo
+    ) => {
+      if (isImporting) return
+      applyPatch((draft) =>
+        BookmarkTreeUtils.reorder(draft, { id, childIds: reorderInfo.childIds })
+      )
+    }
+
+    const handleImportBegan = () => {
+      isImporting = true
+    }
+    const handleImportEnded = () => {
+      isImporting = false
+      void reload()
+    }
+
+    browser.bookmarks.onCreated.addListener(handleCreated)
+    browser.bookmarks.onChanged.addListener(handleChanged)
+    browser.bookmarks.onMoved.addListener(handleMoved)
+    browser.bookmarks.onRemoved.addListener(handleRemoved)
+    browser.bookmarks.onChildrenReordered.addListener(handleReordered)
+    browser.bookmarks.onImportBegan.addListener(handleImportBegan)
+    browser.bookmarks.onImportEnded.addListener(handleImportEnded)
+
     return () => {
-      listeners.forEach((event) => event.removeListener(scheduleReload))
-      if (reloadTimeout !== null) clearTimeout(reloadTimeout)
+      browser.bookmarks.onCreated.removeListener(handleCreated)
+      browser.bookmarks.onChanged.removeListener(handleChanged)
+      browser.bookmarks.onMoved.removeListener(handleMoved)
+      browser.bookmarks.onRemoved.removeListener(handleRemoved)
+      browser.bookmarks.onChildrenReordered.removeListener(handleReordered)
+      browser.bookmarks.onImportBegan.removeListener(handleImportBegan)
+      browser.bookmarks.onImportEnded.removeListener(handleImportEnded)
     }
+  }, [reload, applyPatch])
+
+  // Safety net: reconcile against the real tree whenever the panel becomes
+  // visible again, in case incremental patching ever drifts from reality
+  // (a missed event, an edge case the patch logic doesn't cover).
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void reload()
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () => document.removeEventListener("visibilitychange", handleVisibility)
   }, [reload])
 
   const create = useCallback(async (details: BookmarkCreate) => {
