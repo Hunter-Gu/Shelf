@@ -34,6 +34,19 @@ export function useBookmarks() {
   useEffect(() => {
     void reload()
 
+    // Bookmark events often arrive in bursts (drag-reordering several items,
+    // a sync batch landing) — each one used to trigger its own full getTree()
+    // round trip. Coalesce a burst into a single reload, fired once events
+    // stop for a beat.
+    let reloadTimeout: ReturnType<typeof setTimeout> | null = null
+    const scheduleReload = () => {
+      if (reloadTimeout !== null) clearTimeout(reloadTimeout)
+      reloadTimeout = setTimeout(() => {
+        reloadTimeout = null
+        void reload()
+      }, 120)
+    }
+
     const listeners = [
       browser.bookmarks.onCreated,
       browser.bookmarks.onChanged,
@@ -42,8 +55,11 @@ export function useBookmarks() {
       browser.bookmarks.onChildrenReordered
     ]
 
-    listeners.forEach((event) => event.addListener(reload))
-    return () => listeners.forEach((event) => event.removeListener(reload))
+    listeners.forEach((event) => event.addListener(scheduleReload))
+    return () => {
+      listeners.forEach((event) => event.removeListener(scheduleReload))
+      if (reloadTimeout !== null) clearTimeout(reloadTimeout)
+    }
   }, [reload])
 
   const create = useCallback(async (details: BookmarkCreate) => {
@@ -69,23 +85,29 @@ export function useBookmarks() {
   const search = useCallback((text: string) => {
     searchRequestRef.current += 1
     setSearchText(text)
-    setSearchState(text ? { text, tree: null } : null)
+    // Keep whatever results are already showing instead of flashing empty —
+    // the debounced effect below will replace them once the new query settles.
+    setSearchState((prev) => (text ? { text, tree: prev?.tree ?? null } : null))
   }, [])
 
   useEffect(() => {
     if (!searchText || !tree) return
 
     const requestId = ++searchRequestRef.current
-    void browser.bookmarks
-      .search(searchText)
-      .then((results) => {
-        if (requestId !== searchRequestRef.current) return
-        setSearchState({
-          text: searchText,
-          tree: buildSearchTree(tree, results as Array<Folder | Bookmark>)
+    const timeoutId = setTimeout(() => {
+      void browser.bookmarks
+        .search(searchText)
+        .then((results) => {
+          if (requestId !== searchRequestRef.current) return
+          setSearchState({
+            text: searchText,
+            tree: buildSearchTree(tree, results as Array<Folder | Bookmark>)
+          })
         })
-      })
-      .catch(() => {})
+        .catch(() => {})
+    }, 200)
+
+    return () => clearTimeout(timeoutId)
   }, [searchText, tree])
 
   const getTreeByWorkspaceId = useCallback(
