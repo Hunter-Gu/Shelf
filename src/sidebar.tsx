@@ -7,11 +7,12 @@ import { clsx } from "~/components/clsx"
 import { Editable, useEditable } from "~/components/editable"
 import { FolderTree } from "~/components/folder-tree"
 import { SpaceMenu } from "~/components/menu/space-menu"
+import { PinHint } from "~/components/pin-hint"
 import { useSearch } from "~/hooks/use-search"
 import type { Workspace } from "~/workspace-model"
 
 const TitleContainer = clsx.div(
-  "flex justify-between items-center mx-3 pb-2 border-b border-solid border-b-black/10 dark:border-b-white/10"
+  "flex justify-between items-center mx-3 mb-2 px-3 py-2 rounded-2xl"
 )
 const Title = clsx.span(
   "text-base capitalize font-bold text-black dark:text-white"
@@ -52,7 +53,12 @@ export function Sidebar({ onEdit }: SidebarProps) {
         />
       </div>
 
-      <TitleContainer>
+      <PinHint />
+
+      <TitleContainer
+        style={{
+          backgroundColor: `var(--color-background-${currentSpace.color ?? "gray"})`
+        }}>
         <Title>
           <span className={cn(currentSpace.logo && "mr-3")}>
             {currentSpace.logo}

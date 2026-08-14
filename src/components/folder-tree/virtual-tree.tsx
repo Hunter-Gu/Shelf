@@ -1,6 +1,8 @@
+import { EmptyState } from "@astryxdesign/core/EmptyState"
 import type { Virtualizer } from "@tanstack/react-virtual"
 import { useFolderState } from "common/context/folder-states-context"
 import { noop } from "common/utils/noop"
+import { BookmarkPlus } from "lucide-react"
 import { useCallback, useEffect, useRef } from "react"
 
 import { isFolder, type Bookmark, type Folder } from "~/bookmark-model"
@@ -128,6 +130,19 @@ export function VirtualTree({
 
   const getLeftSpacing = getLeftSpacingCreator(list, foldStatus)
   const { virtualizerRef } = useScrollVirtualTree(list)
+
+  if (list.length === 0) {
+    return (
+      <div className={className}>
+        <EmptyState
+          isCompact
+          icon={<BookmarkPlus className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
+          title="No bookmarks yet"
+          description="Drag a link in, or use the + button above to save the page you're on."
+        />
+      </div>
+    )
+  }
 
   return (
     <VirtualList
