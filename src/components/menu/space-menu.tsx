@@ -1,3 +1,4 @@
+import { AnimatePresence } from "framer-motion"
 import { useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -101,13 +102,16 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
   return (
     <>
       <Menu items={menuItems} />
-      {isConfirmingDelete && (
-        <DeleteConfirmChip
-          label={`Delete "${currentSpace.title}"`}
-          onConfirm={handleDelete}
-          onCancel={() => setConfirmingDelete(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isConfirmingDelete && (
+          <DeleteConfirmChip
+            key="confirm-delete"
+            label={`Delete "${currentSpace.title}"`}
+            onConfirm={handleDelete}
+            onCancel={() => setConfirmingDelete(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }

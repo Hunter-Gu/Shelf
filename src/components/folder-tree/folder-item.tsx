@@ -3,8 +3,9 @@ import {
   useUpdateFolderState
 } from "common/context/folder-states-context"
 import { cn } from "common/lib/utils"
+import { AnimatePresence } from "framer-motion"
 import { FolderIcon, FolderOpenIcon } from "lucide-react"
-import { useCallback, type KeyboardEvent } from "react"
+import { useCallback, useState, type KeyboardEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { useEditable } from "~/context/editable-context"
@@ -15,6 +16,7 @@ import { type Folder } from "../../bookmark-model"
 import { useDnD } from "../../context/dnd-context"
 import { BookmarkButton } from "../bookmark-button/bookmark-button"
 import { clsx } from "../clsx"
+import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Editable } from "../editable"
 import { FolderMenu } from "../menu/folder-menu"
 import { FocusedStyle, getDnDStyle } from "./constants"
@@ -32,11 +34,12 @@ const Title = clsx.span("line-clamp-1 group-hover:mr-20")
 export function FolderItem({ className, ...props }: FolderItemProps) {
   const isFocused = useIsFocused()
   const { bookmarks } = useAppContext()
-  const { change } = bookmarks
+  const { change, removeTree } = bookmarks
 
   const { id, title } = props
   const updateFolderState = useUpdateFolderState()
   const folderState = useFolderState(id)
+  const [isConfirmingDelete, setConfirmingDelete] = useState(false)
 
   const confirmChange = useCallback(
     (e: KeyboardEvent<Element>, newTitle: string) => {
@@ -91,12 +94,28 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
                 <BookmarkButton id={id} />
                 <FolderMenu
                   item={props}
-                  onRename={() => setEditing(true)}></FolderMenu>
+                  onRename={() => setEditing(true)}
+                  onRequestDelete={() => setConfirmingDelete(true)}
+                />
               </ItemActionsContainer>
             </>
           }
           onChange={handleChange}></Editable>
       </Item>
+
+      <AnimatePresence>
+        {isConfirmingDelete && (
+          <DeleteConfirmChip
+            key="confirm-delete"
+            label={`Delete "${title}"`}
+            onConfirm={() => {
+              setConfirmingDelete(false)
+              removeTree(id)
+            }}
+            onCancel={() => setConfirmingDelete(false)}
+          />
+        )}
+      </AnimatePresence>
     </ItemContainer>
   )
 }

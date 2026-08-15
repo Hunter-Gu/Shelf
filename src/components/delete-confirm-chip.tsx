@@ -1,4 +1,6 @@
 import { cn } from "common/lib/utils"
+import { motion } from "framer-motion"
+import { Trash2Icon } from "lucide-react"
 import { useEffect, useRef } from "react"
 
 type DeleteConfirmChipProps = {
@@ -32,22 +34,34 @@ export function DeleteConfirmChip({
   }, [onCancel])
 
   return (
-    <button
+    <motion.button
       ref={ref}
       type="button"
+      initial={{ opacity: 0, y: -6, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: "auto" }}
+      exit={{ opacity: 0, y: -6, height: 0 }}
+      transition={{ duration: 0.16, ease: "easeOut" }}
       onClick={(event) => {
         event.stopPropagation()
         onConfirm()
       }}
+      style={{
+        backgroundColor: "var(--color-background-red)",
+        color: "var(--color-text-red)"
+      }}
       // visible overrides the invisible/group-hover:visible some ancestors
       // (e.g. ItemActionsContainer) use to hide row actions until hovered —
-      // this chip needs to stay visible on its own once it's shown.
+      // this needs to stay visible on its own once it's shown.
       className={cn(
-        "visible absolute top-full right-0 z-10 mt-1.5 whitespace-nowrap rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white shadow-lg transition-transform hover:bg-red-700 active:scale-95",
+        "visible absolute inset-x-0 top-full z-10 mt-1.5 flex items-center gap-2 overflow-hidden rounded-2xl px-3 py-2 text-left text-sm transition-colors hover:brightness-95 active:scale-[0.99]",
         className
       )}>
-      {label}
-      <span className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-red-600" />
-    </button>
+      <Trash2Icon
+        className="h-3.5 w-3.5 shrink-0"
+        style={{ color: "var(--color-icon-red)" }}
+      />
+      <span className="min-w-0 flex-1 truncate font-semibold">{label}</span>
+      <span className="shrink-0 text-xs opacity-70">Tap to confirm</span>
+    </motion.button>
   )
 }
