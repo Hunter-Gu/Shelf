@@ -44,7 +44,8 @@ export function SpaceDockButton({ space, isActive, onClick }: SpaceDockButtonPro
         style={{
           width: "1.75rem",
           height: "1.75rem",
-          borderRadius: "9999px",
+          borderRadius: "50%",
+          overflow: "hidden",
           outline: "none",
           backgroundColor
         }}
