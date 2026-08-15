@@ -31,6 +31,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
   const { searchText, handleSearch } = useSearch()
   const searchInputRef = useRef<HTMLInputElement>(null)
   useFocusSearchShortcut(searchInputRef)
+  const titleRef = useRef<HTMLDivElement>(null)
   const { isEditing, setEditing, handleChange } = useEditable((event) => {
     void workspace.update(currentSpace.id, (nextWorkspace) => {
       nextWorkspace.title = (event.target as HTMLInputElement).value
@@ -61,6 +62,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
       <PinHint />
 
       <TitleContainer
+        ref={titleRef}
         style={{
           backgroundColor: `var(--color-background-${currentSpace.color ?? "gray"})`
         }}>
@@ -82,6 +84,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
               item={tree}
               onRename={() => setEditing(true)}
               onEdit={onEdit}
+              anchorRef={titleRef}
             />
           ) : null}
         </ActionsContainer>

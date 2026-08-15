@@ -108,6 +108,7 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
           <DeleteConfirmChip
             key="confirm-delete"
             label={`Delete "${title}"`}
+            anchorRef={ref}
             onConfirm={() => {
               setConfirmingDelete(false)
               removeTree(id)

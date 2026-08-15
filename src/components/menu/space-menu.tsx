@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion"
-import { useState } from "react"
+import { useState, type RefObject } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { useSetEditableId } from "~/context/editable-context"
@@ -16,9 +16,10 @@ type MenuItemProps = {
   onRename?: () => void
   onEdit?: (workspace: Workspace) => void
   item: Pick<Folder, "id" | "title" | "children">
+  anchorRef: RefObject<HTMLElement | null>
 }
 
-export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
+export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) {
   const { bookmarks, workspace } = useAppContext()
   const { create } = bookmarks
   const { currentWorkspace: currentSpace, remove } = workspace
@@ -107,6 +108,7 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
           <DeleteConfirmChip
             key="confirm-delete"
             label={`Delete "${currentSpace.title}"`}
+            anchorRef={anchorRef}
             onConfirm={handleDelete}
             onCancel={() => setConfirmingDelete(false)}
           />
