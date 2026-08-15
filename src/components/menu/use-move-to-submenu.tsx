@@ -37,10 +37,16 @@ export function useMoveToSubmenu({
     }))
   ]
 
+  const open = () => setOpen(true)
+
   return {
     isOpen,
     items,
-    open: () => setOpen(true),
-    reset: () => setOpen(false)
+    open,
+    reset: () => setOpen(false),
+    // "›" signals this item drills into a sub-view rather than acting
+    // immediately — the data-driven menu item type has no endContent slot
+    // to put a trailing icon in instead.
+    entry: { label: "Move to  ›", onClick: open }
   }
 }

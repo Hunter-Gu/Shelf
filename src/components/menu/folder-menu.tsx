@@ -56,7 +56,7 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     { type: "divider" },
     { label: turnToSpaceTitle, onClick: () => turnToSpace({ id, parentId, title }) },
     { type: "divider" },
-    { label: "Move to", onClick: moveTo.open },
+    moveTo.entry,
     { type: "divider" },
     {
       label: "Delete",

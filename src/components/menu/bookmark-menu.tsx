@@ -31,7 +31,7 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
     { label: "Rename", onClick: onRename },
     { label: "Copy Link", onClick: () => void navigator.clipboard.writeText(item.url) },
     { type: "divider" },
-    { label: "Move to", onClick: moveTo.open },
+    moveTo.entry,
     { type: "divider" },
     { label: "Delete", onClick: () => remove(item.id) }
   ]
