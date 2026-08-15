@@ -4,7 +4,13 @@ import { useEffect, type RefObject } from "react"
 // horizontal-only region normally requires holding Shift. Trackpad two-finger
 // horizontal swipes already produce real deltaX and should pass through
 // untouched — this only takes over when the gesture is purely vertical.
-export function useWheelToHorizontalScroll(ref: RefObject<HTMLElement | null>) {
+export function useWheelToHorizontalScroll(
+  ref: RefObject<HTMLElement | null>,
+  // Raw deltaY per wheel tick varies a lot by OS/mouse (some jump 100+px),
+  // which reads as a too-long scroll per tick — scaled down so the amount
+  // moved feels proportionate to the gesture instead of 1:1 with it.
+  speed = 0.4
+) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
@@ -14,7 +20,7 @@ export function useWheelToHorizontalScroll(ref: RefObject<HTMLElement | null>) {
       if (el.scrollWidth <= el.clientWidth) return
 
       event.preventDefault()
-      el.scrollLeft += event.deltaY
+      el.scrollLeft += event.deltaY * speed
     }
 
     // React attaches wheel listeners as passive by default, which would
@@ -22,5 +28,5 @@ export function useWheelToHorizontalScroll(ref: RefObject<HTMLElement | null>) {
     // actually take over the scroll.
     el.addEventListener("wheel", handleWheel, { passive: false })
     return () => el.removeEventListener("wheel", handleWheel)
-  }, [ref])
+  }, [ref, speed])
 }
