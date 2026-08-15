@@ -9,7 +9,7 @@ export function useWheelToHorizontalScroll(
   // Raw deltaY per wheel tick varies a lot by OS/mouse (some jump 100+px),
   // which reads as a too-long scroll per tick — scaled down so the amount
   // moved feels proportionate to the gesture instead of 1:1 with it.
-  speed = 0.4
+  speed = 0.2
 ) {
   useEffect(() => {
     const el = ref.current

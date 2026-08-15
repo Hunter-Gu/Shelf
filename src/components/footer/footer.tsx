@@ -1,14 +1,16 @@
-import { cn } from "common/lib/utils"
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
+import { cn } from "common/lib/utils"
 import { Reorder } from "framer-motion"
 import { Keyboard, Plus } from "lucide-react"
 import { useRef } from "react"
 import { browser } from "wxt/browser"
 
 import { useAppContext } from "~/app/app-context"
+import { useDockEdgeScroll } from "~/hooks/use-dock-edge-scroll"
 import { useWheelToHorizontalScroll } from "~/hooks/use-wheel-to-horizontal-scroll"
 
 import { clsx } from "../clsx"
+import { DockScrollButton } from "./dock-scroll-button"
 import styles from "./footer.module.css"
 import { SpaceDockButton } from "./space-dock-button"
 import { SpaceItem } from "./space-item"
@@ -30,6 +32,7 @@ export function Footer({
   const switchTo = workspace.switch
   const dockRef = useRef<HTMLUListElement>(null)
   useWheelToHorizontalScroll(dockRef)
+  const dockScroll = useDockEdgeScroll(dockRef, workspaces.length)
 
   return (
     <FooterContainer className={cn(isEditingWorkspace ? "mt-0" : "mt-auto")}>
@@ -38,16 +41,26 @@ export function Footer({
         tooltip="Keyboard shortcuts"
         variant="ghost"
         className="shrink-0"
-        icon={<Keyboard size={18} className="text-gray-500 dark:text-gray-400" />}
+        icon={
+          <Keyboard size={18} className="text-gray-500 dark:text-gray-400" />
+        }
         onClick={() => {
           void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
         }}
       />
 
+      <DockScrollButton
+        direction={-1}
+        isVisible={dockScroll.canScrollLeft}
+        onClick={() => dockScroll.scrollOnce(-1)}
+        onHoverStart={() => dockScroll.startHoverScroll(-1)}
+        onHoverEnd={dockScroll.stopHoverScroll}
+      />
+
       <Reorder.Group
         ref={dockRef}
         className={cn(
-          "flex min-w-0 flex-1 items-center justify-center gap-1 px-3",
+          "flex min-w-0 flex-1 items-center gap-1 px-3",
           styles.dock
         )}
         axis="x"
@@ -71,6 +84,14 @@ export function Footer({
           )
         })}
       </Reorder.Group>
+
+      <DockScrollButton
+        direction={1}
+        isVisible={dockScroll.canScrollRight}
+        onClick={() => dockScroll.scrollOnce(1)}
+        onHoverStart={() => dockScroll.startHoverScroll(1)}
+        onHoverEnd={dockScroll.stopHoverScroll}
+      />
 
       <AstryxIconButton
         label="Create workspace"
