@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "wxt/browser"
-import { storage } from "wxt/utils/storage"
 
 import {
   isFolder,
@@ -10,6 +9,7 @@ import {
   type RootTree
 } from "~/bookmark-model"
 import { proofWorkspaces } from "~/workspace-model/proof-workspaces"
+import { workspaceStorage } from "~/workspace-model/storage/workspace-storage"
 import {
   createWorkspace,
   WorkspaceType,
@@ -18,10 +18,6 @@ import {
   type WorkspaceHue
 } from "~/workspace-model/workspace"
 import { workspaceName } from "~/workspace-model/workspace-name"
-
-const workspaceStorage = storage.defineItem<Workspace[]>("sync:workspaces", {
-  fallback: []
-})
 
 function sameWorkspaces(left: Workspace[], right: Workspace[]) {
   return (
@@ -41,7 +37,9 @@ function sameWorkspaces(left: Workspace[], right: Workspace[]) {
 }
 
 function workspaceSnapshotKey(workspaces: Workspace[]) {
-  return JSON.stringify(workspaces)
+  return JSON.stringify(
+    workspaces.map(({ logo: _logo, ...storedWorkspace }) => storedWorkspace)
+  )
 }
 
 export function useWorkspaces({
@@ -102,7 +100,10 @@ export function useWorkspaces({
   useEffect(
     () =>
       workspaceStorage.watch((saved) => {
-        const next = saved.map(createWorkspace)
+        const restored = saved.map(createWorkspace)
+        const next = treeRef.current
+          ? proofWorkspaces(treeRef.current, restored)
+          : restored
         const key = workspaceSnapshotKey(next)
         const localWriteIndex = localStorageWritesRef.current.indexOf(key)
         if (localWriteIndex !== -1) {
@@ -140,7 +141,12 @@ export function useWorkspaces({
       initializingRef.current = true
 
       try {
-        const saved = await workspaceStorage.getValue()
+        const saved = await workspaceStorage.getValue().catch((error: unknown) => {
+          // Never let a bad stored value hang the app in "not ready" forever
+          // — fall back to re-deriving workspaces from the bookmark tree below.
+          console.error("Failed to read workspace storage", error)
+          return []
+        })
         const latestTree = treeRef.current
         if (!latestTree) return
 
@@ -172,7 +178,7 @@ export function useWorkspaces({
                   createWorkspace({
                     id: item.id,
                     title: workspaceName.parse(item.title),
-                    logo: ""
+                    logo: workspaceName.parseLogo(item.title)
                   })
                 )
             )
@@ -233,6 +239,18 @@ export function useWorkspaces({
         updater(copy)
         return copy
       })
+      const previous = current.find((workspace) => workspace.id === id)!
+      const changed = next.find((workspace) => workspace.id === id)!
+      if (
+        changed.type === WorkspaceType.Normal &&
+        (previous.type !== WorkspaceType.Normal ||
+          changed.title !== previous.title ||
+          changed.logo !== previous.logo)
+      ) {
+        await changeBookmark(id, {
+          title: workspaceName.format(changed.title, changed.logo)
+        })
+      }
       workspacesRef.current = next
       setWorkspaces(next)
       setCurrentWorkspace(
@@ -241,7 +259,7 @@ export function useWorkspaces({
       )
       await persist(next)
     },
-    [persist]
+    [changeBookmark, persist]
   )
 
   const create = useCallback(
@@ -250,7 +268,7 @@ export function useWorkspaces({
 
       const folder = await createBookmark({
         parentId: workspaceParentId,
-        title: workspaceName.format(title)
+        title: workspaceName.format(title, rest.logo)
       })
       const workspace = createWorkspace({ id: folder.id, title, ...rest })
       const next = [...workspacesRef.current, workspace]
@@ -278,7 +296,6 @@ export function useWorkspaces({
       if (!initializedRef.current) return
 
       const nextTitle = title.trim() || "Untitled"
-      await changeBookmark(id, { title: workspaceName.format(nextTitle) })
       if (parentId !== workspaceParentId) {
         await moveBookmark(id, { parentId: workspaceParentId })
       }
@@ -289,6 +306,7 @@ export function useWorkspaces({
           workspace.type = WorkspaceType.Normal
         })
       } else {
+        await changeBookmark(id, { title: workspaceName.format(nextTitle) })
         const workspace = createWorkspace({
           id,
           title: nextTitle,

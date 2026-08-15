@@ -1,7 +1,7 @@
-import type { RootTree } from '~/bookmark-model';
-import { toAllBookmarks, toBaseFolder } from '~/bookmark-model';
+import { isFolder, toAllBookmarks, toBaseFolder, type RootTree } from '~/bookmark-model';
 
-import type { Workspace } from './workspace';
+import { createWorkspace, WorkspaceType, type Workspace } from './workspace';
+import { workspaceName } from './workspace-name';
 
 // check if a workspace still exist
 export function proofWorkspaces(tree: RootTree, workspaces: Workspace[]) {
@@ -9,9 +9,26 @@ export function proofWorkspaces(tree: RootTree, workspaces: Workspace[]) {
 		return [];
 	}
 	const { bookmarksBar, otherBookmarks } = toBaseFolder(tree);
-	const childrenIds = toAllBookmarks(tree).map((item) => item.id);
+	const bookmarksById = new Map(toAllBookmarks(tree).map((item) => [item.id, item]));
+	const childrenIds = [...bookmarksById.keys()];
 	const potentialWorkspaceId = childrenIds.concat([bookmarksBar.id, otherBookmarks.id]);
 
-	// filter not existed workspaces
-	return workspaces.filter((workspace) => potentialWorkspaceId.includes(workspace.id));
+	// Filter removed workspaces and hydrate normal workspace profile data from
+	// its bookmark folder, which is the source of truth as of data v2.
+	return workspaces
+		.filter((workspace) => potentialWorkspaceId.includes(workspace.id))
+		.map((workspace) => {
+			if (workspace.type !== WorkspaceType.Normal) return workspace;
+
+			const folder = bookmarksById.get(workspace.id);
+			if (!folder || !isFolder(folder) || !workspaceName.isValid(folder.title)) {
+				return workspace;
+			}
+
+			return createWorkspace({
+				...workspace,
+				title: workspaceName.parse(folder.title),
+				logo: workspaceName.parseLogo(folder.title),
+			});
+		});
 }
