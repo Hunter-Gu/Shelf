@@ -32,7 +32,6 @@ const Item = clsx.div(
 const Title = clsx.span("line-clamp-1 group-hover:mr-20")
 
 export function FolderItem({ className, ...props }: FolderItemProps) {
-  const isFocused = useIsFocused()
   const { bookmarks } = useAppContext()
   const { change, removeTree } = bookmarks
 
@@ -40,6 +39,11 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
   const updateFolderState = useUpdateFolderState()
   const folderState = useFolderState(id)
   const [isConfirmingDelete, setConfirmingDelete] = useState(false)
+  // The dropdown menu closes (and un-sets isFocused) the instant "Delete" is
+  // clicked, before the confirmation is resolved — without this, the row
+  // loses its highlight and hides its actions while its own delete
+  // confirmation is still showing below it.
+  const isFocused = useIsFocused() || isConfirmingDelete
 
   const confirmChange = useCallback(
     (e: KeyboardEvent<Element>, newTitle: string) => {
