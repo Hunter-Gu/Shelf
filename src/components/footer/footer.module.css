@@ -3,6 +3,10 @@
 .dock {
 	overflow-x: auto;
 	overflow-y: hidden;
+	/* Icons scale up on hover (see SpaceDockButton) — without this slack,
+	   overflow-y: hidden clips the top/bottom of the enlarged icon against
+	   the row's otherwise exactly-fitted height. */
+	padding-block: 0.5rem;
 	scrollbar-width: none;
 	-webkit-mask-image: linear-gradient(
 		to right,
