@@ -7,7 +7,6 @@ import { tabManager } from "~/tabs/actions"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
 import { Menu, type MenuItems } from "./menu"
-import { useMoveToSubmenu } from "./use-move-to-submenu"
 
 type MenuItemProps = {
   onRename?: () => void
@@ -21,21 +20,15 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
   const { scrollToId } = useVirtualTree()
   const nextTick = useNextTick()
   const { bookmarks, workspace } = useAppContext()
-  const { create, move, removeTree } = bookmarks
-  const { currentWorkspace: current, workspaces, turnToSpace } = workspace
+  const { create, removeTree } = bookmarks
+  const { turnToSpace } = workspace
   const setEditableId = useSetEditableId()
   const turnToSpaceTitle = `Turn '${title}' into Space`
   const urls = (item.children || [])
     .filter((child) => !isFolder(child))
     .map((child) => (child as Bookmark).url)
 
-  const moveTo = useMoveToSubmenu({
-    workspaces,
-    current,
-    onMove: (workspaceId) => move(id, { parentId: workspaceId })
-  })
-
-  const mainItems: MenuItems = [
+  const items: MenuItems = [
     { label: "Open All", onClick: () => tabManager.create(urls) },
     { label: "Open All in New Tab Group", onClick: () => tabManager.createInGroup(title, urls) },
     { label: "Open All in New Window", onClick: () => tabManager.createInNewWindow(urls) },
@@ -56,8 +49,6 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     { type: "divider" },
     { label: turnToSpaceTitle, onClick: () => turnToSpace({ id, parentId, title }) },
     { type: "divider" },
-    moveTo.entry,
-    { type: "divider" },
     {
       label: "Delete",
       onClick: () => {
@@ -67,12 +58,5 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     }
   ]
 
-  return (
-    <Menu
-      items={moveTo.isOpen ? moveTo.items : mainItems}
-      onOpenChange={(open) => {
-        if (!open) moveTo.reset()
-      }}
-    />
-  )
+  return <Menu items={items} />
 }

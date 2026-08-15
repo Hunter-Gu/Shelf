@@ -19,6 +19,7 @@ import { clsx } from "../clsx"
 import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Editable } from "../editable"
 import { FolderMenu } from "../menu/folder-menu"
+import { MoveToMenu } from "../menu/move-to-menu"
 import { FocusedStyle, getDnDStyle } from "./constants"
 import { ItemActionsContainer, ItemContainer } from "./styled"
 import { useItemDrag, useItemDrop } from "./use-dnd"
@@ -29,11 +30,11 @@ const Item = clsx.div(
   "flex flex-1 items-center justify-between ml-2 text-sm font-semibold text-gray-700 dark:text-gray-200"
 )
 
-const Title = clsx.span("line-clamp-1 group-hover:mr-20")
+const Title = clsx.span("line-clamp-1 group-hover:mr-28")
 
 export function FolderItem({ className, ...props }: FolderItemProps) {
   const { bookmarks } = useAppContext()
-  const { change, removeTree } = bookmarks
+  const { change, move, removeTree } = bookmarks
 
   const { id, title } = props
   const updateFolderState = useUpdateFolderState()
@@ -91,11 +92,12 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
           text={title}
           preview={
             <>
-              <Title title={title} className={cn(isFocused && "mr-20")}>
+              <Title title={title} className={cn(isFocused && "mr-28")}>
                 {title}
               </Title>
               <ItemActionsContainer className={cn(isFocused && "visible")}>
                 <BookmarkButton id={id} />
+                <MoveToMenu onMove={(workspaceId) => move(id, { parentId: workspaceId })} />
                 <FolderMenu
                   item={props}
                   onRename={() => setEditing(true)}
