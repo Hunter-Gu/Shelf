@@ -72,7 +72,8 @@ function EmojiButton({ className, emoji, onEmojiSelect }: EmojiButtonProps) {
       <Button
         label="Choose workspace emoji"
         variant="ghost"
-        className={className}>
+        className={className}
+        style={emoji ? { padding: 0 } : undefined}>
           {emoji ? (
             <EmojiText style={{ fontSize: "1em" }}>{emoji}</EmojiText>
           ) : (
