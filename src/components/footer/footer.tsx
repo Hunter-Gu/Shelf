@@ -2,9 +2,11 @@ import { cn } from "common/lib/utils"
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { Reorder } from "framer-motion"
 import { Keyboard, Plus } from "lucide-react"
+import { useRef } from "react"
 import { browser } from "wxt/browser"
 
 import { useAppContext } from "~/app/app-context"
+import { useWheelToHorizontalScroll } from "~/hooks/use-wheel-to-horizontal-scroll"
 
 import { clsx } from "../clsx"
 import styles from "./footer.module.css"
@@ -26,6 +28,8 @@ export function Footer({
   const { workspace } = useAppContext()
   const { workspaces, currentWorkspace: current, ready, reorder } = workspace
   const switchTo = workspace.switch
+  const dockRef = useRef<HTMLUListElement>(null)
+  useWheelToHorizontalScroll(dockRef)
 
   return (
     <FooterContainer className={cn(isEditingWorkspace ? "mt-0" : "mt-auto")}>
@@ -41,6 +45,7 @@ export function Footer({
       />
 
       <Reorder.Group
+        ref={dockRef}
         className={cn(
           "flex min-w-0 flex-1 items-center justify-center gap-1 px-3",
           styles.dock
