@@ -59,12 +59,15 @@ export function Footer({
                 label={space.title}
                 tooltip={space.title}
                 variant="ghost"
-                className="h-7 w-7 rounded-full transition-colors duration-200"
-                style={
-                  isActive
+                className="transition-colors duration-200"
+                style={{
+                  width: "1.75rem",
+                  height: "1.75rem",
+                  borderRadius: "9999px",
+                  ...(isActive
                     ? { backgroundColor: `var(--color-background-${hue})` }
-                    : undefined
-                }
+                    : undefined)
+                }}
                 icon={
                   <span
                     className={cn(
