@@ -3,6 +3,7 @@ import { tabManager } from "~/tabs/actions"
 
 import { type Bookmark } from "../../bookmark-model"
 import { Menu, type MenuItems } from "./menu"
+import { useMoveToSubmenu } from "./use-move-to-submenu"
 
 type BookmarkMenuProps = {
   onRename?: () => void
@@ -14,7 +15,13 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
   const { remove, move } = bookmarks
   const { workspaces, currentWorkspace: current } = workspace
 
-  const items: MenuItems = [
+  const moveTo = useMoveToSubmenu({
+    workspaces,
+    current,
+    onMove: (workspaceId) => move(item.id, { parentId: workspaceId })
+  })
+
+  const mainItems: MenuItems = [
     { label: "Open in New Window", onClick: () => tabManager.createInNewWindow(item.url) },
     {
       label: "Open in Incognito Window",
@@ -24,20 +31,17 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
     { label: "Rename", onClick: onRename },
     { label: "Copy Link", onClick: () => void navigator.clipboard.writeText(item.url) },
     { type: "divider" },
-    {
-      type: "section",
-      title: "Move to",
-      items: workspaces.map((space) => ({
-        label: space.title,
-        isDisabled: current.id === space.id,
-        onClick: () => {
-          if (current.id !== space.id) move(item.id, { parentId: space.id })
-        }
-      }))
-    },
+    { label: "Move to", onClick: moveTo.open },
     { type: "divider" },
     { label: "Delete", onClick: () => remove(item.id) }
   ]
 
-  return <Menu items={items} />
+  return (
+    <Menu
+      items={moveTo.isOpen ? moveTo.items : mainItems}
+      onOpenChange={(open) => {
+        if (!open) moveTo.reset()
+      }}
+    />
+  )
 }

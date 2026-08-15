@@ -7,6 +7,7 @@ import { tabManager } from "~/tabs/actions"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
 import { Menu, type MenuItems } from "./menu"
+import { useMoveToSubmenu } from "./use-move-to-submenu"
 
 type MenuItemProps = {
   onRename?: () => void
@@ -28,7 +29,13 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     .filter((child) => !isFolder(child))
     .map((child) => (child as Bookmark).url)
 
-  const items: MenuItems = [
+  const moveTo = useMoveToSubmenu({
+    workspaces,
+    current,
+    onMove: (workspaceId) => move(id, { parentId: workspaceId })
+  })
+
+  const mainItems: MenuItems = [
     { label: "Open All", onClick: () => tabManager.create(urls) },
     { label: "Open All in New Tab Group", onClick: () => tabManager.createInGroup(title, urls) },
     { label: "Open All in New Window", onClick: () => tabManager.createInNewWindow(urls) },
@@ -48,17 +55,8 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     },
     { type: "divider" },
     { label: turnToSpaceTitle, onClick: () => turnToSpace({ id, parentId, title }) },
-    {
-      type: "section",
-      title: "Move to",
-      items: workspaces.map((space) => ({
-        label: space.title,
-        isDisabled: current.id === space.id,
-        onClick: () => {
-          if (current.id !== space.id) move(id, { parentId: space.id })
-        }
-      }))
-    },
+    { type: "divider" },
+    { label: "Move to", onClick: moveTo.open },
     { type: "divider" },
     {
       label: "Delete",
@@ -69,5 +67,12 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
     }
   ]
 
-  return <Menu items={items} />
+  return (
+    <Menu
+      items={moveTo.isOpen ? moveTo.items : mainItems}
+      onOpenChange={(open) => {
+        if (!open) moveTo.reset()
+      }}
+    />
+  )
 }

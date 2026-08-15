@@ -9,15 +9,16 @@ import styles from "./menu.module.css"
 
 export type MenuItems = DropdownMenuOption[]
 
-type MenuProps = { items: MenuItems }
+type MenuProps = { items: MenuItems; onOpenChange?: (open: boolean) => void }
 
-export function Menu({ items }: MenuProps) {
+export function Menu({ items, onOpenChange }: MenuProps) {
   const setFocus = useSetFocus()
   const [isOpen, setIsOpen] = useState(false)
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
     setFocus(open)
+    onOpenChange?.(open)
   }
 
   return (
