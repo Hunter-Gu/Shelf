@@ -1,10 +1,4 @@
-import { Button } from "@astryxdesign/core/Button"
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog"
-import { Layout, LayoutContent, LayoutFooter } from "@astryxdesign/core/Layout"
-import {
-  useState,
-  type PropsWithChildren
-} from "react"
+import { useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { useSetEditableId } from "~/context/editable-context"
@@ -14,6 +8,7 @@ import { tabManager } from "~/tabs/actions"
 import type { Workspace } from "~/workspace-model"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
+import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Menu, type MenuItems } from "./menu"
 
 type MenuItemProps = {
@@ -31,10 +26,10 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
   const { scrollToId } = useVirtualTree()
   const nextTick = useNextTick()
   const setEditableId = useSetEditableId()
-  const [open, setOpen] = useState(false)
+  const [isConfirmingDelete, setConfirmingDelete] = useState(false)
 
   const handleDelete = () => {
-    setOpen(false)
+    setConfirmingDelete(false)
     remove(item.id)
   }
 
@@ -97,7 +92,7 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
     {
       label: "Delete",
       onClick: () => {
-        if (item.children?.length) setOpen(true)
+        if (item.children?.length) setConfirmingDelete(true)
         else handleDelete()
       }
     }
@@ -106,42 +101,13 @@ export function SpaceMenu({ item, onRename, onEdit }: MenuItemProps) {
   return (
     <>
       <Menu items={menuItems} />
-
-      <ConfirmDelete
-        open={open}
-        onOpenChange={setOpen}
-        onConfirm={handleDelete}></ConfirmDelete>
+      {isConfirmingDelete && (
+        <DeleteConfirmChip
+          label={`Delete "${currentSpace.title}"`}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
     </>
-  )
-}
-
-function ConfirmDelete({
-  open,
-  onOpenChange,
-  onConfirm
-}: PropsWithChildren<{
-  open: boolean
-  onOpenChange?: (open: boolean) => void
-  onConfirm?: () => void
-}>) {
-  return (
-    <Dialog isOpen={open} onOpenChange={onOpenChange ?? (() => {})} purpose="form" width={360}>
-      <Layout
-        header={<DialogHeader title="Delete Workspace?" onOpenChange={onOpenChange} />}
-        content={
-          <LayoutContent>
-            This can't be undone. This will permanently delete folders and bookmarks in this workspace.
-          </LayoutContent>
-        }
-        footer={
-          <LayoutFooter>
-            <div className="flex justify-end gap-2">
-              <Button label="Cancel" variant="ghost" onClick={() => onOpenChange?.(false)} />
-              <Button label="Delete" variant="destructive" onClick={onConfirm} />
-            </div>
-          </LayoutFooter>
-        }
-      />
-    </Dialog>
   )
 }

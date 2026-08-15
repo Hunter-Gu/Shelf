@@ -1,11 +1,13 @@
 import { useAppContext } from "~/app/app-context"
 import { useUpdateFolderState } from "common/context/folder-states-context"
+import { useState } from "react"
 import { useSetEditableId } from "~/context/editable-context"
 import { useVirtualTree } from "~/context/virtual-tree-context"
 import { useNextTick } from "~/hooks/use-next-tick"
 import { tabManager } from "~/tabs/actions"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
+import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Menu, type MenuItems } from "./menu"
 
 type MenuItemProps = {
@@ -22,6 +24,7 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
   const { create, move, removeTree } = bookmarks
   const { currentWorkspace: current, workspaces, turnToSpace } = workspace
   const setEditableId = useSetEditableId()
+  const [isConfirmingDelete, setConfirmingDelete] = useState(false)
   const turnToSpaceTitle = `Turn '${title}' into Space`
   const urls = (item.children || [])
     .filter((child) => !isFolder(child))
@@ -59,8 +62,28 @@ export function FolderMenu({ item, onRename }: MenuItemProps) {
       }))
     },
     { type: "divider" },
-    { label: "Delete", onClick: () => removeTree(id) }
+    {
+      label: "Delete",
+      onClick: () => {
+        if (item.children?.length) setConfirmingDelete(true)
+        else removeTree(id)
+      }
+    }
   ]
 
-  return <Menu items={items} />
+  return (
+    <>
+      <Menu items={items} />
+      {isConfirmingDelete && (
+        <DeleteConfirmChip
+          label={`Delete "${title}"`}
+          onConfirm={() => {
+            setConfirmingDelete(false)
+            removeTree(id)
+          }}
+          onCancel={() => setConfirmingDelete(false)}
+        />
+      )}
+    </>
+  )
 }
