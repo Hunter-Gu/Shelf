@@ -30,6 +30,7 @@ function sameWorkspaces(left: Workspace[], right: Workspace[]) {
         workspace.logo === other.logo &&
         workspace.color === other.color &&
         workspace.windowId === other.windowId &&
+        workspace.isPinsCollapsed === other.isPinsCollapsed &&
         workspace.type === other.type
       )
     })

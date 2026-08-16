@@ -30,7 +30,7 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
 
   return (
     <div
-      className="mx-3 border-b border-black/10 pb-1 dark:border-white/10"
+      className="mx-3"
       role="list"
       aria-label="Pinned bookmarks">
       {items.map((item) => {

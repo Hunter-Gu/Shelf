@@ -17,10 +17,12 @@ export interface IWorkspace {
 	title: string;
 	color?: WorkspaceHue;
 	windowId?: string;
+	isPinsCollapsed?: boolean;
 	type?: WorkspaceType;
 }
 
-export type Workspace = Omit<IWorkspace, "type"> & {
+export type Workspace = Omit<IWorkspace, "isPinsCollapsed" | "type"> & {
+	isPinsCollapsed: boolean;
 	type: WorkspaceType;
 };
 
@@ -31,6 +33,7 @@ export function createWorkspace(workspace: IWorkspace): Workspace {
 		title: workspace.title,
 		color: workspace.color,
 		windowId: workspace.windowId,
+		isPinsCollapsed: workspace.isPinsCollapsed ?? false,
 		type: workspace.type ?? WorkspaceType.Normal,
 	};
 }
