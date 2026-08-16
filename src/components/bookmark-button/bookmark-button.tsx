@@ -6,11 +6,7 @@ import { useAppContext } from "~/app/app-context"
 import { useCurrentTabBookmark } from "~/context/tab-bookmark-context"
 import { useAutoAbort } from "~/hooks/use-auto-abort"
 
-import {
-  BookmarkCheckIcon,
-  BookmarkPlusIcon,
-  FileInputIcon
-} from "./styled"
+import { BookmarkIcon } from "./styled"
 
 type BookmarkButtonProps = {
   // should be the id of a folder
@@ -18,18 +14,58 @@ type BookmarkButtonProps = {
 }
 
 /**
- * 1. show add button: add current page to current folder
- * 2. show remove button: remove current page from current folder
- * 3. show move button: move current page from other folder to current folder
+ * Folder-level relationship of the current page to this folder:
+ * - not bookmarked: gray outline, click to save here
+ * - bookmarked elsewhere: amber outline, click to move here
+ * - bookmarked in this folder: amber filled, click to remove
+ *
+ * Hidden for favorited pages. A pinned page is only actionable when its
+ * source lives in another workspace: moving it here also unpins it.
  */
 export function BookmarkButton({ id }: BookmarkButtonProps) {
-  const { bookmarks } = useAppContext()
+  const { bookmarks, pins, workspace } = useAppContext()
   const { create, remove, move } = bookmarks
-  const { currentTab, bookmark } = useCurrentTabBookmark()
+  const { currentTab, bookmark, workspaceId } = useCurrentTabBookmark()
   const switchFn = useAutoAbort()
 
   if (!id) {
     return null
+  }
+
+  const currentUrl = currentTab?.url
+  const isFavorited = !!currentUrl && pins.isFavorite(currentUrl)
+  const isPinned = !!currentUrl && pins.isPinned(currentUrl)
+
+  if (isFavorited) {
+    return null
+  }
+
+  if (isPinned) {
+    const isSameWorkspace = workspaceId === workspace.currentWorkspace.id
+    if (isSameWorkspace || !bookmark || !currentUrl) {
+      return null
+    }
+
+    return (
+      <IconButton
+        label="Move current page"
+        tooltip="Move current page"
+        variant="ghost"
+        icon={
+          <BookmarkIcon
+            fill="none"
+            className={cn("text-amber-500")}
+          />
+        }
+        onClick={(evt: MouseEvent<HTMLButtonElement>) => {
+          evt.stopPropagation()
+          switchFn(async () => {
+            await move(bookmark.id, { parentId: id })
+            await pins.unpin(currentUrl)
+          })
+        }}
+      />
+    )
   }
 
   if (!bookmark) {
@@ -38,7 +74,12 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         label="Save current page"
         tooltip="Save current page"
         variant="ghost"
-        icon={<BookmarkPlusIcon className={cn("text-gray-500 dark:text-gray-400")} />}
+        icon={
+          <BookmarkIcon
+            fill="none"
+            className={cn("text-gray-500 dark:text-gray-400")}
+          />
+        }
         onClick={async (evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
           const { url, title = "" } = currentTab || {}
@@ -62,7 +103,12 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         label="Remove current page"
         tooltip="Remove current page"
         variant="ghost"
-        icon={<BookmarkCheckIcon className={cn("text-amber-500")} />}
+        icon={
+          <BookmarkIcon
+            fill="currentColor"
+            className={cn("text-amber-500")}
+          />
+        }
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
 
@@ -76,7 +122,12 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
       label="Move current page"
       tooltip="Move current page"
       variant="ghost"
-      icon={<FileInputIcon className={cn("text-amber-500")} />}
+      icon={
+        <BookmarkIcon
+          fill="none"
+          className={cn("text-amber-500")}
+        />
+      }
       onClick={(evt: MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation()
 
