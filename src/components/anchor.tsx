@@ -24,7 +24,7 @@ function MockAnchor({ children, href, target, ...rest }: AnchorProps) {
     if (target === "_blank" || e.ctrlKey || e.metaKey) {
       void tabManager.create({
         url: href,
-        active: true
+        active: false
       })
     } else {
       void tabManager

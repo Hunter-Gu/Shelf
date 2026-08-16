@@ -10,9 +10,8 @@ type BookmarkMenuProps = {
 }
 
 export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
-  const { bookmarks, pins } = useAppContext()
+  const { bookmarks } = useAppContext()
   const { remove } = bookmarks
-  const isFavorite = pins.isFavorite(item.url)
 
   const items: MenuItems = [
     { label: "Open in New Window", onClick: () => tabManager.createInNewWindow(item.url) },
@@ -23,11 +22,6 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
     { type: "divider" },
     { label: "Rename", onClick: onRename },
     { label: "Copy Link", onClick: () => void navigator.clipboard.writeText(item.url) },
-    {
-      label: isFavorite ? "Remove from Favorites" : "Add to Favorites",
-      onClick: () =>
-        void (isFavorite ? pins.unfavorite(item.url) : pins.favorite(item))
-    },
     { type: "divider" },
     { label: "Delete", onClick: () => remove(item.id) }
   ]

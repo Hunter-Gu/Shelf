@@ -1,6 +1,6 @@
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { cn } from "common/lib/utils"
-import { PinIcon } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import { useCallback, useMemo, type KeyboardEvent } from "react"
 import type { DropTargetMonitor } from "react-dnd"
 
@@ -14,6 +14,7 @@ import {
 } from "~/components/bookmark-dnd"
 import { useEditable } from "~/context/editable-context"
 import { useIsFocused } from "~/context/focus-context"
+import { tabManager } from "~/tabs/actions"
 
 import type { Bookmark } from "../../bookmark-model"
 import { faviconURL } from "../../utils/favicon"
@@ -22,6 +23,7 @@ import { clsx, withClsx } from "../clsx"
 import { Editable } from "../editable"
 import { BookmarkMenu } from "../menu/bookmark-menu"
 import { MoveToMenu } from "../menu/move-to-menu"
+import { PinFavoriteMenu } from "../menu/pin-favorite-menu"
 import { FocusedStyle } from "./constants"
 import { ItemActionsContainer, ItemContainer } from "./styled"
 
@@ -29,25 +31,22 @@ type BookmarkItemProps = Bookmark & {
   className?: string
 }
 
-// Reserves room for the three row actions (pin, move to, more) that reveal
-// on hover — grow this if a fourth action is ever added, or the icons will
-// start overlapping the title again.
+// Reserves room for the four row actions (open in new tab, pin/favorite,
+// move to, more) that reveal on hover so the icons don't overlap the title.
 const Anchor = withClsx(
   _Anchor,
-  "text-sm text-left flex-1 text-ellipsis text-nowrap overflow-hidden text-gray-700 dark:text-gray-200 group-hover:mr-32"
+  "text-sm text-left flex-1 text-ellipsis text-nowrap overflow-hidden text-gray-700 dark:text-gray-200 group-hover:mr-44"
 )
 
 const Favicon = clsx.img("w-4 h-4 mr-2 rounded")
 
 export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
   const isFocused = useIsFocused()
-  const { bookmarks, pins, workspace } = useAppContext()
+  const { bookmarks } = useAppContext()
   const { change, move } = bookmarks
 
   const { id, title, url } = props
   const favicon = useMemo(() => faviconURL(url), [url])
-  const isPinned = pins.isPinned(url)
-  const pinHue = workspace.currentWorkspace.color ?? "gray"
 
   const confirmChange = useCallback(
     (e: KeyboardEvent<Element>, newTitle: string) => {
@@ -109,29 +108,18 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
             <Anchor
               href={url}
               title={title}
-              className={cn(isFocused && "mr-32")}>
+              className={cn(isFocused && "mr-44")}>
               {title}
             </Anchor>
             <ItemActionsContainer className={cn(isFocused && "visible")}>
               <AstryxIconButton
-                label={isPinned ? "Unpin" : "Pin"}
-                tooltip={isPinned ? "Unpin" : "Pin"}
+                label="Open in New Tab"
+                tooltip="Open in New Tab"
                 variant="ghost"
-                icon={
-                  <PinIcon
-                    className="h-4 w-4"
-                    fill={isPinned ? "currentColor" : "none"}
-                    style={{
-                      color: isPinned
-                        ? `var(--color-icon-${pinHue})`
-                        : "var(--color-icon-gray, #9ca3af)"
-                    }}
-                  />
-                }
-                onClick={() =>
-                  void (isPinned ? pins.unpin(url) : pins.pin({ title, url }))
-                }
+                icon={<ExternalLink className="h-4 w-4" />}
+                onClick={() => void tabManager.create({ url, active: true })}
               />
+              <PinFavoriteMenu item={{ title, url }} />
               <MoveToMenu
                 onMove={(workspaceId) => move(id, { parentId: workspaceId })}
               />
