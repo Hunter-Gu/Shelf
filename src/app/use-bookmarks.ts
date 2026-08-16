@@ -248,11 +248,13 @@ export function useBookmarks() {
     ({
       currentWorkspace,
       workspaces,
-      sourceTree
+      sourceTree,
+      excludeIds = []
     }: {
       currentWorkspace: Workspace
       workspaces: Workspace[]
       sourceTree: RootTree
+      excludeIds?: string[]
     }) => {
       if (!currentWorkspace.id) return null
 
@@ -261,7 +263,10 @@ export function useBookmarks() {
       }
 
       const { bookmarksBar, otherBookmarks } = toBaseFolder(sourceTree)
-      const workspaceIds = workspaces.map((workspace) => workspace.id)
+      const hiddenIds = new Set([
+        ...workspaces.map((workspace) => workspace.id),
+        ...excludeIds
+      ])
       const baseFolder =
         currentWorkspace.type === WorkspaceType.BookmarksBar
           ? bookmarksBar
@@ -269,9 +274,7 @@ export function useBookmarks() {
 
       return {
         ...baseFolder,
-        children: baseFolder.children?.filter(
-          (item) => !workspaceIds.includes(item.id)
-        )
+        children: baseFolder.children?.filter((item) => !hiddenIds.has(item.id))
       }
     },
     []

@@ -1,4 +1,6 @@
 import { cn } from "common/lib/utils"
+import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
+import { PinIcon } from "lucide-react"
 import { useCallback, useMemo, type KeyboardEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -21,20 +23,25 @@ type BookmarkItemProps = Bookmark & {
   className?: string
 }
 
+// Reserves room for the three row actions (pin, move to, more) that reveal
+// on hover — grow this if a fourth action is ever added, or the icons will
+// start overlapping the title again.
 const Anchor = withClsx(
   _Anchor,
-  "text-sm text-left flex-1 text-ellipsis text-nowrap overflow-hidden text-gray-700 dark:text-gray-200 group-hover:mr-16"
+  "text-sm text-left flex-1 text-ellipsis text-nowrap overflow-hidden text-gray-700 dark:text-gray-200 group-hover:mr-32"
 )
 
 const Favicon = clsx.img("w-4 h-4 mr-2 rounded")
 
 export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
   const isFocused = useIsFocused()
-  const { bookmarks } = useAppContext()
+  const { bookmarks, pins, workspace } = useAppContext()
   const { change, move } = bookmarks
 
   const { id, title, url } = props
   const favicon = useMemo(() => faviconURL(url), [url])
+  const isPinned = pins.isPinned(url)
+  const pinHue = workspace.currentWorkspace.color ?? "gray"
 
   const confirmChange = useCallback(
     (e: KeyboardEvent<Element>, newTitle: string) => {
@@ -75,10 +82,27 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
             <Anchor
               href={url}
               title={title}
-              className={cn(isFocused && "mr-16")}>
+              className={cn(isFocused && "mr-32")}>
               {title}
             </Anchor>
             <ItemActionsContainer className={cn(isFocused && "visible")}>
+              <AstryxIconButton
+                label={isPinned ? "Unpin" : "Pin"}
+                tooltip={isPinned ? "Unpin" : "Pin"}
+                variant="ghost"
+                icon={
+                  <PinIcon
+                    className="h-4 w-4"
+                    fill={isPinned ? "currentColor" : "none"}
+                    style={{
+                      color: isPinned
+                        ? `var(--color-icon-${pinHue})`
+                        : "var(--color-icon-gray, #9ca3af)"
+                    }}
+                  />
+                }
+                onClick={() => void (isPinned ? pins.unpin(url) : pins.pin({ title, url }))}
+              />
               <MoveToMenu onMove={(workspaceId) => move(id, { parentId: workspaceId })} />
               <BookmarkMenu
                 item={props}

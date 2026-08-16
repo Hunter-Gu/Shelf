@@ -4,7 +4,13 @@ import { tabManager } from "~/tabs/actions"
 
 export type AnchorProps = Pick<
   AnchorHTMLAttributes<Element>,
-  "href" | "children" | "className" | "target" | "title"
+  | "href"
+  | "children"
+  | "className"
+  | "target"
+  | "title"
+  | "aria-label"
+  | "aria-current"
 >
 
 export function Anchor({ children, ...props }: AnchorProps) {

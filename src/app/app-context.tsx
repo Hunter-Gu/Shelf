@@ -7,6 +7,7 @@ import {
 
 import { useActiveTab } from "./use-active-tab"
 import { useBookmarks } from "./use-bookmarks"
+import { usePins } from "./use-pins"
 import { useWorkspaces } from "./use-workspaces"
 import { useTheme } from "~/hooks/use-theme"
 
@@ -22,10 +23,14 @@ function useAppState() {
     removeBookmark: bookmarks.remove,
     removeBookmarkTree: bookmarks.removeTree
   })
+  const pins = usePins({ tree: bookmarks.tree })
   const tabs = useActiveTab()
   const theme = useTheme()
 
-  return useMemo(() => ({ bookmarks, workspace: workspaces, tabs, theme }), [bookmarks, workspaces, tabs, theme])
+  return useMemo(
+    () => ({ bookmarks, workspace: workspaces, pins, tabs, theme }),
+    [bookmarks, workspaces, pins, tabs, theme]
+  )
 }
 
 export function AppProvider({ children }: PropsWithChildren) {

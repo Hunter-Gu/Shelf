@@ -1,5 +1,5 @@
-import { cn } from "common/lib/utils"
 import { TextInput } from "@astryxdesign/core/TextInput"
+import { cn } from "common/lib/utils"
 import { useRef } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -9,6 +9,8 @@ import { Editable, useEditable } from "~/components/editable"
 import { FolderTree } from "~/components/folder-tree"
 import { SpaceMenu } from "~/components/menu/space-menu"
 import { PinHint } from "~/components/pin-hint"
+import { FavoritesStrip } from "~/components/pin-strip/favorites-strip"
+import { PinnedStrip } from "~/components/pin-strip/pinned-strip"
 import { useFocusSearchShortcut } from "~/hooks/use-focus-search-shortcut"
 import { useSearch } from "~/hooks/use-search"
 import type { Workspace } from "~/workspace-model"
@@ -26,7 +28,7 @@ type SidebarProps = {
 }
 
 export function Sidebar({ onEdit }: SidebarProps) {
-  const { bookmarks, workspace } = useAppContext()
+  const { bookmarks, workspace, pins } = useAppContext()
   const currentSpace = workspace.currentWorkspace
   const { searchText, handleSearch } = useSearch()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -42,13 +44,22 @@ export function Sidebar({ onEdit }: SidebarProps) {
     ? bookmarks.getTreeByWorkspaceId({
         currentWorkspace: currentSpace,
         workspaces: workspace.workspaces,
-        sourceTree: bookmarks.visibleTree
+        sourceTree: bookmarks.visibleTree,
+        excludeIds: [pins.pinsFolderId, pins.favoritesFolderId].filter(
+          (id): id is string => id !== undefined
+        )
       })
     : null
 
   return (
-    <>
-      <div className="mx-3 my-4">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <FavoritesStrip />
+
+      <div
+        className={cn(
+          "mx-3 mb-4",
+          pins.favoriteItems.length ? "mt-2" : "mt-4"
+        )}>
         <TextInput
           ref={searchInputRef}
           label="Search bookmarks"
@@ -90,7 +101,9 @@ export function Sidebar({ onEdit }: SidebarProps) {
         </ActionsContainer>
       </TitleContainer>
 
+      {tree ? <PinnedStrip tree={tree} /> : null}
+
       <FolderTree tree={tree} />
-    </>
+    </div>
   )
 }
