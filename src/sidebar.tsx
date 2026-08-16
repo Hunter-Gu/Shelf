@@ -1,10 +1,10 @@
 import { TextInput } from "@astryxdesign/core/TextInput"
 import { cn } from "common/lib/utils"
 import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
-import { useRef, type CSSProperties, type RefObject } from "react"
+import { useMemo, useRef, type CSSProperties, type RefObject } from "react"
 
 import { useAppContext } from "~/app/app-context"
-import { filterBookmarksByUrl } from "~/bookmark-model"
+import { collectTreeUrls, filterBookmarksByUrl } from "~/bookmark-model"
 import { BookmarkButton } from "~/components/bookmark-button/bookmark-button"
 import {
   BookmarkDndProvider,
@@ -90,6 +90,11 @@ function WorkspaceTitle({
   const { pins, workspace } = useAppContext()
   const currentSpace = workspace.currentWorkspace
   const titleRef = useRef<HTMLDivElement>(null)
+  const hasPinnedItems = useMemo(() => {
+    if (!workspaceTree) return false
+    const urls = collectTreeUrls(workspaceTree)
+    return pins.pinnedItems.some((item) => urls.has(item.url))
+  }, [workspaceTree, pins.pinnedItems])
   const { drop, isOver } = useBookmarkDrop(titleRef, () =>
     resolveAppendDropTarget(
       "pin",
@@ -119,44 +124,52 @@ function WorkspaceTitle({
         } as CSSProperties
       }>
       <Title>
-        <button
-          type="button"
-          className="group/toggle relative mr-3 inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded text-gray-500 outline-none hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-black/30 dark:text-gray-300 dark:hover:text-white dark:focus-visible:ring-white/40"
-          aria-label={
-            isPinsCollapsed
-              ? "Expand pinned bookmarks"
-              : "Collapse pinned bookmarks"
-          }
-          aria-controls="workspace-pinned-bookmarks"
-          aria-expanded={!isPinsCollapsed}
-          onClick={togglePins}>
-          {currentSpace.logo ? (
-            <span
-              aria-hidden
-              className="absolute inset-0 flex items-center justify-center transition-opacity group-hover/workspace:opacity-0 group-focus-visible/toggle:opacity-0">
-              {currentSpace.logo}
-            </span>
-          ) : null}
-          {isPinsCollapsed ? (
-            <ChevronRightIcon
-              aria-hidden
-              className={cn(
-                "h-4 w-4 transition-opacity",
-                currentSpace.logo &&
-                  "opacity-0 group-hover/workspace:opacity-100 group-focus-visible/toggle:opacity-100"
-              )}
-            />
-          ) : (
-            <ChevronDownIcon
-              aria-hidden
-              className={cn(
-                "h-4 w-4 transition-opacity",
-                currentSpace.logo &&
-                  "opacity-0 group-hover/workspace:opacity-100 group-focus-visible/toggle:opacity-100"
-              )}
-            />
-          )}
-        </button>
+        {hasPinnedItems ? (
+          <button
+            type="button"
+            className="group/toggle relative mr-3 inline-flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded text-gray-500 outline-none hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-black/30 dark:text-gray-300 dark:hover:text-white dark:focus-visible:ring-white/40"
+            aria-label={
+              isPinsCollapsed
+                ? "Expand pinned bookmarks"
+                : "Collapse pinned bookmarks"
+            }
+            aria-controls="workspace-pinned-bookmarks"
+            aria-expanded={!isPinsCollapsed}
+            onClick={togglePins}>
+            {currentSpace.logo ? (
+              <span
+                aria-hidden
+                className="absolute inset-0 flex items-center justify-center transition-opacity group-hover/workspace:opacity-0 group-focus-visible/toggle:opacity-0">
+                {currentSpace.logo}
+              </span>
+            ) : null}
+            {isPinsCollapsed ? (
+              <ChevronRightIcon
+                aria-hidden
+                className={cn(
+                  "h-4 w-4 transition-opacity",
+                  currentSpace.logo &&
+                    "opacity-0 group-hover/workspace:opacity-100 group-focus-visible/toggle:opacity-100"
+                )}
+              />
+            ) : (
+              <ChevronDownIcon
+                aria-hidden
+                className={cn(
+                  "h-4 w-4 transition-opacity",
+                  currentSpace.logo &&
+                    "opacity-0 group-hover/workspace:opacity-100 group-focus-visible/toggle:opacity-100"
+                )}
+              />
+            )}
+          </button>
+        ) : (
+          <span
+            aria-hidden
+            className="mr-3 inline-flex h-5 w-5 shrink-0 items-center justify-center">
+            {currentSpace.logo}
+          </span>
+        )}
         <span>{currentSpace.title}</span>
       </Title>
       <ActionsContainer>
