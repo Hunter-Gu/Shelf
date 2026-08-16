@@ -27,16 +27,33 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
   const urls = (item.children || [])
     .filter((child) => !isFolder(child))
     .map((child) => (child as Bookmark).url)
+  const isEmpty = urls.length === 0
 
   const items: MenuItems = [
-    { label: "Open All", onClick: () => tabManager.create(urls) },
-    { label: "Open All in New Tab Group", onClick: () => tabManager.createInGroup(title, urls) },
-    { label: "Open All in New Window", onClick: () => tabManager.createInNewWindow(urls) },
-    { label: "Open All in Incognito Window", onClick: () => tabManager.createInNewWindow(urls, true) },
+    {
+      label: "Open All",
+      isDisabled: isEmpty,
+      onClick: () => tabManager.create(urls)
+    },
+    {
+      label: "Open All in New Tab Group",
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInGroup(title, urls)
+    },
+    {
+      label: "Open All in New Window",
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInNewWindow(urls)
+    },
+    {
+      label: "Open All in Incognito Window",
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInNewWindow(urls, true)
+    },
     { type: "divider" },
     { label: "Rename", onClick: onRename },
     {
-      label: "New Nested Folder",
+      label: "New Folder",
       onClick: async () => {
         const folder = await create({ parentId: id, title: "Untitled" })
         updateFolderState(id, true)

@@ -25,6 +25,10 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
   const { currentWorkspace: currentSpace, remove } = workspace
 
   const { id, children } = item
+  const urls = (children || [])
+    .filter((item) => !isFolder(item))
+    .map((item) => (item as Bookmark).url)
+  const isEmpty = urls.length === 0
   const { scrollToId } = useVirtualTree()
   const nextTick = useNextTick()
   const setEditableId = useSetEditableId()
@@ -38,41 +42,23 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
   const menuItems: MenuItems = [
     {
       label: "Open All",
-      onClick: () =>
-        tabManager.create(
-          (children || [])
-            .filter((item) => !isFolder(item))
-            .map((item) => (item as Bookmark).url)
-        )
+      isDisabled: isEmpty,
+      onClick: () => tabManager.create(urls)
     },
     {
       label: "Open All in New Tab Group",
-      onClick: () =>
-        tabManager.createInGroup(
-          currentSpace.title,
-          (item.children || [])
-            .filter((item) => !isFolder(item))
-            .map((item) => (item as Bookmark).url)
-        )
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInGroup(currentSpace.title, urls)
     },
     {
       label: "Open All in New Window",
-      onClick: () =>
-        tabManager.createInNewWindow(
-          (item.children || [])
-            .filter((item) => !isFolder(item))
-            .map((item) => (item as Bookmark).url)
-        )
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInNewWindow(urls)
     },
     {
       label: "Open All in Incognito Window",
-      onClick: () =>
-        tabManager.createInNewWindow(
-          (item.children || [])
-            .filter((item) => !isFolder(item))
-            .map((item) => (item as Bookmark).url),
-          true
-        )
+      isDisabled: isEmpty,
+      onClick: () => tabManager.createInNewWindow(urls, true)
     },
     { type: "divider" },
     { label: "Rename", onClick: onRename },
@@ -81,7 +67,7 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
       onClick: () => onEdit?.(currentSpace)
     },
     {
-      label: "New Nested Folder",
+      label: "New Folder",
       onClick: async () => {
         const folder = await create({ title: "Untitled", parentId: id })
         nextTick(() => {
