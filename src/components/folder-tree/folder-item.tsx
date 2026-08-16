@@ -8,21 +8,27 @@ import { FolderIcon, FolderOpenIcon } from "lucide-react"
 import { useCallback, useState, type KeyboardEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
+import {
+  bookmarkDropClass,
+  resolveRowDropTarget,
+  useBookmarkDrop,
+  useWorkspaceChildCount,
+  type BookmarkDragItem
+} from "~/components/bookmark-dnd"
 import { useEditable } from "~/context/editable-context"
 import { useIsFocused } from "~/context/focus-context"
 import { useAllyClick } from "~/hooks/use-ally-click"
+import type { DropTargetMonitor } from "react-dnd"
 
 import { type Folder } from "../../bookmark-model"
-import { useDnD } from "../../context/dnd-context"
 import { BookmarkButton } from "../bookmark-button/bookmark-button"
 import { clsx } from "../clsx"
 import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Editable } from "../editable"
 import { FolderMenu } from "../menu/folder-menu"
 import { MoveToMenu } from "../menu/move-to-menu"
-import { FocusedStyle, getDnDStyle } from "./constants"
+import { FocusedStyle } from "./constants"
 import { ItemActionsContainer, ItemContainer } from "./styled"
-import { useItemDrag, useItemDrop } from "./use-dnd"
 
 type FolderItemProps = Folder & { className?: string }
 
@@ -60,12 +66,22 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
     confirmChange
   )
 
-  const { isDragging, drag } = useItemDrag(props)
-  const { isOver, drop } = useItemDrop(ref, props)
-  const { mode } = useDnD()
-  drag(drop(ref))
+  const childCount = useWorkspaceChildCount(id)
+  const { isOver, edge, drop } = useBookmarkDrop(
+    ref,
+    (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
+      resolveRowDropTarget({
+        element,
+        monitor,
+        zone: "workspace",
+        item: props,
+        childCount,
+        allowInside: true
+      })
+  )
+  drop(ref)
 
-  const dndStyle = getDnDStyle(isOver, mode)
+  const dndStyle = bookmarkDropClass(isOver, edge)
   const a11yClick = useAllyClick(() => {
     updateFolderState(id)
   })
@@ -74,7 +90,6 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
     <ItemContainer
       ref={ref}
       className={cn(
-        isDragging && "opacity-30",
         dndStyle,
         isFocused && FocusedStyle,
         className

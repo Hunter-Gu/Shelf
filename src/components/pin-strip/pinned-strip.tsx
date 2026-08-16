@@ -1,11 +1,20 @@
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { cn } from "common/lib/utils"
 import { PinIcon } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
+import type { DropTargetMonitor } from "react-dnd"
 
 import { useAppContext } from "~/app/app-context"
-import { collectTreeUrls, type Folder } from "~/bookmark-model"
+import { collectTreeUrls, type Bookmark, type Folder } from "~/bookmark-model"
 import { Anchor } from "~/components/anchor"
+import {
+  bookmarkDropClass,
+  resolveAppendDropTarget,
+  resolveRowDropTarget,
+  useBookmarkDrag,
+  useBookmarkDrop,
+  type BookmarkDragItem
+} from "~/components/bookmark-dnd"
 import {
   ItemActionsContainer,
   ItemContainer
@@ -13,6 +22,73 @@ import {
 import { faviconURL } from "~/utils/favicon"
 
 import { normalizeBookmarkUrl } from "./bookmark-url"
+
+function PinnedItem({
+  item,
+  hue,
+  isActive,
+  onUnpin
+}: {
+  item: Bookmark
+  hue: string
+  isActive: boolean
+  onUnpin: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { drag, isDragging } = useBookmarkDrag({ zone: "pin", ...item })
+  const { drop, isOver, edge } = useBookmarkDrop(
+    ref,
+    (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
+      resolveRowDropTarget({
+        element,
+        monitor,
+        zone: "pin",
+        item
+      })
+  )
+  drag(drop(ref))
+
+  return (
+    <ItemContainer
+      ref={ref}
+      role="listitem"
+      className={cn(
+        isActive && "bg-black/10 dark:bg-white/10",
+        isDragging && "opacity-30",
+        bookmarkDropClass(isOver, edge)
+      )}>
+      <img
+        src={faviconURL(item.url)}
+        alt={item.title}
+        draggable={false}
+        className="mr-2 h-4 w-4 rounded"
+      />
+      <Anchor
+        href={item.url}
+        title={item.title}
+        aria-label={item.title}
+        aria-current={isActive ? "page" : undefined}
+        className="flex-1 overflow-hidden text-ellipsis text-nowrap text-left text-sm text-gray-700 group-hover:mr-10 dark:text-gray-200">
+        {item.title}
+      </Anchor>
+      <ItemActionsContainer>
+        <AstryxIconButton
+          label="Unpin"
+          tooltip="Unpin"
+          variant="ghost"
+          icon={
+            <PinIcon
+              className="h-4 w-4"
+              fill="currentColor"
+              style={{ color: `var(--color-icon-${hue})` }}
+            />
+          }
+          onClick={onUnpin}
+        />
+      </ItemActionsContainer>
+    </ItemContainer>
+  )
+}
 
 // Pin copies live in one flat, global "Pins (Markit)" folder — which
 // workspace a pin belongs to isn't stored anywhere, it's read off wherever
@@ -25,53 +101,38 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
   const workspaceUrls = useMemo(() => collectTreeUrls(tree), [tree])
   const items = pins.pinnedItems.filter((item) => workspaceUrls.has(item.url))
   const activeUrl = normalizeBookmarkUrl(tabs.activeTab?.url)
-
-  if (items.length === 0) return null
+  const ref = useRef<HTMLDivElement>(null)
+  const { drop, isOver } = useBookmarkDrop(ref, () =>
+    resolveAppendDropTarget(
+      "pin",
+      pins.pinsFolderId ?? "",
+      pins.pinnedItems.length
+    )
+  )
+  drop(ref)
 
   return (
     <div
-      className="mx-3"
+      ref={ref}
+      className={cn(
+        "mx-3 rounded-lg",
+        items.length === 0 && "hidden",
+        isOver &&
+          "bg-black/5 ring-1 ring-black/15 dark:bg-white/5 dark:ring-white/20"
+      )}
       role="list"
       aria-label="Pinned bookmarks">
       {items.map((item) => {
         const isActive = normalizeBookmarkUrl(item.url) === activeUrl
 
         return (
-          <ItemContainer
+          <PinnedItem
             key={item.id}
-            role="listitem"
-            className={cn(
-              isActive && "bg-black/10 dark:bg-white/10"
-            )}>
-            <img
-              src={faviconURL(item.url)}
-              alt={item.title}
-              className="mr-2 h-4 w-4 rounded"
-            />
-            <Anchor
-              href={item.url}
-              title={item.title}
-              aria-label={item.title}
-              aria-current={isActive ? "page" : undefined}
-              className="flex-1 overflow-hidden text-ellipsis text-nowrap text-left text-sm text-gray-700 group-hover:mr-10 dark:text-gray-200">
-              {item.title}
-            </Anchor>
-            <ItemActionsContainer>
-              <AstryxIconButton
-                label="Unpin"
-                tooltip="Unpin"
-                variant="ghost"
-                icon={
-                  <PinIcon
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    style={{ color: `var(--color-icon-${hue})` }}
-                  />
-                }
-                onClick={() => void pins.unpin(item.url)}
-              />
-            </ItemActionsContainer>
-          </ItemContainer>
+            item={item}
+            hue={hue}
+            isActive={isActive}
+            onUnpin={() => void pins.unpin(item.url)}
+          />
         )
       })}
     </div>

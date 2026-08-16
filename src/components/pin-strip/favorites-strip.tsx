@@ -12,6 +12,8 @@ export function FavoritesStrip() {
       items={pins.favoriteItems}
       activeUrl={tabs.activeTab?.url}
       onRemove={pins.unfavorite}
+      folderId={pins.favoritesFolderId}
+      zone="favorite"
     />
   )
 }

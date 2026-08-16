@@ -1,25 +1,67 @@
 import { XIcon } from "lucide-react"
 import { cn } from "common/lib/utils"
+import { useRef } from "react"
+import type { DropTargetMonitor } from "react-dnd"
 
+import {
+  bookmarkDropClass,
+  resolveRowDropTarget,
+  useBookmarkDrag,
+  useBookmarkDrop,
+  type BookmarkDragItem,
+  type BookmarkZone
+} from "~/components/bookmark-dnd"
+import type { Bookmark } from "~/bookmark-model"
 import { faviconURL } from "~/utils/favicon"
 
 import { Anchor } from "../anchor"
 
 type BookmarkChipProps = {
+  id: string
+  parentId: string
+  index: number
   title: string
   url: string
+  zone: BookmarkZone
   isActive: boolean
   onRemove: () => void
 }
 
 export function BookmarkChip({
+  id,
+  parentId,
+  index,
   title,
   url,
+  zone,
   isActive,
   onRemove
 }: BookmarkChipProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const item: Bookmark = { id, parentId, index, title, url }
+  const { drag, isDragging } = useBookmarkDrag({ zone, ...item })
+  const { drop, isOver, edge } = useBookmarkDrop(
+    ref,
+    (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
+      resolveRowDropTarget({
+        element,
+        monitor,
+        zone,
+        item,
+        axis: "horizontal"
+      })
+  )
+  drag(drop(ref))
+
   return (
-    <div className="group relative min-w-0" role="listitem">
+    <div
+      ref={ref}
+      className={cn(
+        "group relative min-w-0",
+        isDragging && "opacity-30",
+        bookmarkDropClass(isOver, edge, "horizontal")
+      )}
+      role="listitem">
       <Anchor
         href={url}
         title={title}
@@ -34,6 +76,7 @@ export function BookmarkChip({
         <img
           src={faviconURL(url, 64)}
           alt=""
+          draggable={false}
           className="h-5 w-5 rounded object-contain"
         />
       </Anchor>

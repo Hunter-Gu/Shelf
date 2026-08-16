@@ -1,23 +1,29 @@
-import { cn } from "common/lib/utils"
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
+import { cn } from "common/lib/utils"
 import { PinIcon } from "lucide-react"
 import { useCallback, useMemo, type KeyboardEvent } from "react"
+import type { DropTargetMonitor } from "react-dnd"
 
 import { useAppContext } from "~/app/app-context"
+import {
+  bookmarkDropClass,
+  resolveRowDropTarget,
+  useBookmarkDrag,
+  useBookmarkDrop,
+  type BookmarkDragItem
+} from "~/components/bookmark-dnd"
 import { useEditable } from "~/context/editable-context"
 import { useIsFocused } from "~/context/focus-context"
 
 import type { Bookmark } from "../../bookmark-model"
-import { useDnD } from "../../context/dnd-context"
 import { faviconURL } from "../../utils/favicon"
 import { Anchor as _Anchor } from "../anchor"
 import { clsx, withClsx } from "../clsx"
 import { Editable } from "../editable"
 import { BookmarkMenu } from "../menu/bookmark-menu"
 import { MoveToMenu } from "../menu/move-to-menu"
-import { FocusedStyle, getDnDStyle } from "./constants"
+import { FocusedStyle } from "./constants"
 import { ItemActionsContainer, ItemContainer } from "./styled"
-import { useItemDrag, useItemDrop } from "./use-dnd"
 
 type BookmarkItemProps = Bookmark & {
   className?: string
@@ -56,16 +62,37 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
     confirmChange
   )
 
-  const { isDragging, drag } = useItemDrag(props)
-  const { isOver, drop } = useItemDrop(ref, props)
-  const { mode } = useDnD()
-  drag(drop(ref))
+  const source: BookmarkDragItem = { zone: "workspace", ...props }
+  const { isDragging, drag } = useBookmarkDrag(source)
+  const { isOver, edge, drop } = useBookmarkDrop(
+    ref,
+    (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
+      resolveRowDropTarget({
+        element,
+        monitor,
+        zone: "workspace",
+        item: props
+      })
+  )
+  // Virtual rows are mounted and recycled as the list scrolls. Connect DnD
+  // to the concrete node through a callback ref instead of handing both
+  // connectors the click-outside ref object: this makes every replacement
+  // row reconnect immediately and prevents the source from remaining bound
+  // to a previously virtualized node.
+  const connectRowRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      ref.current = node
+      drop(node)
+      drag(node)
+    },
+    [drag, drop, ref]
+  )
 
-  const dndStyle = getDnDStyle(isOver, mode)
+  const dndStyle = bookmarkDropClass(isOver, edge)
 
   return (
     <ItemContainer
-      ref={ref}
+      ref={connectRowRef}
       className={cn(
         isDragging && "opacity-30",
         dndStyle,
@@ -101,9 +128,13 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
                     }}
                   />
                 }
-                onClick={() => void (isPinned ? pins.unpin(url) : pins.pin({ title, url }))}
+                onClick={() =>
+                  void (isPinned ? pins.unpin(url) : pins.pin({ title, url }))
+                }
               />
-              <MoveToMenu onMove={(workspaceId) => move(id, { parentId: workspaceId })} />
+              <MoveToMenu
+                onMove={(workspaceId) => move(id, { parentId: workspaceId })}
+              />
               <BookmarkMenu
                 item={props}
                 onRename={() => setEditing(true)}></BookmarkMenu>

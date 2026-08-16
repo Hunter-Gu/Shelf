@@ -7,6 +7,8 @@ import { EditableProvider } from "~/context/editable-context"
 import { CurrentTabBookmarkProvider } from "~/context/tab-bookmark-context"
 import { VirtualTreeProvider } from "~/context/virtual-tree-context"
 import { cn } from "common/lib/utils"
+import { DndProvider } from "react-dnd"
+import { HTML5Backend } from "react-dnd-html5-backend"
 import { useState } from "react"
 
 import { Sidebar } from "~/sidebar"
@@ -55,7 +57,9 @@ export default function App() {
         <CurrentTabBookmarkProvider>
           <VirtualTreeProvider>
             <EditableProvider>
-              <AppContent />
+              <DndProvider backend={HTML5Backend}>
+                <AppContent />
+              </DndProvider>
             </EditableProvider>
           </VirtualTreeProvider>
         </CurrentTabBookmarkProvider>
