@@ -16,7 +16,7 @@ import { useSearch } from "~/hooks/use-search"
 import type { Workspace } from "~/workspace-model"
 
 const TitleContainer = clsx.div(
-  "relative flex justify-between items-center mx-3 mb-2 px-3 py-2 rounded-2xl"
+  "relative mx-3 flex items-center justify-between rounded-2xl px-3 py-2"
 )
 const Title = clsx.span(
   "text-base capitalize font-bold text-black dark:text-white"
@@ -52,14 +52,10 @@ export function Sidebar({ onEdit }: SidebarProps) {
     : null
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 pt-3">
       <FavoritesStrip />
 
-      <div
-        className={cn(
-          "mx-3 mb-4",
-          pins.favoriteItems.length ? "mt-2" : "mt-4"
-        )}>
+      <div className="mx-3">
         <TextInput
           ref={searchInputRef}
           label="Search bookmarks"

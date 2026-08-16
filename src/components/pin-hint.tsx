@@ -8,7 +8,7 @@ export function PinHint() {
   if (!isVisible) return null
 
   return (
-    <div className="mx-3 mb-3 flex items-center gap-2 rounded-full bg-[var(--color-background-purple)] px-3 py-2 text-xs text-[var(--color-text-purple)]">
+    <div className="mx-3 flex items-center gap-2 rounded-full bg-[var(--color-background-purple)] px-3 py-2 text-xs text-[var(--color-text-purple)]">
       <PuzzleIcon className="h-3.5 w-3.5 shrink-0" />
       <span className="flex-1">
         Pin Markit to your toolbar so it's one click next time.

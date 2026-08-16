@@ -15,7 +15,7 @@ type FolderTreeProps = {
 };
 
 const TreeContainer = clsx.div(
-	cn('min-h-0 flex-1 overflow-y-hidden pt-4 pb-10 px-3', styles.folderTree),
+	cn('min-h-0 flex-1 overflow-y-hidden pb-10 px-3', styles.folderTree),
 );
 const VirtualTree = withClsx(_VirtualTree, cn('h-full overflow-x-hidden', styles.folderTree));
 

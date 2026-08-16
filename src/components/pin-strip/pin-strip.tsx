@@ -17,7 +17,7 @@ export function PinStrip({ items, activeUrl, onRemove }: PinStripProps) {
 
   return (
     <div
-      className="mx-3 mt-3 grid gap-1.5"
+      className="mx-3 grid gap-1.5"
       style={{
         gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`
       }}

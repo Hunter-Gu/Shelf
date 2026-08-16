@@ -1,3 +1,4 @@
+import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { cn } from "common/lib/utils"
 import { PinIcon } from "lucide-react"
 import { useMemo } from "react"
@@ -5,6 +6,10 @@ import { useMemo } from "react"
 import { useAppContext } from "~/app/app-context"
 import { collectTreeUrls, type Folder } from "~/bookmark-model"
 import { Anchor } from "~/components/anchor"
+import {
+  ItemActionsContainer,
+  ItemContainer
+} from "~/components/folder-tree/styled"
 import { faviconURL } from "~/utils/favicon"
 
 import { normalizeBookmarkUrl } from "./bookmark-url"
@@ -25,51 +30,48 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
 
   return (
     <div
-      className="mx-3 mb-1 space-y-1"
+      className="mx-3 border-b border-black/10 pb-1 dark:border-white/10"
       role="list"
       aria-label="Pinned bookmarks">
       {items.map((item) => {
         const isActive = normalizeBookmarkUrl(item.url) === activeUrl
 
         return (
-          <div
+          <ItemContainer
             key={item.id}
             role="listitem"
             className={cn(
-              "group relative flex min-h-14 items-center rounded-2xl px-4 transition-[background-color,box-shadow] focus-within:ring-2 focus-within:ring-black/10 motion-reduce:transition-none dark:focus-within:ring-white/15",
-              isActive
-                ? "bg-white/80 shadow-[0_1px_2px_rgba(20,20,30,0.06),0_8px_24px_rgba(20,20,30,0.04)] ring-1 ring-black/[0.035] dark:bg-white/[0.11] dark:ring-white/[0.06]"
-                : "hover:bg-black/[0.045] dark:hover:bg-white/[0.06]"
+              isActive && "bg-black/10 dark:bg-white/10"
             )}>
             <img
-              src={faviconURL(item.url, 48)}
-              alt=""
-              className="mr-4 h-6 w-6 shrink-0 rounded-md object-contain"
+              src={faviconURL(item.url)}
+              alt={item.title}
+              className="mr-2 h-4 w-4 rounded"
             />
             <Anchor
               href={item.url}
               title={item.title}
               aria-label={item.title}
-              className={cn(
-                "min-w-0 flex-1 truncate py-4 pr-8 text-left text-[15px] leading-5 outline-none",
-                isActive
-                  ? "font-medium text-gray-900 dark:text-white"
-                  : "text-gray-600 dark:text-gray-300"
-              )}>
+              aria-current={isActive ? "page" : undefined}
+              className="flex-1 overflow-hidden text-ellipsis text-nowrap text-left text-sm text-gray-700 group-hover:mr-10 dark:text-gray-200">
               {item.title}
             </Anchor>
-            <button
-              type="button"
-              aria-label={`Unpin ${item.title}`}
-              className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-lg opacity-0 outline-none transition-[background-color,opacity] hover:bg-black/[0.06] focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-black/15 group-focus-within:opacity-100 group-hover:opacity-100 motion-reduce:transition-none dark:hover:bg-white/[0.08] dark:focus-visible:ring-white/20"
-              onClick={() => void pins.unpin(item.url)}>
-              <PinIcon
-                className="h-4 w-4"
-                fill="currentColor"
-                style={{ color: `var(--color-icon-${hue})` }}
+            <ItemActionsContainer>
+              <AstryxIconButton
+                label="Unpin"
+                tooltip="Unpin"
+                variant="ghost"
+                icon={
+                  <PinIcon
+                    className="h-4 w-4"
+                    fill="currentColor"
+                    style={{ color: `var(--color-icon-${hue})` }}
+                  />
+                }
+                onClick={() => void pins.unpin(item.url)}
               />
-            </button>
-          </div>
+            </ItemActionsContainer>
+          </ItemContainer>
         )
       })}
     </div>
