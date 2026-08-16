@@ -4,6 +4,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
 import { useRef, type CSSProperties } from "react"
 
 import { useAppContext } from "~/app/app-context"
+import { filterBookmarksByUrl } from "~/bookmark-model"
 import { BookmarkButton } from "~/components/bookmark-button/bookmark-button"
 import { clsx } from "~/components/clsx"
 import { Editable, useEditable } from "~/components/editable"
@@ -48,7 +49,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
     })
   }
 
-  const tree = bookmarks.visibleTree
+  const workspaceTree = bookmarks.visibleTree
     ? bookmarks.getTreeByWorkspaceId({
         currentWorkspace: currentSpace,
         workspaces: workspace.workspaces,
@@ -57,6 +58,13 @@ export function Sidebar({ onEdit }: SidebarProps) {
           (id): id is string => id !== undefined
         )
       })
+    : null
+  const hiddenBookmarkUrls = new Set([
+    ...pins.pinnedUrls,
+    ...pins.favoriteUrls
+  ])
+  const tree = workspaceTree
+    ? filterBookmarksByUrl(workspaceTree, hiddenBookmarkUrls)
     : null
 
   return (
@@ -129,9 +137,9 @@ export function Sidebar({ onEdit }: SidebarProps) {
         </Title>
         <ActionsContainer>
           <BookmarkButton id={currentSpace.id} />
-          {tree ? (
+          {workspaceTree ? (
             <SpaceMenu
-              item={tree}
+              item={workspaceTree}
               onRename={() => setEditing(true)}
               onEdit={onEdit}
               anchorRef={titleRef}
@@ -143,7 +151,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
       <div
         id="workspace-pinned-bookmarks"
         className={isPinsCollapsed ? "hidden" : "contents"}>
-        {tree ? <PinnedStrip tree={tree} /> : null}
+        {workspaceTree ? <PinnedStrip tree={workspaceTree} /> : null}
       </div>
 
       <hr className="mx-3 border-0 border-t border-black/10 dark:border-white/10" />
