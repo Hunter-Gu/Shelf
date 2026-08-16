@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest"
 
+import type { Folder } from "~/bookmark-model"
+
 import {
-  normalizeDropIndex,
+  canDropBookmarkItem,
+  isSameDropPosition,
   planBookmarkDrop,
+  type BookmarkDragBookmarkItem,
   type BookmarkDragItem,
   type BookmarkDropTarget,
   type BookmarkZone
 } from "./bookmark-drop"
 
-const source = (zone: BookmarkZone): BookmarkDragItem => ({
+const source = (zone: BookmarkZone): BookmarkDragBookmarkItem => ({
   zone,
   id: `${zone}-source`,
   parentId: `${zone}-folder`,
@@ -40,28 +44,107 @@ describe("planBookmarkDrop", () => {
   })
 })
 
-describe("normalizeDropIndex", () => {
-  it("shifts a same-folder downward boundary after removing the source", () => {
+describe("isSameDropPosition", () => {
+  it("treats both boundaries around the source as the same position", () => {
     expect(
-      normalizeDropIndex(
+      isSameDropPosition(
         { parentId: "folder", index: 1 },
-        { parentId: "folder", index: 4 }
+        { parentId: "folder", index: 1 }
       )
-    ).toBe(3)
+    ).toBe(true)
+    expect(
+      isSameDropPosition(
+        { parentId: "folder", index: 1 },
+        { parentId: "folder", index: 2 }
+      )
+    ).toBe(true)
   })
 
-  it("keeps upward and cross-folder boundaries unchanged", () => {
+  it("detects a real same-folder or cross-folder move", () => {
     expect(
-      normalizeDropIndex(
+      isSameDropPosition(
         { parentId: "folder", index: 4 },
         { parentId: "folder", index: 1 }
       )
-    ).toBe(1)
+    ).toBe(false)
     expect(
-      normalizeDropIndex(
+      isSameDropPosition(
         { parentId: "source", index: 1 },
         { parentId: "target", index: 4 }
       )
-    ).toBe(4)
+    ).toBe(false)
+  })
+})
+
+describe("canDropBookmarkItem", () => {
+  const workspace: Folder = {
+    id: "workspace",
+    parentId: "root",
+    index: 0,
+    title: "Workspace",
+    children: [
+      {
+        id: "folder",
+        parentId: "workspace",
+        index: 0,
+        title: "Folder",
+        children: [
+          {
+            id: "child",
+            parentId: "folder",
+            index: 0,
+            title: "Child"
+          }
+        ]
+      },
+      {
+        id: "sibling",
+        parentId: "workspace",
+        index: 1,
+        title: "Sibling"
+      }
+    ]
+  }
+  const folder: BookmarkDragItem = {
+    kind: "folder",
+    zone: "workspace",
+    id: "folder",
+    parentId: "workspace",
+    index: 0,
+    title: "Folder"
+  }
+
+  it("rejects pin, favorite, self, and descendant targets for folders", () => {
+    expect(canDropBookmarkItem(folder, target("pin"), workspace)).toBe(false)
+    expect(canDropBookmarkItem(folder, target("favorite"), workspace)).toBe(
+      false
+    )
+    expect(
+      canDropBookmarkItem(
+        folder,
+        { ...target("workspace"), parentId: "folder" },
+        workspace
+      )
+    ).toBe(false)
+    expect(
+      canDropBookmarkItem(
+        folder,
+        { ...target("workspace"), parentId: "child" },
+        workspace
+      )
+    ).toBe(false)
+  })
+
+  it("allows folders elsewhere in the workspace and bookmarks in every zone", () => {
+    expect(
+      canDropBookmarkItem(
+        folder,
+        { ...target("workspace"), parentId: "sibling" },
+        workspace
+      )
+    ).toBe(true)
+    expect(
+      canDropBookmarkItem(source("workspace"), target("pin"), workspace)
+    ).toBe(true)
   })
 })

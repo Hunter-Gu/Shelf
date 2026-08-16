@@ -148,11 +148,10 @@ export function usePins({ tree }: { tree: RootTree | null }) {
         (child) => !isFolder(child) && child.url === bookmark.url
       )
       if (existing) {
-        const nextIndex = existing.index < index ? index - 1 : index
-        if (existing.index !== nextIndex) {
+        if (index !== existing.index && index !== existing.index + 1) {
           await browser.bookmarks.move(existing.id, {
             parentId: folder.id,
-            index: nextIndex
+            index
           })
         }
         if (moveFromId && moveFromId !== existing.id) {

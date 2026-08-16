@@ -1,17 +1,18 @@
-import { XIcon } from "lucide-react"
 import { cn } from "common/lib/utils"
+import { XIcon } from "lucide-react"
 import { useRef } from "react"
 import type { DropTargetMonitor } from "react-dnd"
 
+import type { Bookmark } from "~/bookmark-model"
 import {
   bookmarkDropClass,
   resolveRowDropTarget,
+  useBookmarkDndPreview,
   useBookmarkDrag,
   useBookmarkDrop,
   type BookmarkDragItem,
   type BookmarkZone
 } from "~/components/bookmark-dnd"
-import type { Bookmark } from "~/bookmark-model"
 import { faviconURL } from "~/utils/favicon"
 
 import { Anchor } from "../anchor"
@@ -39,7 +40,9 @@ export function BookmarkChip({
 }: BookmarkChipProps) {
   const ref = useRef<HTMLDivElement>(null)
   const item: Bookmark = { id, parentId, index, title, url }
+  const preview = useBookmarkDndPreview()
   const { drag, isDragging } = useBookmarkDrag({ zone, ...item })
+  const vacatesGrid = isDragging && preview?.target.zone === zone
   const { drop, isOver, edge } = useBookmarkDrop(
     ref,
     (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
@@ -57,8 +60,11 @@ export function BookmarkChip({
     <div
       ref={ref}
       className={cn(
-        "group relative min-w-0",
-        isDragging && "opacity-30",
+        "group min-w-0",
+        vacatesGrid
+          ? "pointer-events-none absolute h-10 w-10 opacity-0"
+          : "relative",
+        isDragging && !vacatesGrid && "opacity-[0.18]",
         bookmarkDropClass(isOver, edge, "horizontal")
       )}
       role="listitem">

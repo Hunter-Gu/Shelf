@@ -6,12 +6,17 @@ import { BookmarkPlus } from "lucide-react"
 import { useCallback, useEffect, useRef } from "react"
 
 import { isFolder, type Bookmark, type Folder } from "~/bookmark-model"
+import {
+  BookmarkDropPlaceholder,
+  useBookmarkDndPreview,
+  type BookmarkDropTarget
+} from "~/components/bookmark-dnd"
 import { BookmarkItem } from "~/components/folder-tree/bookmark-item"
 import { FolderItem } from "~/components/folder-tree/folder-item"
 import { FocusProvider } from "~/context/focus-context"
 import { useVirtualTreeRegister } from "~/context/virtual-tree-context"
 
-import { VirtualList } from "../virtual-list"
+import { VIRTUAL_ROW_HEIGHT, VirtualList } from "../virtual-list"
 
 function tree2List(tree: Folder, foldStatus: Record<string, boolean>) {
   const arr: Array<Folder | Bookmark> = []
@@ -72,6 +77,43 @@ const getLeftSpacingCreator = (
   }
 }
 
+// Where a preview target's placeholder should land in `list`'s own
+// (pre-drag, unmodified) indexing — same boundary math the old
+// array-splice version used, just no longer used to splice anything.
+function resolveInsertionIndex(
+  list: Array<Folder | Bookmark>,
+  target: BookmarkDropTarget
+) {
+  if (!target.anchorId) return list.length
+
+  const anchorIndex = list.findIndex((item) => item.id === target.anchorId)
+  if (anchorIndex === -1) return null
+
+  let insertionIndex = anchorIndex
+  if (target.edge === "after") {
+    insertionIndex += 1
+    const anchor = list[anchorIndex]
+    if (isFolder(anchor)) {
+      const parents = new Map(list.map((item) => [item.id, item.parentId]))
+      const isDescendant = (item: Folder | Bookmark) => {
+        let parentId: string | undefined = item.parentId
+        while (parentId) {
+          if (parentId === anchor.id) return true
+          parentId = parents.get(parentId)
+        }
+        return false
+      }
+      while (
+        insertionIndex < list.length &&
+        isDescendant(list[insertionIndex])
+      ) {
+        insertionIndex += 1
+      }
+    }
+  }
+  return insertionIndex
+}
+
 export function useScrollVirtualTree(list: Array<Folder | Bookmark>) {
   const register = useVirtualTreeRegister()
   const listRef = useRef(list)
@@ -127,7 +169,7 @@ export function VirtualTree({
 }) {
   const foldStatus = useFolderState()
   const list = tree2List(tree, foldStatus)
-
+  const preview = useBookmarkDndPreview()
   const getLeftSpacing = getLeftSpacingCreator(list, foldStatus)
   const { virtualizerRef } = useScrollVirtualTree(list)
 
@@ -136,7 +178,9 @@ export function VirtualTree({
       <div className={className}>
         <EmptyState
           isCompact
-          icon={<BookmarkPlus className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
+          icon={
+            <BookmarkPlus className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+          }
           title="No bookmarks yet"
           description="Drag a link in, or use the + button above to save the page you're on."
         />
@@ -144,12 +188,50 @@ export function VirtualTree({
     )
   }
 
+  // `list` itself never changes shape during a drag — the virtualizer's
+  // item count and keys stay stable, so it never has to remeasure/remount
+  // rows mid-drag. The landing slot is purely visual: rows at or past the
+  // insertion point slide down (getItemOffset) and the dashed slot itself
+  // is a stable overlay/drop target positioned by simple index arithmetic,
+  // not a spliced-in list entry. When a row moves away from the pointer, the
+  // slot keeps the resolved target alive instead of letting the root append
+  // target take over the newly opened gap.
+  const target = preview?.target
+  const showPreview =
+    !!target && target.zone === "workspace" && target.edge !== "inside"
+  const insertionIndex = showPreview
+    ? resolveInsertionIndex(list, target)
+    : null
+
   return (
     <VirtualList
       ref={virtualizerRef}
       className={className}
       list={list}
       getItemKey={(item) => item.id}
+      getItemOffset={(_item, index) =>
+        insertionIndex !== null && index >= insertionIndex
+          ? VIRTUAL_ROW_HEIGHT
+          : 0
+      }
+      overlay={
+        insertionIndex !== null && target ? (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: `${VIRTUAL_ROW_HEIGHT}px`,
+              transform: `translateY(${insertionIndex * VIRTUAL_ROW_HEIGHT}px)`
+            }}>
+            <BookmarkDropPlaceholder
+              target={target}
+              className={getLeftSpacing(target.parentId)}
+            />
+          </div>
+        ) : null
+      }
       Row={(item) => {
         const leftSpacingClsx = getLeftSpacing(item.parentId)
         return (

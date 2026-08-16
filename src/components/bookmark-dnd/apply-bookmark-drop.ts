@@ -1,8 +1,11 @@
 import { isFolder, type Bookmark, type Folder } from "~/bookmark-model"
 
 import {
-  normalizeDropIndex,
+  canDropBookmarkItem,
+  isFolderDragItem,
+  isSameDropPosition,
   planBookmarkDrop,
+  type BookmarkDragBookmarkItem,
   type BookmarkDragItem,
   type BookmarkDropTarget
 } from "./bookmark-drop"
@@ -53,7 +56,7 @@ function findBookmarkByUrl(
 }
 
 async function ensureWorkspaceSource(
-  source: BookmarkDragItem,
+  source: BookmarkDragBookmarkItem,
   workspaceTree: Folder | null,
   operations: BookmarkDropOperations
 ) {
@@ -67,7 +70,7 @@ async function ensureWorkspaceSource(
 }
 
 async function placeInWorkspace(
-  source: BookmarkDragItem,
+  source: BookmarkDragBookmarkItem,
   target: BookmarkDropTarget,
   workspaceTree: Folder | null,
   operations: BookmarkDropOperations
@@ -76,7 +79,7 @@ async function placeInWorkspace(
   if (existing) {
     await operations.moveBookmark(existing.id, {
       parentId: target.parentId,
-      index: normalizeDropIndex(existing, target)
+      index: target.index
     })
   } else {
     await operations.createBookmark({
@@ -102,24 +105,33 @@ export async function applyBookmarkDrop({
   workspaceTree: Folder | null
   operations: BookmarkDropOperations
 }) {
-  const plan = planBookmarkDrop(source, target)
-  const index = normalizeDropIndex(source, target)
+  if (!canDropBookmarkItem(source, target, workspaceTree)) return
 
+  if (isFolderDragItem(source)) {
+    if (isSameDropPosition(source, target)) return
+    await operations.moveBookmark(source.id, {
+      parentId: target.parentId,
+      index: target.index
+    })
+    return
+  }
+
+  const plan = planBookmarkDrop(source, target)
   switch (plan) {
     case "reorder-workspace":
-      if (source.parentId === target.parentId && source.index === index) return
+      if (isSameDropPosition(source, target)) return
       await operations.moveBookmark(source.id, {
         parentId: target.parentId,
-        index
+        index: target.index
       })
       return
     case "reorder-pin":
-      if (source.parentId === target.parentId && source.index === index) return
-      await operations.movePin(source.id, index)
+      if (isSameDropPosition(source, target)) return
+      await operations.movePin(source.id, target.index)
       return
     case "reorder-favorite":
-      if (source.parentId === target.parentId && source.index === index) return
-      await operations.moveFavorite(source.id, index)
+      if (isSameDropPosition(source, target)) return
+      await operations.moveFavorite(source.id, target.index)
       return
     case "move-to-workspace":
       await placeInWorkspace(source, target, workspaceTree, operations)

@@ -179,4 +179,119 @@ describe("applyBookmarkDrop", () => {
 
     expect(actions.removePinsByUrl).not.toHaveBeenCalled()
   })
+
+  it("passes the original list boundary to a downward reorder", async () => {
+    const actions = operations()
+    const source: BookmarkDragItem = {
+      zone: "workspace",
+      id: "source",
+      parentId: "workspace",
+      index: 1,
+      title: "Example",
+      url: "https://example.com/"
+    }
+
+    await applyBookmarkDrop({
+      source,
+      target: {
+        zone: "workspace",
+        parentId: "workspace",
+        index: 4,
+        edge: "after"
+      },
+      workspaceTree: null,
+      operations: actions
+    })
+
+    expect(actions.moveBookmark).toHaveBeenCalledWith("source", {
+      parentId: "workspace",
+      index: 4
+    })
+  })
+
+  it("does not move to either boundary already occupied by the source", async () => {
+    const actions = operations()
+    const source: BookmarkDragItem = {
+      zone: "pin",
+      id: "source",
+      parentId: "pins",
+      index: 1,
+      title: "Example",
+      url: "https://example.com/"
+    }
+
+    for (const index of [1, 2]) {
+      await applyBookmarkDrop({
+        source,
+        target: {
+          zone: "pin",
+          parentId: "pins",
+          index,
+          edge: "after"
+        },
+        workspaceTree: null,
+        operations: actions
+      })
+    }
+
+    expect(actions.movePin).not.toHaveBeenCalled()
+  })
+
+  it("moves a folder only within the workspace", async () => {
+    const actions = operations()
+    const folder: BookmarkDragItem = {
+      kind: "folder",
+      zone: "workspace",
+      id: "folder",
+      parentId: "workspace",
+      index: 1,
+      title: "Folder"
+    }
+
+    const workspaceTree: Folder = {
+      id: "workspace",
+      parentId: "root",
+      index: 0,
+      title: "Workspace",
+      children: [
+        {
+          id: "folder",
+          parentId: "workspace",
+          index: 0,
+          title: "Folder"
+        },
+        {
+          id: "another-folder",
+          parentId: "workspace",
+          index: 1,
+          title: "Another folder"
+        }
+      ]
+    }
+
+    await applyBookmarkDrop({
+      source: folder,
+      target: {
+        zone: "workspace",
+        parentId: "another-folder",
+        index: 2,
+        edge: "inside"
+      },
+      workspaceTree,
+      operations: actions
+    })
+    await applyBookmarkDrop({
+      source: folder,
+      target: target("favorite", "favorites"),
+      workspaceTree,
+      operations: actions
+    })
+
+    expect(actions.moveBookmark).toHaveBeenCalledOnce()
+    expect(actions.moveBookmark).toHaveBeenCalledWith("folder", {
+      parentId: "another-folder",
+      index: 2
+    })
+    expect(actions.placeFavorite).not.toHaveBeenCalled()
+  })
 })

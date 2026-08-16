@@ -94,7 +94,7 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
     <ItemContainer
       ref={connectRowRef}
       className={cn(
-        isDragging && "opacity-30",
+        isDragging && "opacity-[0.18]",
         dndStyle,
         isFocused && FocusedStyle,
         className

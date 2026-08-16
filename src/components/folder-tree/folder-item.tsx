@@ -6,11 +6,13 @@ import { cn } from "common/lib/utils"
 import { AnimatePresence } from "framer-motion"
 import { FolderIcon, FolderOpenIcon } from "lucide-react"
 import { useCallback, useState, type KeyboardEvent } from "react"
+import type { DropTargetMonitor } from "react-dnd"
 
 import { useAppContext } from "~/app/app-context"
 import {
   bookmarkDropClass,
   resolveRowDropTarget,
+  useBookmarkDrag,
   useBookmarkDrop,
   useWorkspaceChildCount,
   type BookmarkDragItem
@@ -18,7 +20,6 @@ import {
 import { useEditable } from "~/context/editable-context"
 import { useIsFocused } from "~/context/focus-context"
 import { useAllyClick } from "~/hooks/use-ally-click"
-import type { DropTargetMonitor } from "react-dnd"
 
 import { type Folder } from "../../bookmark-model"
 import { BookmarkButton } from "../bookmark-button/bookmark-button"
@@ -67,6 +68,14 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
   )
 
   const childCount = useWorkspaceChildCount(id)
+  const { drag, isDragging } = useBookmarkDrag({
+    kind: "folder",
+    zone: "workspace",
+    id,
+    parentId: props.parentId,
+    index: props.index,
+    title
+  })
   const { isOver, edge, drop } = useBookmarkDrop(
     ref,
     (element: HTMLElement, monitor: DropTargetMonitor<BookmarkDragItem>) =>
@@ -79,23 +88,32 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
         allowInside: true
       })
   )
-  drop(ref)
+  const connectRowRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      ref.current = node
+      drop(node)
+      drag(node)
+    },
+    [drag, drop, ref]
+  )
 
   const dndStyle = bookmarkDropClass(isOver, edge)
+  const isDropInside = isOver && edge === "inside"
   const a11yClick = useAllyClick(() => {
     updateFolderState(id)
   })
 
   return (
     <ItemContainer
-      ref={ref}
+      ref={connectRowRef}
       className={cn(
+        isDragging && "opacity-[0.18]",
         dndStyle,
         isFocused && FocusedStyle,
         className
       )}
       {...a11yClick}>
-      {folderState ? (
+      {folderState || isDropInside ? (
         <FolderOpenIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
       ) : (
         <FolderIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -112,7 +130,9 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
               </Title>
               <ItemActionsContainer className={cn(isFocused && "visible")}>
                 <BookmarkButton id={id} />
-                <MoveToMenu onMove={(workspaceId) => move(id, { parentId: workspaceId })} />
+                <MoveToMenu
+                  onMove={(workspaceId) => move(id, { parentId: workspaceId })}
+                />
                 <FolderMenu
                   item={props}
                   onRename={() => setEditing(true)}

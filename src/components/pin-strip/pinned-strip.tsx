@@ -9,8 +9,10 @@ import { collectTreeUrls, type Bookmark, type Folder } from "~/bookmark-model"
 import { Anchor } from "~/components/anchor"
 import {
   bookmarkDropClass,
+  BookmarkDropPlaceholder,
   resolveAppendDropTarget,
   resolveRowDropTarget,
+  useBookmarkDndPreview,
   useBookmarkDrag,
   useBookmarkDrop,
   type BookmarkDragItem
@@ -54,7 +56,7 @@ function PinnedItem({
       role="listitem"
       className={cn(
         isActive && "bg-black/10 dark:bg-white/10",
-        isDragging && "opacity-30",
+        isDragging && "opacity-[0.18]",
         bookmarkDropClass(isOver, edge)
       )}>
       <img
@@ -101,6 +103,11 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
   const workspaceUrls = useMemo(() => collectTreeUrls(tree), [tree])
   const items = pins.pinnedItems.filter((item) => workspaceUrls.has(item.url))
   const activeUrl = normalizeBookmarkUrl(tabs.activeTab?.url)
+  const preview = useBookmarkDndPreview()
+  const previewTarget =
+    preview?.target.zone === "pin" && preview.target.edge !== "inside"
+      ? preview.target
+      : null
   const ref = useRef<HTMLDivElement>(null)
   const { drop, isOver } = useBookmarkDrop(ref, () =>
     resolveAppendDropTarget(
@@ -116,16 +123,15 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
       ref={ref}
       className={cn(
         "mx-3 rounded-lg",
-        items.length === 0 && "hidden",
+        items.length === 0 && !previewTarget && "hidden",
         isOver &&
           "bg-black/5 ring-1 ring-black/15 dark:bg-white/5 dark:ring-white/20"
       )}
       role="list"
       aria-label="Pinned bookmarks">
-      {items.map((item) => {
+      {items.flatMap((item) => {
         const isActive = normalizeBookmarkUrl(item.url) === activeUrl
-
-        return (
+        const pinnedItem = (
           <PinnedItem
             key={item.id}
             item={item}
@@ -134,7 +140,24 @@ export function PinnedStrip({ tree }: { tree: Folder }) {
             onUnpin={() => void pins.unpin(item.url)}
           />
         )
+        const placeholder = previewTarget?.anchorId === item.id && (
+          <BookmarkDropPlaceholder
+            key={`drop-pin-${previewTarget.parentId}-${previewTarget.index}`}
+            target={previewTarget}
+          />
+        )
+
+        if (!placeholder) return [pinnedItem]
+        return previewTarget.edge === "before"
+          ? [placeholder, pinnedItem]
+          : [pinnedItem, placeholder]
       })}
+      {previewTarget?.edge === "append" && !previewTarget.anchorId ? (
+        <BookmarkDropPlaceholder
+          key={`drop-pin-${previewTarget.parentId}-${previewTarget.index}`}
+          target={previewTarget}
+        />
+      ) : null}
     </div>
   )
 }
