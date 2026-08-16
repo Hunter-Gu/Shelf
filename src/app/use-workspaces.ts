@@ -332,6 +332,43 @@ export function useWorkspaces({
     [changeBookmark, moveBookmark, persist, update, workspaceParentId]
   )
 
+  const moveOutOfSpace = useCallback(
+    async (id: string, targetWorkspaceId: string) => {
+      if (!initializedRef.current) return
+
+      const target = workspacesRef.current.find(
+        (workspace) => workspace.id === id
+      )
+      if (!target || target.type !== WorkspaceType.Normal) return
+      if (
+        !workspacesRef.current.some(
+          (workspace) => workspace.id === targetWorkspaceId
+        )
+      ) {
+        return
+      }
+      if (targetWorkspaceId === id) return
+
+      await moveBookmark(id, { parentId: targetWorkspaceId })
+      await changeBookmark(id, { title: target.title })
+
+      const next = workspacesRef.current.filter(
+        (workspace) => workspace.id !== id
+      )
+      workspacesRef.current = next
+      setWorkspaces(next)
+      setCurrentWorkspace((current) =>
+        current.id === id
+          ? (next.find((workspace) => workspace.id === targetWorkspaceId) ??
+            next[0] ??
+            createWorkspace({ id: "", title: "", logo: "" }))
+          : current
+      )
+      await persist(next)
+    },
+    [changeBookmark, moveBookmark, persist]
+  )
+
   const remove = useCallback(
     async (id: string) => {
       if (!initializedRef.current) return
@@ -401,6 +438,7 @@ export function useWorkspaces({
       update,
       create,
       turnToSpace,
+      moveOutOfSpace,
       remove,
       reorder,
       switch: switchTo
@@ -412,6 +450,7 @@ export function useWorkspaces({
       update,
       create,
       turnToSpace,
+      moveOutOfSpace,
       remove,
       reorder,
       switchTo

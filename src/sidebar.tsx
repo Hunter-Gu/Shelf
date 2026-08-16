@@ -12,15 +12,15 @@ import {
   useBookmarkDrop
 } from "~/components/bookmark-dnd"
 import { clsx } from "~/components/clsx"
-import { Editable, useEditable } from "~/components/editable"
 import { FolderTree } from "~/components/folder-tree"
+import { MoveOutOfSpaceMenu } from "~/components/menu/move-out-of-space-menu"
 import { SpaceMenu } from "~/components/menu/space-menu"
 import { PinHint } from "~/components/pin-hint"
 import { FavoritesStrip } from "~/components/pin-strip/favorites-strip"
 import { PinnedStrip } from "~/components/pin-strip/pinned-strip"
 import { useFocusSearchShortcut } from "~/hooks/use-focus-search-shortcut"
 import { useSearch } from "~/hooks/use-search"
-import type { Workspace } from "~/workspace-model"
+import { WorkspaceType, type Workspace } from "~/workspace-model"
 
 const TitleContainer = clsx.div(
   "group/workspace relative mx-3 flex items-center justify-between rounded-2xl bg-transparent px-3 py-2 hover:bg-[var(--workspace-background)]"
@@ -90,11 +90,6 @@ function WorkspaceTitle({
   const { pins, workspace } = useAppContext()
   const currentSpace = workspace.currentWorkspace
   const titleRef = useRef<HTMLDivElement>(null)
-  const { isEditing, setEditing, handleChange } = useEditable((event) => {
-    void workspace.update(currentSpace.id, (nextWorkspace) => {
-      nextWorkspace.title = (event.target as HTMLInputElement).value
-    })
-  })
   const { drop, isOver } = useBookmarkDrop(titleRef, () =>
     resolveAppendDropTarget(
       "pin",
@@ -162,19 +157,16 @@ function WorkspaceTitle({
             />
           )}
         </button>
-        <Editable
-          isEditing={isEditing}
-          text={currentSpace.title}
-          preview={<span>{currentSpace.title}</span>}
-          onChange={handleChange}
-        />
+        <span>{currentSpace.title}</span>
       </Title>
       <ActionsContainer>
         <BookmarkButton id={currentSpace.id} />
+        {workspace.ready && currentSpace.type === WorkspaceType.Normal ? (
+          <MoveOutOfSpaceMenu workspaceId={currentSpace.id} />
+        ) : null}
         {workspaceTree ? (
           <SpaceMenu
             item={workspaceTree}
-            onRename={() => setEditing(true)}
             onEdit={onEdit}
             anchorRef={titleRef}
           />

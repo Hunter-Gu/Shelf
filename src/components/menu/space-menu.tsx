@@ -6,20 +6,19 @@ import { useSetEditableId } from "~/context/editable-context"
 import { useVirtualTree } from "~/context/virtual-tree-context"
 import { useNextTick } from "~/hooks/use-next-tick"
 import { tabManager } from "~/tabs/actions"
-import type { Workspace } from "~/workspace-model"
+import { WorkspaceType, type Workspace } from "~/workspace-model"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
 import { DeleteConfirmChip } from "../delete-confirm-chip"
 import { Menu, type MenuItems } from "./menu"
 
 type MenuItemProps = {
-  onRename?: () => void
   onEdit?: (workspace: Workspace) => void
   item: Pick<Folder, "id" | "title" | "children">
   anchorRef: RefObject<HTMLElement | null>
 }
 
-export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) {
+export function SpaceMenu({ item, onEdit, anchorRef }: MenuItemProps) {
   const { bookmarks, workspace } = useAppContext()
   const { create } = bookmarks
   const { currentWorkspace: currentSpace, remove } = workspace
@@ -38,6 +37,7 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
     setConfirmingDelete(false)
     remove(item.id)
   }
+  const isBuiltIn = currentSpace.type !== WorkspaceType.Normal
 
   const menuItems: MenuItems = [
     {
@@ -61,7 +61,6 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
       onClick: () => tabManager.createInNewWindow(urls, true)
     },
     { type: "divider" },
-    { label: "Rename", onClick: onRename },
     {
       label: "Edit Workspace Profile",
       onClick: () => onEdit?.(currentSpace)
@@ -77,13 +76,18 @@ export function SpaceMenu({ item, onRename, onEdit, anchorRef }: MenuItemProps) 
       }
     },
     { type: "divider" },
-    {
-      label: "Delete",
-      onClick: () => {
-        if (item.children?.length) setConfirmingDelete(true)
-        else handleDelete()
-      }
-    }
+    isBuiltIn
+      ? {
+          label: `Delete — ${currentSpace.title} can't be deleted`,
+          isDisabled: true
+        }
+      : {
+          label: "Delete",
+          onClick: () => {
+            if (item.children?.length) setConfirmingDelete(true)
+            else handleDelete()
+          }
+        }
   ]
 
   return (
