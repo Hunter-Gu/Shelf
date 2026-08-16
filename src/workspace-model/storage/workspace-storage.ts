@@ -66,3 +66,19 @@ export const workspaceStorage = {
     })
   }
 }
+
+// The active workspace is a device-local preference, unlike the workspace
+// list itself (which is synced), so it lives in `local` rather than `sync`.
+const currentWorkspaceIdItem = storage.defineItem<string>(
+  "local:currentWorkspaceId",
+  { fallback: "" }
+)
+
+export const currentWorkspaceStorage = {
+  getValue() {
+    return currentWorkspaceIdItem.getValue()
+  },
+  setValue(id: string) {
+    return currentWorkspaceIdItem.setValue(id)
+  }
+}

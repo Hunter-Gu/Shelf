@@ -9,7 +9,10 @@ import {
   type RootTree
 } from "~/bookmark-model"
 import { proofWorkspaces } from "~/workspace-model/proof-workspaces"
-import { workspaceStorage } from "~/workspace-model/storage/workspace-storage"
+import {
+  currentWorkspaceStorage,
+  workspaceStorage
+} from "~/workspace-model/storage/workspace-storage"
 import {
   createWorkspace,
   WorkspaceType,
@@ -148,6 +151,9 @@ export function useWorkspaces({
           console.error("Failed to read workspace storage", error)
           return []
         })
+        const savedCurrentId = await currentWorkspaceStorage
+          .getValue()
+          .catch(() => "")
         const latestTree = treeRef.current
         if (!latestTree) return
 
@@ -196,6 +202,7 @@ export function useWorkspaces({
         setWorkspaces(next)
         setCurrentWorkspace(
           (current) =>
+            next.find((workspace) => workspace.id === savedCurrentId) ??
             next.find((workspace) => workspace.id === current.id) ??
             next[0] ??
             createWorkspace({ id: "", title: "", logo: "" })
@@ -380,7 +387,10 @@ export function useWorkspaces({
 
   const switchTo = useCallback((id: string) => {
     const next = workspacesRef.current.find((workspace) => workspace.id === id)
-    if (next) setCurrentWorkspace(next)
+    if (next) {
+      setCurrentWorkspace(next)
+      void currentWorkspaceStorage.setValue(id).catch(() => {})
+    }
   }, [])
 
   return useMemo(
