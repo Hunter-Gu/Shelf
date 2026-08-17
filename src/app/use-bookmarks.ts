@@ -29,6 +29,15 @@ export function useBookmarks() {
     const requestId = ++reloadRequestRef.current
     const [nextTree] = await browser.bookmarks.getTree()
     if (requestId !== reloadRequestRef.current) return
+    // Drop any patch still queued from an event that arrived just before
+    // this reload — the freshly fetched tree already reflects it, and
+    // replaying the patch on top would double-apply it (e.g. inserting the
+    // same created bookmark a second time).
+    if (patchTimeoutRef.current !== null) {
+      clearTimeout(patchTimeoutRef.current)
+      patchTimeoutRef.current = null
+    }
+    pendingPatchesRef.current = []
     setTree(nextTree as unknown as RootTree)
   }, [])
 
