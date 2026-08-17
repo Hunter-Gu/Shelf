@@ -3,7 +3,7 @@ import type { Virtualizer } from "@tanstack/react-virtual"
 import { useFolderState } from "common/context/folder-states-context"
 import { noop } from "common/utils/noop"
 import { BookmarkPlus } from "lucide-react"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 
 import { isFolder, type Bookmark, type Folder } from "~/bookmark-model"
 import {
@@ -168,9 +168,16 @@ export function VirtualTree({
   className?: string
 }) {
   const foldStatus = useFolderState()
-  const list = tree2List(tree, foldStatus)
+  // Recomputed only when the tree/fold state actually changes shape, not on
+  // every drag-preview update — `preview` changes on nearly every pointer
+  // move during a drag, and re-flattening the whole tree on each of those
+  // frames was pure waste since the list's shape never changes mid-drag.
+  const list = useMemo(() => tree2List(tree, foldStatus), [tree, foldStatus])
+  const getLeftSpacing = useMemo(
+    () => getLeftSpacingCreator(list, foldStatus),
+    [list, foldStatus]
+  )
   const preview = useBookmarkDndPreview()
-  const getLeftSpacing = getLeftSpacingCreator(list, foldStatus)
   const { virtualizerRef } = useScrollVirtualTree(list)
 
   if (list.length === 0) {
