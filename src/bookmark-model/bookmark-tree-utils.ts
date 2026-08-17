@@ -48,6 +48,11 @@ export class BookmarkTreeUtils {
 
     if (parentNode && isFolder(parentNode)) {
       parentNode.children = parentNode.children || []
+      // A reload() that lands while an onCreated patch for the same node is
+      // still queued can already contain this id by the time the patch
+      // applies — splicing again would insert a visible duplicate.
+      if (parentNode.children.some((child) => child.id === node.id)) return
+
       parentNode.children.splice(node.index, 0, node)
 
       // update from old item
