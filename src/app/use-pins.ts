@@ -47,28 +47,38 @@ export function usePins({ tree }: { tree: RootTree | null }) {
 
   // Both folders are created lazily on first use rather than on install, so
   // a fresh profile never gets them until the feature is actually touched.
-  const ensuringRef = useRef<Set<string>>(new Set())
-  const ensureFolder = useCallback(
-    async (title: string, existing: Folder | null) => {
-      if (existing || !tree || ensuringRef.current.has(title)) return
-      ensuringRef.current.add(title)
-      try {
-        const { otherBookmarks } = toBaseFolder(tree)
-        await browser.bookmarks.create({ parentId: otherBookmarks.id, title })
-      } finally {
-        ensuringRef.current.delete(title)
+  // The in-flight creation promise is cached per title so a drop that lands
+  // before the mount effect's creation has resolved awaits the same
+  // creation instead of throwing "not ready" or racing a second create.
+  const ensuringRef = useRef<Map<string, Promise<string>>>(new Map())
+  const ensureFolderId = useCallback(
+    (title: string, existing: Folder | null): Promise<string> => {
+      if (existing) return Promise.resolve(existing.id)
+      if (!tree) {
+        return Promise.reject(new Error("Bookmark collection is not ready"))
       }
+
+      const pending = ensuringRef.current.get(title)
+      if (pending) return pending
+
+      const { otherBookmarks } = toBaseFolder(tree)
+      const promise = browser.bookmarks
+        .create({ parentId: otherBookmarks.id, title })
+        .then((created) => created.id)
+        .finally(() => ensuringRef.current.delete(title))
+      ensuringRef.current.set(title, promise)
+      return promise
     },
     [tree]
   )
 
   useEffect(() => {
-    void ensureFolder(PINS_FOLDER_TITLE, pinsFolder)
-  }, [ensureFolder, pinsFolder])
+    void ensureFolderId(PINS_FOLDER_TITLE, pinsFolder).catch(() => {})
+  }, [ensureFolderId, pinsFolder])
 
   useEffect(() => {
-    void ensureFolder(FAVORITES_FOLDER_TITLE, favoritesFolder)
-  }, [ensureFolder, favoritesFolder])
+    void ensureFolderId(FAVORITES_FOLDER_TITLE, favoritesFolder).catch(() => {})
+  }, [ensureFolderId, favoritesFolder])
 
   // Deleting a bookmark also removes any pinned/favorited copy of it.
   // Deleting *from* one of the special folders is just a plain removal —
@@ -137,20 +147,21 @@ export function usePins({ tree }: { tree: RootTree | null }) {
   // node and then remove it again through a stale folder snapshot.
   const placeIn = useCallback(
     async (
+      title: string,
       folder: Folder | null,
       bookmark: { title: string; url: string },
       index: number,
       moveFromId?: string
     ) => {
-      if (!folder) throw new Error("Bookmark collection is not ready")
+      const folderId = await ensureFolderId(title, folder)
 
-      const existing = folder.children?.find(
+      const existing = folder?.children?.find(
         (child) => !isFolder(child) && child.url === bookmark.url
       )
       if (existing) {
         if (index !== existing.index && index !== existing.index + 1) {
           await browser.bookmarks.move(existing.id, {
-            parentId: folder.id,
+            parentId: folderId,
             index
           })
         }
@@ -161,18 +172,18 @@ export function usePins({ tree }: { tree: RootTree | null }) {
       }
 
       if (moveFromId) {
-        await browser.bookmarks.move(moveFromId, { parentId: folder.id, index })
+        await browser.bookmarks.move(moveFromId, { parentId: folderId, index })
         return
       }
 
       await browser.bookmarks.create({
-        parentId: folder.id,
+        parentId: folderId,
         index,
         title: bookmark.title,
         url: bookmark.url
       })
     },
-    []
+    [ensureFolderId]
   )
 
   const moveIn = useCallback(
@@ -227,12 +238,19 @@ export function usePins({ tree }: { tree: RootTree | null }) {
         bookmark: { title: string; url: string },
         index: number,
         moveFromId?: string
-      ) => placeIn(pinsFolder, bookmark, index, moveFromId),
+      ) => placeIn(PINS_FOLDER_TITLE, pinsFolder, bookmark, index, moveFromId),
       placeFavorite: (
         bookmark: { title: string; url: string },
         index: number,
         moveFromId?: string
-      ) => placeIn(favoritesFolder, bookmark, index, moveFromId),
+      ) =>
+        placeIn(
+          FAVORITES_FOLDER_TITLE,
+          favoritesFolder,
+          bookmark,
+          index,
+          moveFromId
+        ),
       movePin: (id: string, index: number) => moveIn(pinsFolder, id, index),
       moveFavorite: (id: string, index: number) =>
         moveIn(favoritesFolder, id, index),
