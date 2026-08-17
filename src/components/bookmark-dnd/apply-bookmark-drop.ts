@@ -106,9 +106,9 @@ export async function applyBookmarkDrop({
   operations: BookmarkDropOperations
 }) {
   if (!canDropBookmarkItem(source, target, workspaceTree)) return
+  if (isSameDropPosition(source, target)) return
 
   if (isFolderDragItem(source)) {
-    if (isSameDropPosition(source, target)) return
     await operations.moveBookmark(source.id, {
       parentId: target.parentId,
       index: target.index
@@ -119,18 +119,15 @@ export async function applyBookmarkDrop({
   const plan = planBookmarkDrop(source, target)
   switch (plan) {
     case "reorder-workspace":
-      if (isSameDropPosition(source, target)) return
       await operations.moveBookmark(source.id, {
         parentId: target.parentId,
         index: target.index
       })
       return
     case "reorder-pin":
-      if (isSameDropPosition(source, target)) return
       await operations.movePin(source.id, target.index)
       return
     case "reorder-favorite":
-      if (isSameDropPosition(source, target)) return
       await operations.moveFavorite(source.id, target.index)
       return
     case "move-to-workspace":
