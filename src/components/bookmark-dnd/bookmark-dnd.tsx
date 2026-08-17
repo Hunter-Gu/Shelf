@@ -27,6 +27,7 @@ import { BookmarkDragOverlay } from "./bookmark-drag-overlay"
 import {
   BOOKMARK_DND_TYPE,
   canDropBookmarkItem,
+  findFolderById,
   isSameDropPosition,
   type BookmarkDragItem,
   type BookmarkDropEdge,
@@ -145,18 +146,6 @@ function useClearPreviewOutsideDropTargets(
       unsubscribe()
     }
   }, [clearPreview, manager])
-}
-
-function findFolderById(folder: Folder | null, id: string): Folder | null {
-  if (!folder) return null
-  if (folder.id === id) return folder
-
-  for (const child of folder.children ?? []) {
-    if (!isFolder(child)) continue
-    const match = findFolderById(child, id)
-    if (match) return match
-  }
-  return null
 }
 
 export function BookmarkDndProvider({
