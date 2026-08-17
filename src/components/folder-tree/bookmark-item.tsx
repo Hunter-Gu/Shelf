@@ -98,7 +98,7 @@ export function BookmarkItem({ className, ...props }: BookmarkItemProps) {
         isFocused && FocusedStyle,
         className
       )}>
-      <Favicon src={favicon} alt={title} />
+      <Favicon src={favicon} alt={title} draggable={false} />
 
       <Editable
         isEditing={isEditing}
