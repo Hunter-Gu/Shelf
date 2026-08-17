@@ -377,35 +377,46 @@ export function useWorkspaces({
       const target = current.find((workspace) => workspace.id === id)
       if (!target) return
 
+      try {
+        if (target.type === WorkspaceType.Normal) {
+          await removeBookmarkTree(id)
+        } else if (treeRef.current) {
+          const { bookmarksBar, otherBookmarks } = toBaseFolder(
+            treeRef.current
+          )
+          const baseFolder =
+            target.type === WorkspaceType.BookmarksBar
+              ? bookmarksBar
+              : otherBookmarks
+          const workspaceIds = new Set(current.map((workspace) => workspace.id))
+          await Promise.all(
+            (baseFolder.children ?? [])
+              .filter((item) => !workspaceIds.has(item.id))
+              .map((item) =>
+                isFolder(item)
+                  ? removeBookmarkTree(item.id)
+                  : removeBookmark(item.id)
+              )
+          )
+        }
+      } catch (error) {
+        // The underlying bookmark folder may already be gone (e.g. deleted
+        // from another window/device just before this ran). Leave local
+        // state and storage untouched rather than dropping the workspace
+        // from the UI while the deletion itself never went through.
+        console.error("Failed to delete workspace bookmarks", error)
+        return
+      }
+
       const next = current.filter((workspace) => workspace.id !== id)
       workspacesRef.current = next
       setWorkspaces(next)
-      setCurrentWorkspace((current) =>
-        current.id === id
+      setCurrentWorkspace((active) =>
+        active.id === id
           ? (next[next.length - 1] ??
             createWorkspace({ id: "", title: "", logo: "" }))
-          : current
+          : active
       )
-
-      if (target.type === WorkspaceType.Normal) {
-        await removeBookmarkTree(id)
-      } else if (treeRef.current) {
-        const { bookmarksBar, otherBookmarks } = toBaseFolder(treeRef.current)
-        const baseFolder =
-          target.type === WorkspaceType.BookmarksBar
-            ? bookmarksBar
-            : otherBookmarks
-        const workspaceIds = new Set(current.map((workspace) => workspace.id))
-        await Promise.all(
-          (baseFolder.children ?? [])
-            .filter((item) => !workspaceIds.has(item.id))
-            .map((item) =>
-              isFolder(item)
-                ? removeBookmarkTree(item.id)
-                : removeBookmark(item.id)
-            )
-        )
-      }
       await persist(next)
     },
     [persist, removeBookmark, removeBookmarkTree]
