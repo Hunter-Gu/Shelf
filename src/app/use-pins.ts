@@ -47,9 +47,15 @@ export function usePins({ tree }: { tree: RootTree | null }) {
 
   // Both folders are created lazily on first use rather than on install, so
   // a fresh profile never gets them until the feature is actually touched.
-  // The in-flight creation promise is cached per title so a drop that lands
-  // before the mount effect's creation has resolved awaits the same
-  // creation instead of throwing "not ready" or racing a second create.
+  // The creation promise is cached per title so a drop that lands before
+  // the mount effect's creation has resolved awaits the same creation
+  // instead of throwing "not ready" or racing a second create. The entry is
+  // kept on success (not just while pending) — `pinsFolder`/`favoritesFolder`
+  // only pick up the new folder once its onCreated event round-trips through
+  // the tree's patch debounce, so a caller that lands in that gap must still
+  // see the same resolved id rather than finding an empty cache and creating
+  // a second folder. It's only cleared on failure, so a later attempt can
+  // retry.
   const ensuringRef = useRef<Map<string, Promise<string>>>(new Map())
   const ensureFolderId = useCallback(
     (title: string, existing: Folder | null): Promise<string> => {
@@ -65,7 +71,10 @@ export function usePins({ tree }: { tree: RootTree | null }) {
       const promise = browser.bookmarks
         .create({ parentId: otherBookmarks.id, title })
         .then((created) => created.id)
-        .finally(() => ensuringRef.current.delete(title))
+        .catch((error: unknown) => {
+          ensuringRef.current.delete(title)
+          throw error
+        })
       ensuringRef.current.set(title, promise)
       return promise
     },
