@@ -2,24 +2,38 @@ import { Button } from "@astryxdesign/core/Button"
 import { Theme as AstryxTheme } from "@astryxdesign/core/theme"
 import { neutralTheme } from "@astryxdesign/theme-neutral/built"
 import { KeyboardIcon, PanelRightOpen, PuzzleIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { browser } from "wxt/browser"
 
 type OpenState = "idle" | "opening" | "opened" | "error"
 
 function WelcomeContent() {
   const [state, setState] = useState<OpenState>("idle")
+  // sidePanel.open() only succeeds when called synchronously in direct
+  // response to a user gesture — awaiting windows.getCurrent() first breaks
+  // that chain and gets rejected with "sidePanel.open() may only be called
+  // in response to a user gesture." Fetch the window id ahead of time so
+  // the click handler can call open() as its first statement.
+  const windowIdRef = useRef<number | null>(null)
 
-  const handleOpen = async () => {
-    setState("opening")
-    try {
-      const window = await browser.windows.getCurrent()
-      if (!window.id) throw new Error("no window id")
-      await browser.sidePanel.open({ windowId: window.id })
-      setState("opened")
-    } catch {
+  useEffect(() => {
+    void browser.windows.getCurrent().then((window) => {
+      windowIdRef.current = window.id ?? null
+    })
+  }, [])
+
+  const handleOpen = () => {
+    const windowId = windowIdRef.current
+    if (windowId === null) {
       setState("error")
+      return
     }
+
+    setState("opening")
+    browser.sidePanel
+      .open({ windowId })
+      .then(() => setState("opened"))
+      .catch(() => setState("error"))
   }
 
   return (
