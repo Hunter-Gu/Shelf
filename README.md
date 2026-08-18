@@ -1,6 +1,6 @@
-# Markit extension
+# Sifter extension
 
-Markit is a Chrome side panel for organizing bookmarks into workspaces.
+Sifter is a Chrome side panel for organizing bookmarks into workspaces.
 
 ## Development
 

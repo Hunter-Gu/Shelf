@@ -5,8 +5,8 @@ import { isFolder, toBaseFolder, type Folder, type RootTree } from "~/bookmark-m
 // item, so create/delete/reorder/sync all come for free from the bookmark
 // APIs. Titles are exact-match, not a parsed pattern like workspaceName —
 // there's exactly one of each, so no variable portion to parse.
-export const PINS_FOLDER_TITLE = "Pins (Markit)"
-export const FAVORITES_FOLDER_TITLE = "Favorites (Markit)"
+export const PINS_FOLDER_TITLE = "Pins (Sifter)"
+export const FAVORITES_FOLDER_TITLE = "Favorites (Sifter)"
 
 export function findSpecialFolder(tree: RootTree, title: string): Folder | null {
   const { otherBookmarks } = toBaseFolder(tree)

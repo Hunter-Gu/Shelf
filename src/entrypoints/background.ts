@@ -3,15 +3,64 @@ import { defineBackground } from "wxt/utils/define-background"
 
 import { FOCUS_SEARCH_MESSAGE, focusSearchOnOpenStorage } from "~/focus-search"
 
+const FILLED_ICON = {
+  16: "icon/16.png",
+  32: "icon/32.png",
+  48: "icon/48.png",
+  128: "icon/128.png"
+}
+const STROKE_ICON = {
+  16: "icon/stroke/16.png",
+  32: "icon/stroke/32.png",
+  48: "icon/stroke/48.png",
+  128: "icon/stroke/128.png"
+}
+
+// Toolbar icon mirrors the same fill/stroke language as the in-panel bookmark
+// button: filled once the current tab's URL is saved, stroke otherwise.
+async function updateActionIcon(tabId: number, url: string | undefined) {
+  if (!url || !/^https?:/.test(url)) {
+    await browser.action.setIcon({ tabId, path: STROKE_ICON })
+    return
+  }
+
+  const matches = await browser.bookmarks.search({ url })
+  await browser.action.setIcon({
+    tabId,
+    path: matches.length > 0 ? FILLED_ICON : STROKE_ICON
+  })
+}
+
+async function refreshActiveTabIcons() {
+  const tabs = await browser.tabs.query({ active: true })
+  await Promise.all(
+    tabs
+      .filter((tab): tab is typeof tab & { id: number } => tab.id !== undefined)
+      .map((tab) => updateActionIcon(tab.id, tab.url))
+  )
+}
+
 export default defineBackground(() => {
   void browser.sidePanel.setPanelBehavior({
     openPanelOnActionClick: true
   })
 
+  browser.tabs.onActivated.addListener(({ tabId }) => {
+    void browser.tabs.get(tabId).then((tab) => updateActionIcon(tabId, tab.url))
+  })
+  browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url === undefined && changeInfo.status !== "complete") return
+    void updateActionIcon(tabId, tab.url)
+  })
+  browser.bookmarks.onCreated.addListener(() => void refreshActiveTabIcons())
+  browser.bookmarks.onChanged.addListener(() => void refreshActiveTabIcons())
+  browser.bookmarks.onMoved.addListener(() => void refreshActiveTabIcons())
+  browser.bookmarks.onRemoved.addListener(() => void refreshActiveTabIcons())
+
   // sidePanel.open() only succeeds inside a real user gesture, and onInstalled
   // firing right after install doesn't reliably count as one — so the install
   // handler opens a normal tab instead (tabs.create has no such restriction).
-  // That tab's own "Open Markit" button is a genuine click, so it can call
+  // That tab's own "Open Sifter" button is a genuine click, so it can call
   // sidePanel.open() itself.
   browser.runtime.onInstalled.addListener(({ reason }) => {
     if (reason !== "install") return
