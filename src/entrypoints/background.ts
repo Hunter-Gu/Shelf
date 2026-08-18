@@ -20,18 +20,25 @@ export default defineBackground(() => {
 
   // Keyboard shortcut (chrome://extensions/shortcuts) to open the panel and
   // jump straight into search — a command's callback is a real user gesture,
-  // unlike onInstalled, so sidePanel.open() can be called directly here.
-  browser.commands.onCommand.addListener(async (command) => {
+  // but only for as long as no `await` runs before sidePanel.open() is
+  // called. `windows.getCurrent()` was an async call sitting in front of it,
+  // which broke the gesture chain and made Chrome reject the call with
+  // "sidePanel.open() may only be called in response to a user gesture."
+  // The command's own `tab` argument already carries the window id
+  // synchronously, so open() can fire as the listener's first statement.
+  browser.commands.onCommand.addListener((command, tab) => {
     if (command !== "open-panel") return
+    if (tab?.windowId === undefined) return
 
-    const window = await browser.windows.getCurrent()
-    if (!window.id) return
-    await browser.sidePanel.open({ windowId: window.id })
-
-    // Covers the panel being closed (about to mount fresh, will read this on
-    // mount) and already open (won't remount, so it needs the live message
-    // below instead) — see focus-search.ts for why both are needed.
-    void focusSearchOnOpenStorage.setValue(true)
-    void browser.runtime.sendMessage({ type: FOCUS_SEARCH_MESSAGE }).catch(() => {})
+    void browser.sidePanel.open({ windowId: tab.windowId }).then(() => {
+      // Covers the panel being closed (about to mount fresh, will read this
+      // on mount) and already open (won't remount, so it needs the live
+      // message below instead) — see focus-search.ts for why both are
+      // needed.
+      void focusSearchOnOpenStorage.setValue(true)
+      void browser.runtime
+        .sendMessage({ type: FOCUS_SEARCH_MESSAGE })
+        .catch(() => {})
+    })
   })
 })
