@@ -41,9 +41,11 @@ function sameWorkspaces(left: Workspace[], right: Workspace[]) {
 }
 
 function workspaceSnapshotKey(workspaces: Workspace[]) {
-  return JSON.stringify(
-    workspaces.map(({ logo: _logo, ...storedWorkspace }) => storedWorkspace)
-  )
+  // Storage used to always report logo as "" (see workspace-storage.ts), so
+  // this excluded it to keep persist()'s pre-write key comparable to
+  // watch()'s post-write key. Now that logo round-trips through storage for
+  // every workspace type, both sides include real values symmetrically.
+  return JSON.stringify(workspaces.map(createWorkspace))
 }
 
 export function useWorkspaces({

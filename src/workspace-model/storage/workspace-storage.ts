@@ -4,20 +4,30 @@ import { storage } from "wxt/utils/storage"
 import { createWorkspace, WorkspaceType, type Workspace } from "../workspace"
 import { workspaceName } from "../workspace-name"
 
-export type StoredWorkspace = Omit<Workspace, "logo">
+export type StoredWorkspace = Workspace
 type LegacyWorkspaceV1 = Omit<Workspace, "isPinsCollapsed">
-type StoredWorkspaceV2 = Omit<StoredWorkspace, "isPinsCollapsed">
+type StoredWorkspaceV2 = Omit<Workspace, "isPinsCollapsed" | "logo">
+type StoredWorkspaceV3 = Omit<Workspace, "logo">
 
 // v1 (unversioned — wxt treats a stored value with no recorded version as
 // v1): plain Workspace[], logo included.
 // v2: logo moved out of storage into the bookmark folder's title (see
-// workspaceName.format), so it doesn't need to be duplicated here — it's
-// re-derived from the folder title on read (see proof-workspaces.ts).
+// workspaceName.format) for Normal workspaces — re-derived from the folder
+// title on read (see proof-workspaces.ts), so it didn't need to be
+// duplicated here.
 // v3: each workspace stores whether its pinned bookmarks are collapsed.
+// v4: logo restored to storage. BookmarksBar/OtherBookmarks pseudo-workspaces
+// have no bookmark folder of their own to encode a logo into (update() never
+// renames "Bookmarks Bar"/"Other Bookmarks"), so v2 silently dropped any
+// emoji set on Home/Other the next time storage was read — the sidepanel
+// remounting was enough to trigger it. Normal workspaces still treat the
+// folder title as authoritative (proofWorkspaces overwrites logo/title from
+// it when present); storing logo again here is just the only durable home
+// Home/Other have for it.
 const workspaceStorageItem = storage.defineItem<StoredWorkspace[]>(
   "sync:workspaces",
   {
-    version: 3,
+    version: 4,
     migrations: {
       2: async (legacyWorkspaces: LegacyWorkspaceV1[]) => {
         for (const workspace of legacyWorkspaces) {
@@ -40,6 +50,11 @@ const workspaceStorageItem = storage.defineItem<StoredWorkspace[]>(
         workspaces.map((workspace) => ({
           ...workspace,
           isPinsCollapsed: false
+        })),
+      4: (workspaces: StoredWorkspaceV3[]) =>
+        workspaces.map((workspace) => ({
+          ...workspace,
+          logo: ""
         }))
     },
     fallback: []
@@ -49,20 +64,16 @@ const workspaceStorageItem = storage.defineItem<StoredWorkspace[]>(
 export const workspaceStorage = {
   async getValue() {
     const stored = await workspaceStorageItem.getValue()
-    return stored.map((workspace) => createWorkspace({ ...workspace, logo: "" }))
+    return stored.map((workspace) => createWorkspace(workspace))
   },
 
   setValue(workspaces: Workspace[]) {
-    return workspaceStorageItem.setValue(
-      workspaces.map(({ logo: _logo, ...rest }) => rest)
-    )
+    return workspaceStorageItem.setValue(workspaces.map(createWorkspace))
   },
 
   watch(callback: (workspaces: Workspace[]) => void) {
     return workspaceStorageItem.watch((stored) => {
-      callback(
-        (stored ?? []).map((workspace) => createWorkspace({ ...workspace, logo: "" }))
-      )
+      callback((stored ?? []).map((workspace) => createWorkspace(workspace)))
     })
   }
 }
