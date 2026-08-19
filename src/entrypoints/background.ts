@@ -60,7 +60,7 @@ export default defineBackground(() => {
   // sidePanel.open() only succeeds inside a real user gesture, and onInstalled
   // firing right after install doesn't reliably count as one — so the install
   // handler opens a normal tab instead (tabs.create has no such restriction).
-  // That tab's own "Open Sifter" button is a genuine click, so it can call
+  // That tab's own "Open Shelf" button is a genuine click, so it can call
   // sidePanel.open() itself.
   browser.runtime.onInstalled.addListener(({ reason }) => {
     if (reason !== "install") return

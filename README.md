@@ -1,6 +1,6 @@
-# Sifter extension
+# Shelf extension
 
-Sifter is a Chrome side panel for organizing bookmarks into workspaces.
+Shelf is a Chrome side panel for organizing bookmarks into workspaces.
 
 ## Development
 

@@ -1,6 +1,6 @@
 import { isFolder, type Folder } from "~/bookmark-model"
 
-export const BOOKMARK_DND_TYPE = "markit_bookmark"
+export const BOOKMARK_DND_TYPE = "shelf_bookmark"
 
 export type BookmarkZone = "workspace" | "pin" | "favorite"
 

@@ -1,5 +1,5 @@
-import tailwindcss from "@tailwindcss/vite"
 import { fileURLToPath } from "node:url"
+import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "wxt"
 
 export default defineConfig({
@@ -9,11 +9,11 @@ export default defineConfig({
   },
   modules: ["@wxt-dev/module-react"],
   manifest: {
-    name: "Sifter",
+    name: "Shelf – Bookmark Manager & Workspaces",
     description: "Bookmarks, organized your way.",
     minimum_chrome_version: "116",
     action: {
-      default_title: "Open Sifter",
+      default_title: "Open Shelf",
       // Default (no active tab yet) matches the "not bookmarked" state; the
       // background script overrides this per-tab once it knows whether the
       // active tab's URL is saved — see updateActionIcon in background.ts.
@@ -30,7 +30,7 @@ export default defineConfig({
           default: "Ctrl+Shift+K",
           mac: "Command+Shift+K"
         },
-        description: "Open Sifter and focus search"
+        description: "Open Shelf and focus search"
       }
     },
     permissions: ["bookmarks", "favicon", "storage", "tabs", "tabGroups"]
