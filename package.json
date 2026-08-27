@@ -4,8 +4,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Bookmarks, organized your way.",
+  "description": "An open-source Chrome side panel for organizing bookmarks into focused workspaces.",
   "author": "Neil Gu. <nail.gu.hunter@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "bookmarks",
+    "browser-extension",
+    "chrome-extension",
+    "side-panel",
+    "workspace",
+    "wxt"
+  ],
   "packageManager": "pnpm@11.17.0",
   "scripts": {
     "dev": "wxt",
