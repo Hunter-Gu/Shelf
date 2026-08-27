@@ -1,0 +1,4 @@
+allowBuilds:
+  "@astryxdesign/core": true
+  esbuild: true
+  spawn-sync: false
