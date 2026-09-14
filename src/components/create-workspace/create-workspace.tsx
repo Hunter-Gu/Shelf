@@ -5,7 +5,11 @@ import { TextInput } from "@astryxdesign/core/TextInput"
 import { lazy, Suspense, useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
-import type { Workspace, WorkspaceHue } from "~/workspace-model"
+import {
+  workspaceName,
+  type Workspace,
+  type WorkspaceHue
+} from "~/workspace-model"
 
 import { ColorPicker } from "./color-picker"
 import styles from "./create-workspace.module.css"
@@ -94,7 +98,13 @@ export function CreateWorkspace({
   const [emoji, setEmoji] = useState(workspace?.logo || "")
   const [color, setColor] = useState<WorkspaceHue | undefined>(workspace?.color)
 
-  const { update, create } = useAppContext().workspace
+  const { update, create, workspaces } = useAppContext().workspace
+  const isNameTaken = workspaceName.isTaken(
+    name,
+    workspaces
+      .filter((item) => item.id !== workspace?.id)
+      .map((item) => item.title)
+  )
 
   const handleSubmit = async () => {
     if (name.trim()) {
@@ -143,6 +153,14 @@ export function CreateWorkspace({
           value={name}
           onChange={(value) => setName(value)}
           isRequired
+          status={
+            isNameTaken
+              ? {
+                  type: "error",
+                  message: `"${name.trim()}" is already a space`
+                }
+              : undefined
+          }
           className="pl-2"
         />
 
@@ -155,7 +173,7 @@ export function CreateWorkspace({
           label={isUpdating ? "Update Space" : "Create Space"}
           variant="primary"
           onClick={handleSubmit}
-          isDisabled={!name}
+          isDisabled={!name.trim() || isNameTaken}
         />
         <CancelButton label="Cancel" variant="ghost" onClick={onCancel} />
       </ActionButtonsContainer>

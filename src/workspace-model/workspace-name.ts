@@ -14,6 +14,11 @@ function parse(folderTitle: string) {
   }
 }
 
+function isTaken(title: string, takenTitles: string[]) {
+  const wanted = title.trim().toLowerCase()
+  return takenTitles.some((taken) => taken.trim().toLowerCase() === wanted)
+}
+
 export const workspaceName = {
   home: HOME_NAME,
   isValid(folderTitle: string) {
@@ -21,6 +26,22 @@ export const workspaceName = {
   },
   isHome(folderTitle: string) {
     return parse(folderTitle).isHome
+  },
+  // Names are what a workspace is recovered by when its bookmark id stops
+  // resolving, so two workspaces sharing one would make that ambiguous. The
+  // comparison ignores case and padding to keep near-duplicates out too.
+  isTaken,
+  // For entry points with nowhere to show an error — turning an existing
+  // folder into a space — where refusing would just look broken.
+  disambiguate(title: string, takenTitles: string[]) {
+    const wanted = title.trim()
+    let candidate = wanted
+    let suffix = 2
+    while (isTaken(candidate, takenTitles)) {
+      candidate = `${wanted} ${suffix}`
+      suffix += 1
+    }
+    return candidate
   },
   parse(folderTitle: string) {
     return parse(folderTitle).title

@@ -305,7 +305,12 @@ export function useWorkspaces({
     }) => {
       if (!initializedRef.current) return
 
-      const nextTitle = title.trim() || "Untitled"
+      const nextTitle = workspaceName.disambiguate(
+        title.trim() || "Untitled",
+        workspacesRef.current
+          .filter((workspace) => workspace.id !== id)
+          .map((workspace) => workspace.title)
+      )
       if (parentId !== workspaceParentId) {
         await moveBookmark(id, { parentId: workspaceParentId })
       }

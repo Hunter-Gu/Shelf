@@ -39,6 +39,21 @@ describe("workspaceName", () => {
     expect(workspaceName.parseLogo(title)).toBe("🏠")
   })
 
+  it("treats names differing only by case or padding as taken", () => {
+    const taken = ["Home", "Read"]
+
+    expect(workspaceName.isTaken("read", taken)).toBe(true)
+    expect(workspaceName.isTaken("  Home ", taken)).toBe(true)
+    expect(workspaceName.isTaken("Reading", taken)).toBe(false)
+  })
+
+  it("disambiguates a taken name by counting up", () => {
+    expect(workspaceName.disambiguate("Read", ["Home"])).toBe("Read")
+    expect(workspaceName.disambiguate("Read", ["read"])).toBe("Read 2")
+    expect(workspaceName.disambiguate("Read", ["Read", "Read 2"])).toBe("Read 3")
+    expect(workspaceName.disambiguate("Home", ["Home"])).toBe("Home 2")
+  })
+
   it("continues to parse names without an emoji", () => {
     expect(workspaceName.isValid("Read  (Workspace)")).toBe(true)
     expect(workspaceName.parse("Read  (Workspace)")).toBe("Read")
