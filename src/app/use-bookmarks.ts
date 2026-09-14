@@ -5,7 +5,7 @@ import {
   BookmarkTreeUtils,
   buildSearchTree,
   toAllBookmarks,
-  toBaseFolder,
+  toHomeTree,
   treeToWorkspace,
   type Bookmark,
   type Folder,
@@ -262,20 +262,12 @@ export function useBookmarks() {
         return treeToWorkspace(currentWorkspace.id, sourceTree)
       }
 
-      const { bookmarksBar, otherBookmarks } = toBaseFolder(sourceTree)
       const hiddenIds = new Set([
         ...workspaces.map((workspace) => workspace.id),
         ...excludeIds
       ])
-      const baseFolder =
-        currentWorkspace.type === WorkspaceType.BookmarksBar
-          ? bookmarksBar
-          : otherBookmarks
 
-      return {
-        ...baseFolder,
-        children: baseFolder.children?.filter((item) => !hiddenIds.has(item.id))
-      }
+      return toHomeTree(sourceTree, currentWorkspace.id, hiddenIds)
     },
     []
   )

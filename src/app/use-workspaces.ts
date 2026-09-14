@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "wxt/browser"
 
-import {
-  isFolder,
-  toBaseFolder,
-  toWorkspaceParentId,
-  type Folder,
-  type RootTree
-} from "~/bookmark-model"
+import { toBaseFolder, toWorkspaceParentId, type RootTree } from "~/bookmark-model"
+import { adoptWorkspaceFolders } from "~/workspace-model/adopt-workspace-folders"
 import { proofWorkspaces } from "~/workspace-model/proof-workspaces"
 import {
   currentWorkspaceStorage,
@@ -53,7 +48,6 @@ export function useWorkspaces({
   createBookmark,
   changeBookmark,
   moveBookmark,
-  removeBookmark,
   removeBookmarkTree
 }: {
   tree: RootTree | null
@@ -68,7 +62,6 @@ export function useWorkspaces({
     id: string,
     details: Parameters<typeof browser.bookmarks.move>[1]
   ) => Promise<unknown>
-  removeBookmark: (id: string) => Promise<void>
   removeBookmarkTree: (id: string) => Promise<void>
 }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
@@ -159,44 +152,24 @@ export function useWorkspaces({
         const latestTree = treeRef.current
         if (!latestTree) return
 
-        let next = pendingStorageRef.current
-          ? pendingStorageRef.current
-          : proofWorkspaces(latestTree, saved.map(createWorkspace))
+        const pending = pendingStorageRef.current
         pendingStorageRef.current = null
-        if (!next.length) {
-          const { bookmarksBar, otherBookmarks } = toBaseFolder(latestTree)
-          next = [
-            createWorkspace({
-              id: bookmarksBar.id,
-              title: workspaceName.home,
-              logo: "",
-              type: WorkspaceType.BookmarksBar
-            }),
-            createWorkspace({
-              id: otherBookmarks.id,
-              title: workspaceName.other,
-              logo: "",
-              type: WorkspaceType.OtherBookmarks
-            }),
-            ...[bookmarksBar, otherBookmarks].flatMap((baseFolder) =>
-              (baseFolder.children ?? [])
-                .filter(
-                  (item) => isFolder(item) && workspaceName.isValid(item.title)
-                )
-                .map((item) =>
-                  createWorkspace({
-                    id: item.id,
-                    title: workspaceName.parse(item.title),
-                    logo: workspaceName.parseLogo(item.title)
-                  })
-                )
-            )
-          ]
-          await persist(next)
-        }
+
+        // Deliberately not persisted: a storage read that lands before
+        // chrome.storage.sync has caught up looks exactly like a first run, and
+        // writing this back is what used to wipe Home's emoji and reset the
+        // workspace order. Anything derived here is re-derived next time, and
+        // the watcher above applies the real list as soon as it arrives.
+        // The watcher can only proof a list once the tree has loaded, so
+        // anything it parked has to be proofed here rather than trusted.
+        let next = await adoptWorkspaceFolders(
+          latestTree,
+          proofWorkspaces(latestTree, pending ?? saved.map(createWorkspace)),
+          moveBookmark
+        )
 
         if (pendingStorageRef.current) {
-          next = pendingStorageRef.current
+          next = proofWorkspaces(latestTree, pendingStorageRef.current)
           pendingStorageRef.current = null
         }
 
@@ -230,7 +203,7 @@ export function useWorkspaces({
         createWorkspace({ id: "", title: "", logo: "" })
     )
     await persist(next)
-  }, [persist])
+  }, [moveBookmark, persist])
 
   useEffect(() => {
     void initialize()
@@ -241,35 +214,62 @@ export function useWorkspaces({
       if (!initializedRef.current) return
 
       const current = workspacesRef.current
-      if (!current.some((workspace) => workspace.id === id)) return
+      const previous = current.find((workspace) => workspace.id === id)
+      if (!previous) return
 
-      const next = current.map((workspace) => {
-        if (workspace.id !== id) return workspace
-        const copy = createWorkspace(workspace)
-        updater(copy)
-        return copy
-      })
-      const previous = current.find((workspace) => workspace.id === id)!
-      const changed = next.find((workspace) => workspace.id === id)!
-      if (
-        changed.type === WorkspaceType.Normal &&
-        (previous.type !== WorkspaceType.Normal ||
-          changed.title !== previous.title ||
-          changed.logo !== previous.logo)
-      ) {
-        await changeBookmark(id, {
-          title: workspaceName.format(changed.title, changed.logo)
-        })
+      let changed = createWorkspace(previous)
+      updater(changed)
+
+      const bookmarksBarId = treeRef.current
+        ? toBaseFolder(treeRef.current).bookmarksBar.id
+        : ""
+      const isProfileEdit =
+        changed.type !== previous.type ||
+        changed.title !== previous.title ||
+        changed.logo !== previous.logo ||
+        changed.color !== previous.color
+
+      if (isProfileEdit) {
+        if (changed.type === WorkspaceType.Normal) {
+          await changeBookmark(id, {
+            title: workspaceName.format(changed.title, changed.logo)
+          })
+        } else if (bookmarksBarId && id !== bookmarksBarId) {
+          await changeBookmark(id, {
+            title: workspaceName.formatHome(changed.title, changed.logo)
+          })
+        } else if (bookmarksBarId) {
+          // Home has no folder of its own until someone edits its profile.
+          // Giving it one anchors its emoji to a bookmark the way every other
+          // workspace's is, instead of to a storage entry that a slow sync read
+          // can blank out.
+          const folder = await createBookmark({
+            parentId: bookmarksBarId,
+            title: workspaceName.formatHome(changed.title, changed.logo)
+          })
+          changed = createWorkspace({ ...changed, id: folder.id })
+          // Home's id changes here, so the remembered active workspace has to
+          // follow it or the panel reopens on a different space.
+          const activeId = await currentWorkspaceStorage.getValue().catch(() => "")
+          if (activeId === id) {
+            void currentWorkspaceStorage.setValue(folder.id).catch(() => {})
+          }
+        }
       }
+
+      const next = current.map((workspace) =>
+        workspace.id === id ? changed : workspace
+      )
       workspacesRef.current = next
       setWorkspaces(next)
-      setCurrentWorkspace(
-        (current) =>
-          next.find((workspace) => workspace.id === current.id) ?? current
+      setCurrentWorkspace((active) =>
+        active.id === id
+          ? changed
+          : (next.find((workspace) => workspace.id === active.id) ?? active)
       )
       await persist(next)
     },
-    [changeBookmark, persist]
+    [changeBookmark, createBookmark, persist]
   )
 
   const create = useCallback(
@@ -377,30 +377,12 @@ export function useWorkspaces({
 
       const current = workspacesRef.current
       const target = current.find((workspace) => workspace.id === id)
-      if (!target) return
+      // Home can't be deleted — it is where everything outside a workspace is
+      // rendered, and the UI offers no way to trigger this for it.
+      if (!target || target.type !== WorkspaceType.Normal) return
 
       try {
-        if (target.type === WorkspaceType.Normal) {
-          await removeBookmarkTree(id)
-        } else if (treeRef.current) {
-          const { bookmarksBar, otherBookmarks } = toBaseFolder(
-            treeRef.current
-          )
-          const baseFolder =
-            target.type === WorkspaceType.BookmarksBar
-              ? bookmarksBar
-              : otherBookmarks
-          const workspaceIds = new Set(current.map((workspace) => workspace.id))
-          await Promise.all(
-            (baseFolder.children ?? [])
-              .filter((item) => !workspaceIds.has(item.id))
-              .map((item) =>
-                isFolder(item)
-                  ? removeBookmarkTree(item.id)
-                  : removeBookmark(item.id)
-              )
-          )
-        }
+        await removeBookmarkTree(id)
       } catch (error) {
         // The underlying bookmark folder may already be gone (e.g. deleted
         // from another window/device just before this ran). Leave local
@@ -421,7 +403,7 @@ export function useWorkspaces({
       )
       await persist(next)
     },
-    [persist, removeBookmark, removeBookmarkTree]
+    [persist, removeBookmarkTree]
   )
 
   const reorder = useCallback(

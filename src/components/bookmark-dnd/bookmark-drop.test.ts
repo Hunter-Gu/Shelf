@@ -5,6 +5,7 @@ import type { Folder } from "~/bookmark-model"
 import {
   canDropBookmarkItem,
   isSameDropPosition,
+  ownChildCount,
   planBookmarkDrop,
   type BookmarkDragBookmarkItem,
   type BookmarkDragItem,
@@ -146,5 +147,39 @@ describe("canDropBookmarkItem", () => {
     expect(
       canDropBookmarkItem(source("workspace"), target("pin"), workspace)
     ).toBe(true)
+  })
+})
+
+describe("ownChildCount", () => {
+  it("counts every child of an ordinary workspace folder", () => {
+    const workspaceFolder: Folder = {
+      id: "workspace",
+      parentId: "1",
+      index: 0,
+      title: "Work",
+      children: [
+        { id: "a", parentId: "workspace", index: 0, title: "A", url: "https://a/" },
+        { id: "b", parentId: "workspace", index: 1, title: "B", url: "https://b/" }
+      ]
+    }
+
+    expect(ownChildCount(workspaceFolder)).toBe(2)
+  })
+
+  it("ignores the borrowed children in Home's merged tree", () => {
+    const homeTree: Folder = {
+      id: "home",
+      parentId: "1",
+      index: 0,
+      title: "Home",
+      children: [
+        { id: "own", parentId: "home", index: 0, title: "Own", url: "https://own/" },
+        { id: "bar", parentId: "1", index: 1, title: "Bar", url: "https://bar/" },
+        { id: "other", parentId: "2", index: 0, title: "Other", url: "https://other/" }
+      ]
+    }
+
+    expect(ownChildCount(homeTree)).toBe(1)
+    expect(ownChildCount(null)).toBe(0)
   })
 })

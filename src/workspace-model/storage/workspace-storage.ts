@@ -16,14 +16,13 @@ type StoredWorkspaceV3 = Omit<Workspace, "logo">
 // title on read (see proof-workspaces.ts), so it didn't need to be
 // duplicated here.
 // v3: each workspace stores whether its pinned bookmarks are collapsed.
-// v4: logo restored to storage. BookmarksBar/OtherBookmarks pseudo-workspaces
-// have no bookmark folder of their own to encode a logo into (update() never
-// renames "Bookmarks Bar"/"Other Bookmarks"), so v2 silently dropped any
-// emoji set on Home/Other the next time storage was read — the sidepanel
-// remounting was enough to trigger it. Normal workspaces still treat the
-// folder title as authoritative (proofWorkspaces overwrites logo/title from
-// it when present); storing logo again here is just the only durable home
-// Home/Other have for it.
+// v4: logo restored to storage. Home and the since-removed Other pseudo-
+// workspaces had no bookmark folder of their own to encode a logo into, so v2
+// silently dropped any emoji set on them the next time storage was read — the
+// sidepanel remounting was enough to trigger it. Workspaces backed by a folder
+// treat its title as authoritative (proofWorkspaces overwrites logo/title from
+// it when present); storing logo here still covers Home before its first
+// profile edit, which is when it gets a folder of its own.
 const workspaceStorageItem = storage.defineItem<StoredWorkspace[]>(
   "sync:workspaces",
   {

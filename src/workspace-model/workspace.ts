@@ -1,7 +1,9 @@
+// Values are persisted, so they stay pinned: 1 was OtherBookmarks, dropped when
+// Other Bookmarks was folded into Home's view, and Normal must keep reading
+// back as 2 for workspaces stored before that.
 export enum WorkspaceType {
-	BookmarksBar,
-	OtherBookmarks,
-	Normal,
+	BookmarksBar = 0,
+	Normal = 2,
 }
 
 // Astryx's categorical hue palette (theme-neutral's --color-{background,border,icon,text}-{hue}

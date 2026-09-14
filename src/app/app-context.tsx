@@ -20,7 +20,6 @@ function useAppState() {
     createBookmark: bookmarks.create,
     changeBookmark: bookmarks.change,
     moveBookmark: bookmarks.move,
-    removeBookmark: bookmarks.remove,
     removeBookmarkTree: bookmarks.removeTree
   })
   const pins = usePins({ tree: bookmarks.tree })

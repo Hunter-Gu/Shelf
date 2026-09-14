@@ -4,6 +4,7 @@ import {
   canDropBookmarkItem,
   isFolderDragItem,
   isSameDropPosition,
+  ownChildCount,
   planBookmarkDrop,
   type BookmarkDragBookmarkItem,
   type BookmarkDragItem,
@@ -63,7 +64,7 @@ async function ensureWorkspaceSource(
   if (findBookmarkByUrl(workspaceTree, source.url) || !workspaceTree) return
   await operations.createBookmark({
     parentId: workspaceTree.id,
-    index: workspaceTree.children?.length ?? 0,
+    index: ownChildCount(workspaceTree),
     title: source.title,
     url: source.url
   })

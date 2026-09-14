@@ -27,3 +27,18 @@ export function treeToWorkspace(workspaceId: number | string, tree: RootTree) {
 
 	return bookmarks.find((item) => item.id === workspaceId) as Folder | null;
 }
+
+// Home shows everything that isn't filed under a workspace: the contents of its
+// own folder once it has one, plus whatever sits loose in either root. Other
+// Bookmarks has no space of its own — it renders here.
+export function toHomeTree(tree: RootTree, homeId: string, hiddenIds: Set<string>): Folder {
+	const { bookmarksBar, otherBookmarks } = toBaseFolder(tree);
+	const homeFolder = treeToWorkspace(homeId, tree);
+	const loose = (folder: Folder) =>
+		(folder.children ?? []).filter((item) => !hiddenIds.has(item.id));
+
+	return {
+		...(homeFolder ?? bookmarksBar),
+		children: [...(homeFolder?.children ?? []), ...loose(bookmarksBar), ...loose(otherBookmarks)],
+	};
+}

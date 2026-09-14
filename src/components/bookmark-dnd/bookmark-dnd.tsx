@@ -29,6 +29,7 @@ import {
   canDropBookmarkItem,
   findFolderById,
   isSameDropPosition,
+  ownChildCount,
   type BookmarkDragItem,
   type BookmarkDropEdge,
   type BookmarkDropTarget,
@@ -228,7 +229,7 @@ export function useWorkspaceRootDrop(ref: RefObject<HTMLElement | null>) {
   const target = resolveAppendDropTarget(
     "workspace",
     workspaceRoot?.id ?? "",
-    workspaceRoot?.children?.length ?? 0
+    ownChildCount(workspaceRoot)
   )
   const targetRef = useRef(target)
   targetRef.current = target

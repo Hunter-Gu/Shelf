@@ -30,6 +30,15 @@ export function isFolderDragItem(
   return item.kind === "folder"
 }
 
+// Home's tree merges the loose contents of both bookmark roots under a single
+// folder, so a folder's rendered children can outnumber the ones Chrome
+// actually keeps there. Appending needs the real count or the index lands out
+// of bounds.
+export function ownChildCount(folder: Folder | null) {
+  return (folder?.children ?? []).filter((item) => item.parentId === folder?.id)
+    .length
+}
+
 export function findFolderById(folder: Folder | null, id: string): Folder | null {
   if (!folder) return null
   if (folder.id === id) return folder
