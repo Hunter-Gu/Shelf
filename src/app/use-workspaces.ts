@@ -101,15 +101,19 @@ export function useWorkspaces({
     () =>
       workspaceStorage.watch((saved) => {
         const restored = saved.map(createWorkspace)
-        const next = treeRef.current
-          ? proofWorkspaces(treeRef.current, restored)
-          : restored
-        const key = workspaceSnapshotKey(next)
+        // Recognise our own writes before proofing: a workspace created a
+        // moment ago is in storage before its folder reaches the debounced
+        // tree, so proofing first would drop it and apply that as remote.
+        const key = workspaceSnapshotKey(restored)
         const localWriteIndex = localStorageWritesRef.current.indexOf(key)
         if (localWriteIndex !== -1) {
           localStorageWritesRef.current.splice(localWriteIndex, 1)
           return
         }
+
+        const next = treeRef.current
+          ? proofWorkspaces(treeRef.current, restored)
+          : restored
 
         if (!initializedRef.current) {
           pendingStorageRef.current = next
