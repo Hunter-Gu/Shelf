@@ -201,7 +201,17 @@ export function useWorkspaces({
     }
 
     const current = workspacesRef.current
-    const next = proofWorkspaces(currentTree, current)
+    // Adopting here too, not just at startup, lets folders that arrive while
+    // the panel is open — an Arc import, another device's sync — show up as
+    // spaces straight away.
+    const next = await adoptWorkspaceFolders(
+      currentTree,
+      proofWorkspaces(currentTree, current),
+      moveBookmark
+    )
+    // A create or update that landed while this awaited wins; the tree change
+    // it causes runs this again.
+    if (workspacesRef.current !== current) return
     if (sameWorkspaces(current, next)) return
 
     workspacesRef.current = next
