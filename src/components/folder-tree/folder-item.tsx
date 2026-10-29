@@ -3,7 +3,6 @@ import {
   useUpdateFolderState
 } from "common/context/folder-states-context"
 import { cn } from "common/lib/utils"
-import { AnimatePresence } from "framer-motion"
 import { FolderIcon, FolderOpenIcon } from "lucide-react"
 import { useCallback, useState, type KeyboardEvent } from "react"
 import type { DropTargetMonitor } from "react-dnd"
@@ -24,7 +23,7 @@ import { useAllyClick } from "~/hooks/use-ally-click"
 import { type Folder } from "../../bookmark-model"
 import { BookmarkButton } from "../bookmark-button/bookmark-button"
 import { clsx } from "../clsx"
-import { DeleteConfirmChip } from "../delete-confirm-chip"
+import { DeleteConfirmDialog } from "../delete-confirm-dialog"
 import { Editable } from "../editable"
 import { FolderMenu } from "../menu/folder-menu"
 import { MoveToMenu } from "../menu/move-to-menu"
@@ -144,20 +143,15 @@ export function FolderItem({ className, ...props }: FolderItemProps) {
           onChange={handleChange}></Editable>
       </Item>
 
-      <AnimatePresence>
-        {isConfirmingDelete && (
-          <DeleteConfirmChip
-            key="confirm-delete"
-            label={`Delete "${title}"`}
-            anchorRef={ref}
-            onConfirm={() => {
-              setConfirmingDelete(false)
-              removeTree(id)
-            }}
-            onCancel={() => setConfirmingDelete(false)}
-          />
-        )}
-      </AnimatePresence>
+      <DeleteConfirmDialog
+        isOpen={isConfirmingDelete}
+        folder={props}
+        onConfirm={() => {
+          setConfirmingDelete(false)
+          removeTree(id)
+        }}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </ItemContainer>
   )
 }

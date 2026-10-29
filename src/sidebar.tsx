@@ -178,11 +178,7 @@ function WorkspaceTitle({
           <MoveOutOfSpaceMenu workspaceId={currentSpace.id} />
         ) : null}
         {workspaceTree ? (
-          <SpaceMenu
-            item={workspaceTree}
-            onEdit={onEdit}
-            anchorRef={titleRef}
-          />
+          <SpaceMenu item={workspaceTree} onEdit={onEdit} />
         ) : null}
       </ActionsContainer>
     </TitleContainer>
