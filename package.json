@@ -1,10 +1,10 @@
 {
   "name": "Shelf",
   "displayName": "Shelf",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "An open-source Chrome side panel for organizing bookmarks into focused workspaces.",
+  "description": "An open-source, Arc-style Chrome sidebar that keeps your spaces, pinned links and favorites in your own Chrome bookmarks.",
   "author": "Neil Gu. <nail.gu.hunter@gmail.com>",
   "license": "MIT",
   "keywords": [

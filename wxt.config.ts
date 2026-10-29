@@ -9,8 +9,9 @@ export default defineConfig({
   },
   modules: ["@wxt-dev/module-react"],
   manifest: {
-    name: "Shelf – Bookmark Manager & Workspaces",
-    description: "Bookmarks, organized your way.",
+    name: "Shelf – Arc-Style Bookmark Manager",
+    description:
+      "Arc-style bookmarks in Chrome's side panel: spaces, pinned links and favorites, kept as your own Chrome bookmarks. Open source.",
     minimum_chrome_version: "116",
     action: {
       default_title: "Open Shelf",

@@ -14,6 +14,8 @@
 
 Shelf keeps the bookmarks you reach for close at hand without replacing Chrome's bookmark system. Organize projects into workspaces, pin important links, search instantly, and rearrange everything with drag and drop—all from the browser side panel.
 
+If you used Arc's sidebar for spaces and pinned links, Shelf gives you the same layout in Chrome. Because every space, pin, and favorite is an ordinary Chrome bookmark, nothing is lost if Shelf ever goes away.
+
 ## Highlights
 
 - **Workspaces for every context.** Separate work, research, travel, or anything else without maintaining another bookmark database.
@@ -88,7 +90,7 @@ Shelf is intentionally a single WXT extension with explicit boundaries:
 - `src/bookmark-model`, `src/workspace-model`, and `src/pin-model` contain the domain logic.
 - `store-assets` contains the artwork used for the extension listing and this README.
 
-Bookmarks, pins, and favorites remain real Chrome bookmark nodes. Workspace metadata uses Chrome sync storage, while the currently selected workspace stays device-local.
+Bookmarks, pins, and favorites remain real Chrome bookmark nodes, and the folders decide which workspaces exist. Every folder Shelf owns ends in a generated marker: a workspace is `Name (Shelf)`, Home is `Name (Shelf|Home)`, and the pins and favorites folders under Other Bookmarks are `Pins (Shelf|Pins)` and `Favorites (Shelf|Favorites)`. Order, color, and pin collapse state are kept in Chrome sync storage, while the currently selected workspace stays device-local.
 
 ## Permissions
 
