@@ -1,5 +1,7 @@
 import { browser } from "wxt/browser"
 
+import { findOpenTab } from "./find-open-tab"
+
 export const tabManager = {
   async create(
     input: string[] | Parameters<typeof browser.tabs.create>[0],
@@ -31,6 +33,34 @@ export const tabManager = {
     const groupId = await browser.tabs.group({ tabIds: tabIds as [number, ...number[]] }) as number
     await browser.tabGroups.update(groupId, { title })
     return groupId
+  },
+
+  // Goes to the tab already showing this page, as Arc's pinned tabs did;
+  // only when none is open does the current tab navigate there.
+  async switchToOrOpen(url: string) {
+    const [current] = await browser.tabs.query({
+      active: true,
+      currentWindow: true
+    })
+    const open = findOpenTab(
+      await browser.tabs.query({}),
+      url,
+      current?.windowId
+    )
+
+    if (open?.id !== undefined) {
+      await browser.tabs.update(open.id, { active: true })
+      if (open.windowId !== current?.windowId) {
+        await browser.windows.update(open.windowId, { focused: true })
+      }
+      return
+    }
+
+    if (current?.id === undefined) {
+      await browser.tabs.create({ url, active: true })
+    } else {
+      await browser.tabs.update(current.id, { url })
+    }
   },
 
   createInNewWindow(url: string | string[], incognito = false) {
