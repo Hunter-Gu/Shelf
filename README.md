@@ -21,6 +21,8 @@ If you used Arc's sidebar for spaces and pinned links, Shelf gives you the same 
 - **Workspaces for every context.** Separate work, research, travel, or anything else without maintaining another bookmark database.
 - **Favorites that stay visible.** Keep a small set of frequently used links at the top of each workspace.
 - **Pins for what matters now.** Promote important bookmarks without losing their place in your folders.
+- **Import from Arc.** Settings → Import from Arc reads Arc's `StorableSidebar.json` and brings each space's pinned tabs and folders, Arc's favorites, and optionally the open Today tabs into Shelf.
+- **Goes to tabs you already have open.** Clicking a bookmark that's open in a tab switches to it; Cmd/Ctrl-click opens a new one.
 - **Drag-and-drop organization.** Move bookmarks and folders directly in the tree, including across workspaces.
 - **Fast keyboard access.** Press `Ctrl+Shift+K` (`Command+Shift+K` on macOS) to open Shelf and focus search.
 - **Local-first by design.** Shelf talks directly to Chrome's bookmark, storage, tab, and tab-group APIs. It has no application server or account system.
