@@ -4,6 +4,7 @@ import { browser } from "wxt/browser"
 import { toBaseFolder, toWorkspaceParentId, type RootTree } from "~/bookmark-model"
 import { adoptWorkspaceFolders } from "~/workspace-model/adopt-workspace-folders"
 import { proofWorkspaces } from "~/workspace-model/proof-workspaces"
+import { renameLegacyTitles } from "~/workspace-model/rename-legacy-titles"
 import {
   currentWorkspaceStorage,
   workspaceStorage
@@ -149,8 +150,13 @@ export function useWorkspaces({
         const savedCurrentId = await currentWorkspaceStorage
           .getValue()
           .catch(() => "")
-        const latestTree = treeRef.current
-        if (!latestTree) return
+        if (!treeRef.current) return
+        // Before anything reads titles, so folders named by an older version
+        // are recognised rather than shown as plain folders under Home.
+        const latestTree = await renameLegacyTitles(
+          treeRef.current,
+          changeBookmark
+        )
 
         const pending = pendingStorageRef.current
         pendingStorageRef.current = null
@@ -203,7 +209,7 @@ export function useWorkspaces({
         createWorkspace({ id: "", title: "", logo: "" })
     )
     await persist(next)
-  }, [moveBookmark, persist])
+  }, [changeBookmark, moveBookmark, persist])
 
   useEffect(() => {
     void initialize()

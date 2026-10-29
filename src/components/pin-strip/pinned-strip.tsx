@@ -92,7 +92,7 @@ function PinnedItem({
   )
 }
 
-// Pin copies live in one flat, global "Pins (Shelf)" folder — which
+// Pin copies live in one flat, global "Pins (Shelf|Pins)" folder — which
 // workspace a pin belongs to isn't stored anywhere, it's read off wherever
 // the *source* bookmark currently lives. So scoping to the current
 // workspace means intersecting the global pin list against this

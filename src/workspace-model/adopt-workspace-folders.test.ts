@@ -48,7 +48,7 @@ describe("adoptWorkspaceFolders", () => {
 
   it("adopts workspace folders the stored list doesn't know about", async () => {
     const tree = treeOf([
-      folder("10", "[🧠] Read (Workspace)", "1"),
+      folder("10", "[🧠] Read (Shelf)", "1"),
       folder("11", "Notes", "1")
     ])
 
@@ -60,8 +60,8 @@ describe("adoptWorkspaceFolders", () => {
 
   it("adopts an existing Home folder, under whatever name, and puts it first", async () => {
     const tree = treeOf([
-      folder("10", "Read (Workspace)", "1"),
-      folder("42", "[🏠] 工作 (Home Workspace)", "1")
+      folder("10", "Read (Shelf)", "1"),
+      folder("42", "[🏠] 工作 (Shelf|Home)", "1")
     ])
 
     expect(await adoptWorkspaceFolders(tree, [], noMoves)).toEqual([
@@ -77,7 +77,7 @@ describe("adoptWorkspaceFolders", () => {
 
   it("leaves a stored order alone", async () => {
     const read = createWorkspace({ id: "10", title: "Read", logo: "" })
-    const tree = treeOf([folder("10", "Read (Workspace)", "1")])
+    const tree = treeOf([folder("10", "Read (Shelf)", "1")])
 
     expect(await adoptWorkspaceFolders(tree, [read, home], noMoves)).toEqual([
       read,
@@ -90,7 +90,7 @@ describe("adoptWorkspaceFolders", () => {
     const tree = treeOf(
       [],
       [
-        folder("10", "Read (Workspace)", "2"),
+        folder("10", "Read (Shelf)", "2"),
         folder("20", "Shelf Pins", "2"),
         { id: "30", parentId: "2", index: 2, title: "Loose", url: "https://a/" }
       ]
@@ -108,7 +108,7 @@ describe("adoptWorkspaceFolders", () => {
   it("still returns a list when a folder vanishes mid-move", async () => {
     const moveBookmark = vi.fn().mockRejectedValue(new Error("No bookmark"))
     vi.spyOn(console, "error").mockImplementation(() => {})
-    const tree = treeOf([], [folder("10", "Read (Workspace)", "2")])
+    const tree = treeOf([], [folder("10", "Read (Shelf)", "2")])
 
     await expect(
       adoptWorkspaceFolders(tree, [home], moveBookmark)
@@ -118,7 +118,7 @@ describe("adoptWorkspaceFolders", () => {
   it("keeps workspaces already on the Bookmarks Bar where they are", async () => {
     const read = createWorkspace({ id: "10", title: "Read", logo: "" })
     const moveBookmark = vi.fn().mockResolvedValue(undefined)
-    const tree = treeOf([folder("10", "Read (Workspace)", "1")])
+    const tree = treeOf([folder("10", "Read (Shelf)", "1")])
 
     await adoptWorkspaceFolders(tree, [home, read], moveBookmark)
 
@@ -141,13 +141,13 @@ describe("upgrading from the Home/Other layout", () => {
     ]
     const tree = treeOf(
       [
-        folder("10", "Read (Workspace)", "1"),
+        folder("10", "Read (Shelf)", "1"),
         { id: "50", parentId: "1", index: 1, title: "Loose", url: "https://a/" }
       ],
       [
         // A workspace an older version left behind under Other Bookmarks, and
         // one the id-drift bug dropped from storage entirely.
-        folder("20", "Write (Workspace)", "2"),
+        folder("20", "Write (Shelf)", "2"),
         folder("30", "Shelf Pins", "2"),
         { id: "60", parentId: "2", index: 2, title: "Stashed", url: "https://b/" }
       ]

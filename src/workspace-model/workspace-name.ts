@@ -1,16 +1,21 @@
-// The optional "Home" marker is what identifies Home's folder. It lives in the
-// generated suffix rather than in the name, so the name stays the user's to
-// change and no typed name can ever impersonate it.
-const WORKSPACE_NAME_PATTERN =
-  /^(?:\[([^\]]*)\]\s*)?(.*?)\s*\((Home )?Workspace\)\s*$/
+import { formatShelfTitle, parseShelfTitle } from "~/shelf-title"
+
 const HOME_NAME = "Home"
 
+// Home is identified by the "Home" role in the generated marker rather than by
+// its name, so the name stays the user's to change and no typed name can ever
+// impersonate it. Shelf folders with any other role (pins, favorites) are not
+// workspaces.
 function parse(folderTitle: string) {
-  const match = WORKSPACE_NAME_PATTERN.exec(folderTitle)
+  const parsed = parseShelfTitle(folderTitle)
+  const isWorkspace =
+    !!parsed && (parsed.role === undefined || parsed.role === "Home")
+
   return {
-    logo: match?.[1]?.trim() ?? "",
-    title: match?.[2]?.trim() ?? folderTitle.trim(),
-    isHome: !!match?.[3]
+    isWorkspace,
+    logo: isWorkspace ? parsed.logo : "",
+    title: isWorkspace ? parsed.name : folderTitle.trim(),
+    isHome: isWorkspace && parsed.role === "Home"
   }
 }
 
@@ -22,7 +27,7 @@ function isTaken(title: string, takenTitles: string[]) {
 export const workspaceName = {
   home: HOME_NAME,
   isValid(folderTitle: string) {
-    return WORKSPACE_NAME_PATTERN.test(folderTitle)
+    return parse(folderTitle).isWorkspace
   },
   isHome(folderTitle: string) {
     return parse(folderTitle).isHome
@@ -50,11 +55,9 @@ export const workspaceName = {
     return parse(folderTitle).logo
   },
   format(title: string, logo = "") {
-    const profile = logo.trim() ? `[${logo.trim()}] ` : ""
-    return `${profile}${title.trim()} (Workspace)`
+    return formatShelfTitle(title, { logo })
   },
   formatHome(title: string, logo = "") {
-    const profile = logo.trim() ? `[${logo.trim()}] ` : ""
-    return `${profile}${title.trim()} (Home Workspace)`
+    return formatShelfTitle(title, { logo, role: "Home" })
   }
 }

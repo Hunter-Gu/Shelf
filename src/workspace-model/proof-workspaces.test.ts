@@ -35,7 +35,7 @@ function normal(id: string, title: string, extra: Partial<Workspace> = {}) {
 
 describe("proofWorkspaces", () => {
   it("hydrates a workspace from the folder its id still resolves to", () => {
-    const tree = treeOf([folder("10", "[🧠] Read (Workspace)", "1")])
+    const tree = treeOf([folder("10", "[🧠] Read (Shelf)", "1")])
 
     expect(proofWorkspaces(tree, [normal("10", "Stale")])).toEqual([
       normal("10", "Read", { logo: "🧠" })
@@ -43,7 +43,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("re-adopts a workspace by title when its stored id no longer resolves", () => {
-    const tree = treeOf([folder("99", "Read (Workspace)", "1")])
+    const tree = treeOf([folder("99", "Read (Shelf)", "1")])
     const stored = normal("10", "Read", {
       color: "teal",
       isPinsCollapsed: true
@@ -55,7 +55,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("prefers a title match over an id that landed on an unrelated folder", () => {
-    const tree = treeOf([folder("10", "Notes", "1"), folder("99", "Read (Workspace)", "1")])
+    const tree = treeOf([folder("10", "Notes", "1"), folder("99", "Read (Shelf)", "1")])
 
     expect(proofWorkspaces(tree, [normal("10", "Read")])).toEqual([
       normal("99", "Read")
@@ -71,15 +71,15 @@ describe("proofWorkspaces", () => {
   })
 
   it("drops a workspace when no folder matches its id or title", () => {
-    const tree = treeOf([folder("99", "Write (Workspace)", "1")])
+    const tree = treeOf([folder("99", "Write (Shelf)", "1")])
 
     expect(proofWorkspaces(tree, [normal("10", "Read")])).toEqual([])
   })
 
   it("gives each drifted workspace a folder of its own", () => {
     const tree = treeOf([
-      folder("98", "Read (Workspace)", "1"),
-      folder("99", "Read (Workspace)", "1")
+      folder("98", "Read (Shelf)", "1"),
+      folder("99", "Read (Shelf)", "1")
     ])
 
     expect(
@@ -92,7 +92,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("re-adopts Home's own folder by its marker", () => {
-    const tree = treeOf([folder("42", "[🏠] Home (Home Workspace)", "1")])
+    const tree = treeOf([folder("42", "[🏠] Home (Shelf|Home)", "1")])
     const stored = createWorkspace({
       id: "41",
       title: "Home",
@@ -111,7 +111,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("follows a renamed Home by its marker, not its name", () => {
-    const tree = treeOf([folder("42", "工作 (Home Workspace)", "1")])
+    const tree = treeOf([folder("42", "工作 (Shelf|Home)", "1")])
     const stored = createWorkspace({
       id: "41",
       title: "Home",
@@ -130,7 +130,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("takes over the Home folder when one shows up", () => {
-    const tree = treeOf([folder("42", "[🏠] Home (Home Workspace)", "1")])
+    const tree = treeOf([folder("42", "[🏠] Home (Shelf|Home)", "1")])
 
     expect(proofWorkspaces(tree, [home])).toEqual([
       createWorkspace({
@@ -161,15 +161,15 @@ describe("proofWorkspaces", () => {
   })
 
   it("never lets a normal workspace adopt Home's folder", () => {
-    const tree = treeOf([folder("42", "Read (Home Workspace)", "1")])
+    const tree = treeOf([folder("42", "Read (Shelf|Home)", "1")])
 
     expect(proofWorkspaces(tree, [normal("10", "Read")])).toEqual([])
   })
 
   it("lets a normal workspace be named Home once Home is renamed", () => {
     const tree = treeOf([
-      folder("42", "工作 (Home Workspace)", "1"),
-      folder("10", "Home (Workspace)", "1")
+      folder("42", "工作 (Shelf|Home)", "1"),
+      folder("10", "Home (Shelf)", "1")
     ])
 
     expect(proofWorkspaces(tree, [home, normal("10", "Home")])).toEqual([
@@ -196,7 +196,7 @@ describe("proofWorkspaces", () => {
   })
 
   it("still resolves a workspace left under Other Bookmarks", () => {
-    const tree = treeOf([], [folder("10", "Read (Workspace)", "2")])
+    const tree = treeOf([], [folder("10", "Read (Shelf)", "2")])
 
     expect(proofWorkspaces(tree, [normal("10", "Read")])).toEqual([
       normal("10", "Read")

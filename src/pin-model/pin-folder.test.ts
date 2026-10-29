@@ -50,6 +50,15 @@ describe("findSpecialFolder", () => {
     ])
     expect(findSpecialFolder(tree, PINS_FOLDER_TITLE)).toBeNull()
   })
+
+  it("still finds a folder under the title older versions gave it", () => {
+    const tree = makeTree([
+      { id: "13", parentId: "2", index: 0, title: "Pins (Shelf)", children: [] }
+    ])
+
+    expect(PINS_FOLDER_TITLE).toBe("Pins (Shelf|Pins)")
+    expect(findSpecialFolder(tree, PINS_FOLDER_TITLE)?.id).toBe("13")
+  })
 })
 
 describe("collectFolderUrls", () => {
