@@ -233,11 +233,12 @@ export function useWorkspaces({
       const bookmarksBarId = treeRef.current
         ? toBaseFolder(treeRef.current).bookmarksBar.id
         : ""
+      // Color lives only in storage, so changing it alone leaves the folder
+      // title as it is — and mustn't give Home a folder it doesn't need.
       const isProfileEdit =
         changed.type !== previous.type ||
         changed.title !== previous.title ||
-        changed.logo !== previous.logo ||
-        changed.color !== previous.color
+        changed.logo !== previous.logo
 
       if (isProfileEdit) {
         if (changed.type === WorkspaceType.Normal) {
