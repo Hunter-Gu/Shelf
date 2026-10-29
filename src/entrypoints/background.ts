@@ -40,10 +40,17 @@ async function refreshActiveTabIcons() {
   )
 }
 
+const UNINSTALL_URL = "https://usecarrel.app/shelf/uninstalled"
+
 export default defineBackground(() => {
   void browser.sidePanel.setPanelBehavior({
     openPanelOnActionClick: true
   })
+  // Tells whoever removes Shelf that their bookmarks are still in Chrome, and
+  // asks why; the version tells which release the answer is about.
+  void browser.runtime.setUninstallURL(
+    `${UNINSTALL_URL}?v=${browser.runtime.getManifest().version}`
+  )
 
   browser.tabs.onActivated.addListener(({ tabId }) => {
     void browser.tabs.get(tabId).then((tab) => updateActionIcon(tabId, tab.url))
