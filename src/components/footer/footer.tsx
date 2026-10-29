@@ -1,9 +1,8 @@
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
 import { cn } from "common/lib/utils"
 import { Reorder } from "framer-motion"
-import { Keyboard, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useRef } from "react"
-import { browser } from "wxt/browser"
 
 import { useAppContext } from "~/app/app-context"
 import { useDockEdgeScroll } from "~/hooks/use-dock-edge-scroll"
@@ -12,6 +11,7 @@ import { useWheelToHorizontalScroll } from "~/hooks/use-wheel-to-horizontal-scro
 import { clsx } from "../clsx"
 import { DockScrollButton } from "./dock-scroll-button"
 import styles from "./footer.module.css"
+import { SettingsMenu } from "./settings-menu"
 import { SpaceDockButton } from "./space-dock-button"
 import { SpaceItem } from "./space-item"
 
@@ -36,18 +36,9 @@ export function Footer({
 
   return (
     <FooterContainer className={cn(isEditingWorkspace ? "mt-0" : "mt-auto")}>
-      <AstryxIconButton
-        label="Keyboard shortcuts"
-        tooltip="Keyboard shortcuts"
-        variant="ghost"
-        className="shrink-0"
-        icon={
-          <Keyboard size={18} className="text-gray-500 dark:text-gray-400" />
-        }
-        onClick={() => {
-          void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
-        }}
-      />
+      <div className="shrink-0">
+        <SettingsMenu />
+      </div>
 
       <DockScrollButton
         direction={-1}
