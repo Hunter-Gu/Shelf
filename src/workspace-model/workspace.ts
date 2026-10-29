@@ -28,14 +28,21 @@ export type Workspace = Omit<IWorkspace, "isPinsCollapsed" | "type"> & {
 	type: WorkspaceType;
 };
 
+const HOME_DEFAULT_LOGO = "🏠";
+
 export function createWorkspace(workspace: IWorkspace): Workspace {
+	const type = workspace.type ?? WorkspaceType.Normal;
+
 	return {
 		id: workspace.id,
-		logo: workspace.logo,
+		logo:
+			type === WorkspaceType.BookmarksBar && !workspace.logo.trim()
+				? HOME_DEFAULT_LOGO
+				: workspace.logo,
 		title: workspace.title,
 		color: workspace.color,
 		windowId: workspace.windowId,
 		isPinsCollapsed: workspace.isPinsCollapsed ?? false,
-		type: workspace.type ?? WorkspaceType.Normal,
+		type,
 	};
 }
