@@ -4,10 +4,20 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "An open-source, Arc-style Chrome sidebar that keeps your spaces, pinned links and favorites in your own Chrome bookmarks.",
+  "description": "An Arc-style bookmark manager for Chrome: spaces, pinned links and favorites in the side panel, kept as your own Chrome bookmarks.",
   "author": "Neil Gu. <nail.gu.hunter@gmail.com>",
   "license": "MIT",
+  "homepage": "https://usecarrel.app/shelf",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hunter-Gu/Shelf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hunter-Gu/Shelf/issues"
+  },
   "keywords": [
+    "arc-browser",
+    "bookmark-manager",
     "bookmarks",
     "browser-extension",
     "chrome-extension",
