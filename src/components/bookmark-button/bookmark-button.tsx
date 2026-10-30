@@ -11,6 +11,7 @@ import { BookmarkIcon } from "./styled"
 type BookmarkButtonProps = {
   // should be the id of a folder
   id: string
+  onSaved?: (bookmark: { id: string; url: string; parentId: string }) => void
 }
 
 /**
@@ -22,7 +23,7 @@ type BookmarkButtonProps = {
  * Hidden for favorited pages. A pinned page is only actionable when its
  * source lives in another workspace: moving it here also unpins it.
  */
-export function BookmarkButton({ id }: BookmarkButtonProps) {
+export function BookmarkButton({ id, onSaved }: BookmarkButtonProps) {
   const { bookmarks, pins, workspace } = useAppContext()
   const { create, remove, move } = bookmarks
   const { currentTab, bookmark, workspaceId } = useCurrentTabBookmark()
@@ -81,13 +82,14 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
           if (!url) {
             return
           }
-          switchFn(() =>
+          const created = await switchFn(() =>
             create({
               title,
               url,
               parentId: id
             })
           )
+          onSaved?.({ id: created.id, url, parentId: id })
         }}
       />
     )
