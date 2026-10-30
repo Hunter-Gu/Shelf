@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- these wrappers pass any props through to any element */
 import { cn } from "common/lib/utils"
 import { createElement, forwardRef, type ComponentType } from "react"
 

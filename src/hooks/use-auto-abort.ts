@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react"
 
 type PromiseCreator<Args extends unknown[], T> = (...args: Args) => Promise<T>
-type Any = any
 
 class AutoAbortPromise<Args extends unknown[], T> {
   private _cancelled = false
@@ -28,13 +27,14 @@ class AutoAbortPromise<Args extends unknown[], T> {
 }
 
 export function createAutoAbort() {
-  let autoAbort: AutoAbortPromise<Any[], Any> | undefined
+  let autoAbort: { abort(): void } | undefined
 
   function switchFn<Args extends unknown[], T>(fn: PromiseCreator<Args, T>) {
     autoAbort?.abort()
-    autoAbort = new AutoAbortPromise<Args, T>(fn)
+    const next = new AutoAbortPromise<Args, T>(fn)
+    autoAbort = next
 
-    return autoAbort.create()
+    return next.create(...([] as unknown as Args))
   }
 
   function dispose() {

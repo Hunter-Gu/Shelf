@@ -4,7 +4,7 @@ import {
 } from "~/pin-model/pin-folder"
 import { formatShelfTitle, parseShelfTitle } from "~/shelf-title"
 
-import type { ArcLink, ArcNode, ArcSidebar } from "./parse-arc-sidebar"
+import type { ArcNode, ArcSidebar } from "./parse-arc-sidebar"
 
 export type BookmarkNode = {
   id: string
