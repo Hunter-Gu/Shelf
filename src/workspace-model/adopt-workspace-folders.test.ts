@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { toHomeTree, type Bookmark, type Folder, type RootTree } from "~/bookmark-model"
+import {
+  toHomeTree,
+  type Bookmark,
+  type Folder,
+  type RootTree
+} from "~/bookmark-model"
 
 import { adoptWorkspaceFolders } from "./adopt-workspace-folders"
 import { proofWorkspaces } from "./proof-workspaces"
@@ -136,7 +141,12 @@ describe("upgrading from the Home/Other layout", () => {
         logo: "🏠",
         type: WorkspaceType.BookmarksBar
       }),
-      createWorkspace({ id: "2", title: "Other", logo: "", type: 1 as WorkspaceType }),
+      createWorkspace({
+        id: "2",
+        title: "Other",
+        logo: "",
+        type: 1 as WorkspaceType
+      }),
       createWorkspace({ id: "10", title: "Read", logo: "" })
     ]
     const tree = treeOf(
@@ -149,7 +159,13 @@ describe("upgrading from the Home/Other layout", () => {
         // one the id-drift bug dropped from storage entirely.
         folder("20", "Write (Shelf)", "2"),
         folder("30", "Shelf Pins", "2"),
-        { id: "60", parentId: "2", index: 2, title: "Stashed", url: "https://b/" }
+        {
+          id: "60",
+          parentId: "2",
+          index: 2,
+          title: "Stashed",
+          url: "https://b/"
+        }
       ]
     )
 

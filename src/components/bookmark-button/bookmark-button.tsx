@@ -1,5 +1,5 @@
-import { cn } from "common/lib/utils"
 import { IconButton } from "@astryxdesign/core/IconButton"
+import { cn } from "common/lib/utils"
 import type { MouseEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -51,12 +51,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         label="Move current page"
         tooltip="Move current page"
         variant="ghost"
-        icon={
-          <BookmarkIcon
-            fill="none"
-            className={cn("text-amber-500")}
-          />
-        }
+        icon={<BookmarkIcon fill="none" className={cn("text-amber-500")} />}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
           switchFn(async () => {
@@ -93,7 +88,8 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
               parentId: id
             })
           )
-        }} />
+        }}
+      />
     )
   }
 
@@ -104,16 +100,14 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         tooltip="Remove current page"
         variant="ghost"
         icon={
-          <BookmarkIcon
-            fill="currentColor"
-            className={cn("text-amber-500")}
-          />
+          <BookmarkIcon fill="currentColor" className={cn("text-amber-500")} />
         }
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
 
           switchFn(() => remove(bookmark.id))
-        }} />
+        }}
+      />
     )
   }
 
@@ -122,12 +116,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
       label="Move current page"
       tooltip="Move current page"
       variant="ghost"
-      icon={
-        <BookmarkIcon
-          fill="none"
-          className={cn("text-amber-500")}
-        />
-      }
+      icon={<BookmarkIcon fill="none" className={cn("text-amber-500")} />}
       onClick={(evt: MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation()
 
@@ -136,6 +125,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
             parentId: id
           })
         )
-      }} />
+      }}
+    />
   )
 }

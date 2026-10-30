@@ -17,15 +17,9 @@ export const ActionButtonsContainer = clsx.div(
   "flex flex-col gap-1 pt-4 mt-auto mb-4 px-3"
 )
 
-export const ConfirmButton = withClsx(
-  Button,
-  "font-semibold"
-)
+export const ConfirmButton = withClsx(Button, "font-semibold")
 
-export const CancelButton = withClsx(
-  Button,
-  "text-black/50 dark:text-white/60"
-)
+export const CancelButton = withClsx(Button, "text-black/50 dark:text-white/60")
 
 const EmojiStyle = "w-full h-full"
 export const EmojiText = clsx.span(EmojiStyle)

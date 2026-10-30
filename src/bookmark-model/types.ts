@@ -1,27 +1,27 @@
 type TreeNode = {
-	id: string;
-	parentId: string;
-	index: number;
-	title: string;
-};
+  id: string
+  parentId: string
+  index: number
+  title: string
+}
 
 export type Bookmark = TreeNode & {
-	url: string;
-};
+  url: string
+}
 
 export type RootTree = TreeNode & {
-  children: [Folder, Folder];
-};
+  children: [Folder, Folder]
+}
 
 export type Folder = TreeNode & {
-	children?: Array<Folder | Bookmark>;
-};
+  children?: Array<Folder | Bookmark>
+}
 
 export function isFolder(node: Partial<Folder | Bookmark>): node is Folder {
-	return !('url' in node);
+  return !("url" in node)
 }
 
 export type SearchState = {
-	text: string;
-	tree: RootTree | null;
-};
+  text: string
+  tree: RootTree | null
+}

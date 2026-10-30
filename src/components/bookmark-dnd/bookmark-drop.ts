@@ -39,7 +39,10 @@ export function ownChildCount(folder: Folder | null) {
     .length
 }
 
-export function findFolderById(folder: Folder | null, id: string): Folder | null {
+export function findFolderById(
+  folder: Folder | null,
+  id: string
+): Folder | null {
   if (!folder) return null
   if (folder.id === id) return folder
 

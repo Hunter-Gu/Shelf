@@ -1,5 +1,5 @@
-import { cn } from "common/lib/utils"
 import { IconButton as AstryxIconButton } from "@astryxdesign/core/IconButton"
+import { cn } from "common/lib/utils"
 import { motion } from "framer-motion"
 import { useState } from "react"
 
@@ -11,7 +11,11 @@ type SpaceDockButtonProps = {
   onClick: () => void
 }
 
-export function SpaceDockButton({ space, isActive, onClick }: SpaceDockButtonProps) {
+export function SpaceDockButton({
+  space,
+  isActive,
+  onClick
+}: SpaceDockButtonProps) {
   const [isFocused, setIsFocused] = useState(false)
   const hue = space.color ?? "gray"
 

@@ -10,9 +10,7 @@ type MoveOutOfSpaceMenuProps = {
 
 // The inverse of "Turn into Space": move a Normal workspace back under
 // another workspace and demote it to a regular folder, keeping its contents.
-export function MoveOutOfSpaceMenu({
-  workspaceId
-}: MoveOutOfSpaceMenuProps) {
+export function MoveOutOfSpaceMenu({ workspaceId }: MoveOutOfSpaceMenuProps) {
   const { workspace } = useAppContext()
   const { workspaces, moveOutOfSpace } = workspace
 

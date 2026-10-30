@@ -3,7 +3,9 @@ import { browser } from "wxt/browser"
 
 import { FOCUS_SEARCH_MESSAGE, focusSearchOnOpenStorage } from "~/focus-search"
 
-export function useFocusSearchShortcut(inputRef: RefObject<HTMLInputElement | null>) {
+export function useFocusSearchShortcut(
+  inputRef: RefObject<HTMLInputElement | null>
+) {
   useEffect(() => {
     const focus = () => {
       inputRef.current?.focus()

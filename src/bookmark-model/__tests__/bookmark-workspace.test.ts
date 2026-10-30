@@ -26,7 +26,13 @@ function treeOf(
     title: "",
     children: [
       { id: "1", parentId: "0", index: 0, title: "Bar", children: barChildren },
-      { id: "2", parentId: "0", index: 1, title: "Other", children: otherChildren }
+      {
+        id: "2",
+        parentId: "0",
+        index: 1,
+        title: "Other",
+        children: otherChildren
+      }
     ]
   }
 }
@@ -35,7 +41,10 @@ const idsOf = (folder: Folder) => (folder.children ?? []).map((item) => item.id)
 
 describe("toHomeTree", () => {
   it("gathers loose bookmarks from both roots while Home has no folder", () => {
-    const tree = treeOf([bookmark("bar-item", "1")], [bookmark("other-item", "2")])
+    const tree = treeOf(
+      [bookmark("bar-item", "1")],
+      [bookmark("other-item", "2")]
+    )
 
     const home = toHomeTree(tree, "1", new Set())
 
@@ -56,7 +65,10 @@ describe("toHomeTree", () => {
 
   it("puts Home's own folder contents first once it has one", () => {
     const tree = treeOf(
-      [folder("home", "1", [bookmark("filed", "home")]), bookmark("bar-item", "1")],
+      [
+        folder("home", "1", [bookmark("filed", "home")]),
+        bookmark("bar-item", "1")
+      ],
       [bookmark("other-item", "2")]
     )
 

@@ -1,4 +1,9 @@
-import { isFolder, toBaseFolder, type Folder, type RootTree } from "~/bookmark-model"
+import {
+  isFolder,
+  toBaseFolder,
+  type Folder,
+  type RootTree
+} from "~/bookmark-model"
 import { formatShelfTitle } from "~/shelf-title"
 
 // Pins and favorites live as real bookmark nodes inside these two hidden
@@ -18,7 +23,10 @@ export const LEGACY_SPECIAL_TITLES: Record<string, string> = {
   [FAVORITES_FOLDER_TITLE]: "Favorites (Shelf)"
 }
 
-export function findSpecialFolder(tree: RootTree, title: string): Folder | null {
+export function findSpecialFolder(
+  tree: RootTree,
+  title: string
+): Folder | null {
   const { otherBookmarks } = toBaseFolder(tree)
   const children = otherBookmarks.children ?? []
   const match =

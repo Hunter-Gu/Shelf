@@ -74,9 +74,7 @@ export function CurrentTabBookmarkProvider({ children }: PropsWithChildren) {
       bookmarks.tree && url
         ? findDescendantBookmark(bookmarks.tree, url, excludeIds)
         : null
-    const workspaceIds = new Set(
-      workspace.workspaces.map((space) => space.id)
-    )
+    const workspaceIds = new Set(workspace.workspaces.map((space) => space.id))
     const workspaceId =
       bookmark && bookmarks.tree
         ? findWorkspaceId(bookmarks.tree, bookmark.parentId, workspaceIds)

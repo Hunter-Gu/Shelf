@@ -1,7 +1,7 @@
-import { cn } from "common/lib/utils"
 import { Button } from "@astryxdesign/core/Button"
 import { Popover } from "@astryxdesign/core/Popover"
 import { TextInput } from "@astryxdesign/core/TextInput"
+import { cn } from "common/lib/utils"
 import { lazy, Suspense, useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -78,11 +78,11 @@ function EmojiButton({ className, emoji, onEmojiSelect }: EmojiButtonProps) {
         variant="ghost"
         className={className}
         style={emoji ? { padding: 0 } : undefined}>
-          {emoji ? (
-            <EmojiText style={{ fontSize: "1em" }}>{emoji}</EmojiText>
-          ) : (
-            <EmojiPlaceholder />
-          )}
+        {emoji ? (
+          <EmojiText style={{ fontSize: "1em" }}>{emoji}</EmojiText>
+        ) : (
+          <EmojiPlaceholder />
+        )}
       </Button>
     </Popover>
   )

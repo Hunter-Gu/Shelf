@@ -1,6 +1,6 @@
-import { cn } from "common/lib/utils"
-import { MoreMenu } from "@astryxdesign/core/MoreMenu"
 import type { DropdownMenuOption } from "@astryxdesign/core/DropdownMenu"
+import { MoreMenu } from "@astryxdesign/core/MoreMenu"
+import { cn } from "common/lib/utils"
 import { useState, type MouseEvent, type ReactNode } from "react"
 
 import { useSetFocus } from "~/context/focus-context"
@@ -34,7 +34,8 @@ export function Menu({
   }
 
   return (
-    <div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
+    <div
+      onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
       <MoreMenu
         label={label}
         icon={icon}

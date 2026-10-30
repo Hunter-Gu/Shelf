@@ -48,7 +48,9 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             className={cn(
               "h-6 w-6 rounded-full transition-transform",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500",
-              isSelected ? "scale-110" : "hover:scale-105 opacity-80 hover:opacity-100"
+              isSelected
+                ? "scale-110"
+                : "hover:scale-105 opacity-80 hover:opacity-100"
             )}
             style={{
               backgroundColor: preview,

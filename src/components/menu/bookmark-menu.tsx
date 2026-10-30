@@ -14,14 +14,20 @@ export function BookmarkMenu({ item, onRename }: BookmarkMenuProps) {
   const { remove } = bookmarks
 
   const items: MenuItems = [
-    { label: "Open in New Window", onClick: () => tabManager.createInNewWindow(item.url) },
+    {
+      label: "Open in New Window",
+      onClick: () => tabManager.createInNewWindow(item.url)
+    },
     {
       label: "Open in Incognito Window",
       onClick: () => tabManager.createInNewWindow(item.url, true)
     },
     { type: "divider" },
     { label: "Rename", onClick: onRename },
-    { label: "Copy Link", onClick: () => void navigator.clipboard.writeText(item.url) },
+    {
+      label: "Copy Link",
+      onClick: () => void navigator.clipboard.writeText(item.url)
+    },
     { type: "divider" },
     { label: "Delete", onClick: () => remove(item.id) }
   ]

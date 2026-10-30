@@ -38,7 +38,14 @@ type VirtualListProps<Data> = {
 const VirtualListContainer = clsx.div("overflow-y-auto")
 
 function VirtualListComponent<Data>(
-  { list, className, Row, getItemKey, getItemOffset, overlay }: VirtualListProps<Data>,
+  {
+    list,
+    className,
+    Row,
+    getItemKey,
+    getItemOffset,
+    overlay
+  }: VirtualListProps<Data>,
   ref: Ref<Virtualizer<Element, Element>>
 ) {
   const containerRef = useRef(null)

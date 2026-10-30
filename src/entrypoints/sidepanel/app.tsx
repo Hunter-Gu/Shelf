@@ -1,16 +1,16 @@
-import { AppProvider, useAppContext } from "~/app/app-context"
 import { Theme as AstryxTheme } from "@astryxdesign/core/theme"
 import { neutralTheme } from "@astryxdesign/theme-neutral/built"
+import { cn } from "common/lib/utils"
+import { useState } from "react"
+import { DndProvider } from "react-dnd"
+import { HTML5Backend } from "react-dnd-html5-backend"
+
+import { AppProvider, useAppContext } from "~/app/app-context"
 import { CreateWorkspace } from "~/components/create-workspace"
 import { Footer } from "~/components/footer/footer"
 import { EditableProvider } from "~/context/editable-context"
 import { CurrentTabBookmarkProvider } from "~/context/tab-bookmark-context"
 import { VirtualTreeProvider } from "~/context/virtual-tree-context"
-import { cn } from "common/lib/utils"
-import { DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
-import { useState } from "react"
-
 import { Sidebar } from "~/sidebar"
 import { createWorkspace, type Workspace } from "~/workspace-model"
 
@@ -27,7 +27,9 @@ function AppContent() {
           onCancel={() => setEditingWorkspace(undefined)}
         />
       ) : (
-        <Sidebar onEdit={(nextWorkspace) => setEditingWorkspace(nextWorkspace)} />
+        <Sidebar
+          onEdit={(nextWorkspace) => setEditingWorkspace(nextWorkspace)}
+        />
       )}
 
       <Footer

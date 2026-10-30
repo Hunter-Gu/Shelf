@@ -60,7 +60,8 @@ export function useBookmarks() {
 
   useEffect(
     () => () => {
-      if (patchTimeoutRef.current !== null) clearTimeout(patchTimeoutRef.current)
+      if (patchTimeoutRef.current !== null)
+        clearTimeout(patchTimeoutRef.current)
     },
     []
   )
@@ -85,7 +86,8 @@ export function useBookmarks() {
       _id: string,
       bookmark: chrome.bookmarks.BookmarkTreeNode
     ) => {
-      if (bookmark.parentId === undefined || bookmark.index === undefined) return
+      if (bookmark.parentId === undefined || bookmark.index === undefined)
+        return
       const node: Bookmark | Folder =
         bookmark.url !== undefined
           ? {
@@ -193,7 +195,8 @@ export function useBookmarks() {
       if (document.visibilityState === "visible") void reload()
     }
     document.addEventListener("visibilitychange", handleVisibility)
-    return () => document.removeEventListener("visibilitychange", handleVisibility)
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility)
   }, [reload])
 
   const create = useCallback(async (details: BookmarkCreate) => {

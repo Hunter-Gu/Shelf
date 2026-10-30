@@ -5,11 +5,12 @@ import {
   type PropsWithChildren
 } from "react"
 
+import { useTheme } from "~/hooks/use-theme"
+
 import { useActiveTab } from "./use-active-tab"
 import { useBookmarks } from "./use-bookmarks"
 import { usePins } from "./use-pins"
 import { useWorkspaces } from "./use-workspaces"
-import { useTheme } from "~/hooks/use-theme"
 
 const AppContext = createContext<ReturnType<typeof useAppState> | null>(null)
 
@@ -33,7 +34,9 @@ function useAppState() {
 }
 
 export function AppProvider({ children }: PropsWithChildren) {
-  return <AppContext.Provider value={useAppState()}>{children}</AppContext.Provider>
+  return (
+    <AppContext.Provider value={useAppState()}>{children}</AppContext.Provider>
+  )
 }
 
 export function useAppContext() {

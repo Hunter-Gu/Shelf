@@ -5,7 +5,10 @@ import { findOpenTab } from "./find-open-tab"
 export const tabManager = {
   async create(
     input: string[] | Parameters<typeof browser.tabs.create>[0],
-    options?: Omit<Parameters<typeof browser.tabs.create>[0], "active" | "selected">
+    options?: Omit<
+      Parameters<typeof browser.tabs.create>[0],
+      "active" | "selected"
+    >
   ) {
     if (Array.isArray(input)) {
       return Promise.all(
@@ -24,13 +27,19 @@ export const tabManager = {
 
   async createInGroup(title: string, urls: string[]) {
     if (!urls.length) return
-    const tabs = await Promise.all(urls.map((url, index) => browser.tabs.create({ url, active: index === 0 })))
+    const tabs = await Promise.all(
+      urls.map((url, index) =>
+        browser.tabs.create({ url, active: index === 0 })
+      )
+    )
     const tabIds = tabs
       .map((tab) => tab.id)
       .filter((id): id is number => typeof id === "number")
     if (!tabIds.length) return
 
-    const groupId = await browser.tabs.group({ tabIds: tabIds as [number, ...number[]] }) as number
+    const groupId = (await browser.tabs.group({
+      tabIds: tabIds as [number, ...number[]]
+    })) as number
     await browser.tabGroups.update(groupId, { title })
     return groupId
   },

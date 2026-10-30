@@ -22,6 +22,8 @@
     "zip": "wxt zip",
     "compile": "tsc --noEmit",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "postinstall": "wxt prepare"
   },
