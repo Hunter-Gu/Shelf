@@ -25,8 +25,9 @@ WHAT YOU GET
 • Click a bookmark that's already open and Shelf takes you to that tab instead of opening it twice.
 • Drag and drop to rearrange bookmarks and folders, including across spaces.
 • Instant search across all your bookmarks. Press Ctrl+Shift+K (⌘+Shift+K on Mac) to open Shelf straight into search.
+• Save the page you're on in one click, and Shelf offers to move it into the folder that already holds that site's bookmarks.
 • Open a whole space as a Chrome tab group.
-• Turn any existing bookmark folder into a space.
+• Already have bookmark folders? Turn several into spaces at once, renaming them and picking an emoji as you go.
 
 MOVING FROM ARC?
 

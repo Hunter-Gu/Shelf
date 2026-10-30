@@ -1,7 +1,7 @@
 {
   "name": "Shelf",
   "displayName": "Shelf",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "An Arc-style bookmark manager for Chrome: spaces, pinned links and favorites in the side panel, kept as your own Chrome bookmarks.",
