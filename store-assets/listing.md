@@ -22,14 +22,18 @@ WHAT YOU GET
 • Spaces for every context — work, research, side projects, travel. Switch with one click from the dock at the bottom.
 • Favorites that stay visible at the top of the sidebar.
 • Pinned links for what matters right now, without moving them out of their folders.
+• Click a bookmark that's already open and Shelf takes you to that tab instead of opening it twice.
 • Drag and drop to rearrange bookmarks and folders, including across spaces.
 • Instant search across all your bookmarks. Press Ctrl+Shift+K (⌘+Shift+K on Mac) to open Shelf straight into search.
+• Save the page you're on in one click, and Shelf offers to move it into the folder that already holds that site's bookmarks.
 • Open a whole space as a Chrome tab group.
-• Turn any existing bookmark folder into a space.
+• Already have bookmark folders? Turn several into spaces at once, renaming them and picking an emoji as you go.
 
 MOVING FROM ARC?
 
 Arc stops working on December 22, 2026. If you relied on its sidebar for spaces and pinned links, Shelf gives you the same layout in Chrome, and because it is built on Chrome bookmarks, it can't be shut down on you: your spaces are ordinary bookmark folders you keep either way.
+
+Bring your Arc sidebar over in one step: open Settings → Import from Arc and pick Arc's sidebar file. Each space comes over with its pinned tabs and folders, Arc's favorites become Shelf's favorites, and your open Today tabs can come along too. Importing again only adds what's missing.
 
 HOW SHELF CHANGES YOUR BOOKMARKS
 

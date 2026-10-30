@@ -1,5 +1,6 @@
-import { useAppContext } from "~/app/app-context"
 import { useUpdateFolderState } from "common/context/folder-states-context"
+
+import { useAppContext } from "~/app/app-context"
 import { useSetEditableId } from "~/context/editable-context"
 import { useVirtualTree } from "~/context/virtual-tree-context"
 import { useNextTick } from "~/hooks/use-next-tick"
@@ -64,7 +65,10 @@ export function FolderMenu({ item, onRename, onRequestDelete }: MenuItemProps) {
       }
     },
     { type: "divider" },
-    { label: turnToSpaceTitle, onClick: () => turnToSpace({ id, parentId, title }) },
+    {
+      label: turnToSpaceTitle,
+      onClick: () => turnToSpace({ id, parentId, title })
+    },
     { type: "divider" },
     {
       label: "Delete",

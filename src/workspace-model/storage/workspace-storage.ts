@@ -30,14 +30,18 @@ const workspaceStorageItem = storage.defineItem<StoredWorkspace[]>(
     migrations: {
       2: async (legacyWorkspaces: LegacyWorkspaceV1[]) => {
         for (const workspace of legacyWorkspaces) {
-          if (workspace.type !== WorkspaceType.Normal || !workspace.logo) continue
+          if (workspace.type !== WorkspaceType.Normal || !workspace.logo)
+            continue
 
           const [folder] = await browser.bookmarks
             .get(workspace.id)
             .catch(() => [])
           if (!folder) continue
 
-          const nextTitle = workspaceName.format(workspace.title, workspace.logo)
+          const nextTitle = workspaceName.format(
+            workspace.title,
+            workspace.logo
+          )
           if (folder.title !== nextTitle) {
             await browser.bookmarks.update(workspace.id, { title: nextTitle })
           }

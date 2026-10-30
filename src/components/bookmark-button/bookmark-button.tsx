@@ -1,5 +1,5 @@
-import { cn } from "common/lib/utils"
 import { IconButton } from "@astryxdesign/core/IconButton"
+import { cn } from "common/lib/utils"
 import type { MouseEvent } from "react"
 
 import { useAppContext } from "~/app/app-context"
@@ -11,6 +11,7 @@ import { BookmarkIcon } from "./styled"
 type BookmarkButtonProps = {
   // should be the id of a folder
   id: string
+  onSaved?: (bookmark: { id: string; url: string; parentId: string }) => void
 }
 
 /**
@@ -22,7 +23,7 @@ type BookmarkButtonProps = {
  * Hidden for favorited pages. A pinned page is only actionable when its
  * source lives in another workspace: moving it here also unpins it.
  */
-export function BookmarkButton({ id }: BookmarkButtonProps) {
+export function BookmarkButton({ id, onSaved }: BookmarkButtonProps) {
   const { bookmarks, pins, workspace } = useAppContext()
   const { create, remove, move } = bookmarks
   const { currentTab, bookmark, workspaceId } = useCurrentTabBookmark()
@@ -51,12 +52,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         label="Move current page"
         tooltip="Move current page"
         variant="ghost"
-        icon={
-          <BookmarkIcon
-            fill="none"
-            className={cn("text-amber-500")}
-          />
-        }
+        icon={<BookmarkIcon fill="none" className={cn("text-amber-500")} />}
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
           switchFn(async () => {
@@ -86,14 +82,16 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
           if (!url) {
             return
           }
-          switchFn(() =>
+          const created = await switchFn(() =>
             create({
               title,
               url,
               parentId: id
             })
           )
-        }} />
+          onSaved?.({ id: created.id, url, parentId: id })
+        }}
+      />
     )
   }
 
@@ -104,16 +102,14 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
         tooltip="Remove current page"
         variant="ghost"
         icon={
-          <BookmarkIcon
-            fill="currentColor"
-            className={cn("text-amber-500")}
-          />
+          <BookmarkIcon fill="currentColor" className={cn("text-amber-500")} />
         }
         onClick={(evt: MouseEvent<HTMLButtonElement>) => {
           evt.stopPropagation()
 
           switchFn(() => remove(bookmark.id))
-        }} />
+        }}
+      />
     )
   }
 
@@ -122,12 +118,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
       label="Move current page"
       tooltip="Move current page"
       variant="ghost"
-      icon={
-        <BookmarkIcon
-          fill="none"
-          className={cn("text-amber-500")}
-        />
-      }
+      icon={<BookmarkIcon fill="none" className={cn("text-amber-500")} />}
       onClick={(evt: MouseEvent<HTMLButtonElement>) => {
         evt.stopPropagation()
 
@@ -136,6 +127,7 @@ export function BookmarkButton({ id }: BookmarkButtonProps) {
             parentId: id
           })
         )
-      }} />
+      }}
+    />
   )
 }

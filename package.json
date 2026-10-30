@@ -1,13 +1,23 @@
 {
   "name": "Shelf",
   "displayName": "Shelf",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "An open-source, Arc-style Chrome sidebar that keeps your spaces, pinned links and favorites in your own Chrome bookmarks.",
+  "description": "An Arc-style bookmark manager for Chrome: spaces, pinned links and favorites in the side panel, kept as your own Chrome bookmarks.",
   "author": "Neil Gu. <nail.gu.hunter@gmail.com>",
   "license": "MIT",
+  "homepage": "https://usecarrel.app/shelf",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hunter-Gu/Shelf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hunter-Gu/Shelf/issues"
+  },
   "keywords": [
+    "arc-browser",
+    "bookmark-manager",
     "bookmarks",
     "browser-extension",
     "chrome-extension",
@@ -22,6 +32,8 @@
     "zip": "wxt zip",
     "compile": "tsc --noEmit",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "postinstall": "wxt prepare"
   },
@@ -50,7 +62,6 @@
     "@wxt-dev/module-react": "^1.1.5",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^16.5.0",
     "prettier": "^3.7.4",
     "tailwindcss": "^4.3.3",

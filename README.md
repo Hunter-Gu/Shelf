@@ -27,7 +27,8 @@ Shelf manages bookmarks, not open tabs.
 ## Features
 
 - **Spaces for every context.** Work, research, side projects, travel — switch from the dock at the bottom of the panel.
-- **Turn folders you already have into spaces.** Shelf works on your existing bookmarks instead of starting you from scratch.
+- **Turn folders you already have into spaces.** Pick several at once from Settings → Turn folders into spaces, renaming them and choosing an emoji as you go.
+- **Saves land next to their site.** After you save a page, Shelf offers to move it into the folder that already holds that site's bookmarks.
 - **Favorites** that stay visible at the top, and **pins** for what matters right now, without moving bookmarks out of their folders.
 - **Goes to tabs you already have open.** Clicking a bookmark that's open in a tab switches to it; Cmd/Ctrl-click opens a new one.
 - **Search everything.** `Ctrl+Shift+K` (`Command+Shift+K` on macOS) opens Shelf straight into search.

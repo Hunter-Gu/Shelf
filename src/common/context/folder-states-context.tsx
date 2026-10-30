@@ -1,8 +1,15 @@
-import { createContext, useContext, useState, type PropsWithChildren } from "react"
+import {
+  createContext,
+  useContext,
+  useState,
+  type PropsWithChildren
+} from "react"
 
 type FolderState = Record<string, boolean>
 const FolderStatesContext = createContext<FolderState>({})
-const UpdateFolderStateContext = createContext<(id: string, value?: boolean) => void>(() => {})
+const UpdateFolderStateContext = createContext<
+  (id: string, value?: boolean) => void
+>(() => {})
 
 export function FolderStatesProvider({ children }: PropsWithChildren) {
   const [states, setStates] = useState<FolderState>({})

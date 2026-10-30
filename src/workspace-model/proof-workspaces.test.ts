@@ -16,8 +16,20 @@ function treeOf(barChildren: Folder[], otherChildren: Folder[] = []): RootTree {
     index: 0,
     title: "",
     children: [
-      { id: "1", parentId: "0", index: 0, title: "Bookmarks Bar", children: barChildren },
-      { id: "2", parentId: "0", index: 1, title: "Other Bookmarks", children: otherChildren }
+      {
+        id: "1",
+        parentId: "0",
+        index: 0,
+        title: "Bookmarks Bar",
+        children: barChildren
+      },
+      {
+        id: "2",
+        parentId: "0",
+        index: 1,
+        title: "Other Bookmarks",
+        children: otherChildren
+      }
     ]
   }
 }
@@ -55,7 +67,10 @@ describe("proofWorkspaces", () => {
   })
 
   it("prefers a title match over an id that landed on an unrelated folder", () => {
-    const tree = treeOf([folder("10", "Notes", "1"), folder("99", "Read (Shelf)", "1")])
+    const tree = treeOf([
+      folder("10", "Notes", "1"),
+      folder("99", "Read (Shelf)", "1")
+    ])
 
     expect(proofWorkspaces(tree, [normal("10", "Read")])).toEqual([
       normal("99", "Read")

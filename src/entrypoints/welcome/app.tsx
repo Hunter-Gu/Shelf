@@ -1,40 +1,18 @@
 import { Button } from "@astryxdesign/core/Button"
 import { Theme as AstryxTheme } from "@astryxdesign/core/theme"
 import { neutralTheme } from "@astryxdesign/theme-neutral/built"
-import { KeyboardIcon, PuzzleIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import {
+  ArrowRightLeftIcon,
+  FolderInputIcon,
+  KeyboardIcon,
+  PuzzleIcon
+} from "lucide-react"
 import { browser } from "wxt/browser"
 
-type OpenState = "idle" | "opening" | "opened" | "error"
+import { useOpenSidePanel } from "~/hooks/use-open-side-panel"
 
 function WelcomeContent() {
-  const [state, setState] = useState<OpenState>("idle")
-  // sidePanel.open() only succeeds when called synchronously in direct
-  // response to a user gesture — awaiting windows.getCurrent() first breaks
-  // that chain and gets rejected with "sidePanel.open() may only be called
-  // in response to a user gesture." Fetch the window id ahead of time so
-  // the click handler can call open() as its first statement.
-  const windowIdRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    void browser.windows.getCurrent().then((window) => {
-      windowIdRef.current = window.id ?? null
-    })
-  }, [])
-
-  const handleOpen = () => {
-    const windowId = windowIdRef.current
-    if (windowId === null) {
-      setState("error")
-      return
-    }
-
-    setState("opening")
-    browser.sidePanel
-      .open({ windowId })
-      .then(() => setState("opened"))
-      .catch(() => setState("error"))
-  }
+  const { state, open } = useOpenSidePanel()
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
@@ -59,7 +37,7 @@ function WelcomeContent() {
                 ? "Opening…"
                 : "Open Shelf"
           }
-          onClick={handleOpen}
+          onClick={open}
         />
 
         {state === "error" && (
@@ -75,8 +53,38 @@ function WelcomeContent() {
             Pin it so it's easy to find next time
           </p>
           <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
-            Click the puzzle-piece icon next to your address bar, then the
-            pin next to Shelf.
+            Click the puzzle-piece icon next to your address bar, then the pin
+            next to Shelf.
+          </p>
+        </div>
+
+        <div className="mt-6 border-t border-black/5 pt-6 text-left dark:border-white/10">
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+            <FolderInputIcon className="h-4 w-4" />
+            Already have bookmark folders?
+          </p>
+          <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
+            Pick the ones you want as spaces, and name them as you go.{" "}
+            <a
+              className="underline underline-offset-2 hover:no-underline"
+              href="/folders-to-spaces.html">
+              Turn folders into spaces
+            </a>
+          </p>
+        </div>
+
+        <div className="mt-6 border-t border-black/5 pt-6 text-left dark:border-white/10">
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">
+            <ArrowRightLeftIcon className="h-4 w-4" />
+            Moving from Arc?
+          </p>
+          <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-300">
+            Bring your Arc spaces, pinned tabs and favorites over in one step.{" "}
+            <a
+              className="underline underline-offset-2 hover:no-underline"
+              href="/import-arc.html">
+              Import from Arc
+            </a>
           </p>
         </div>
 
@@ -94,7 +102,9 @@ function WelcomeContent() {
               type="button"
               className="underline underline-offset-2 hover:no-underline"
               onClick={() =>
-                void browser.tabs.create({ url: "chrome://extensions/shortcuts" })
+                void browser.tabs.create({
+                  url: "chrome://extensions/shortcuts"
+                })
               }>
               Change the shortcut
             </button>

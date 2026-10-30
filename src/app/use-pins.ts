@@ -272,8 +272,8 @@ export function usePins({ tree }: { tree: RootTree | null }) {
       unfavorite
     }),
     [
-      pinsFolder?.id,
-      favoritesFolder?.id,
+      pinsFolder,
+      favoritesFolder,
       pinnedUrls,
       favoriteUrls,
       pinnedItems,

@@ -27,13 +27,7 @@ function MockAnchor({ children, href, target, ...rest }: AnchorProps) {
         active: false
       })
     } else {
-      void tabManager
-        .query({ active: true, currentWindow: true })
-        .then(([tab]) =>
-          tab?.id === undefined
-            ? tabManager.create({ url: href, active: true })
-            : tabManager.update(tab.id, { url: href })
-        )
+      void tabManager.switchToOrOpen(href)
     }
   }
   return (

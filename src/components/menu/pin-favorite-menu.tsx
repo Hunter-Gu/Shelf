@@ -21,8 +21,7 @@ export function PinFavoriteMenu({ item }: PinFavoriteMenuProps) {
   const items: MenuItems = [
     {
       label: isPinned ? "Unpin" : "Pin to this workspace",
-      onClick: () =>
-        void (isPinned ? pins.unpin(item.url) : pins.pin(item))
+      onClick: () => void (isPinned ? pins.unpin(item.url) : pins.pin(item))
     },
     {
       label: isFavorite ? "Remove from Favorites" : "Add to Favorites",

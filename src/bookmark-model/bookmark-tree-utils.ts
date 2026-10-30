@@ -1,4 +1,4 @@
-import { isFolder, type Bookmark, type Folder, type RootTree } from "./types"
+import { isFolder, type Bookmark, type Folder } from "./types"
 
 export class BookmarkTreeUtils {
   private static findNodeById(draft: Folder, id: string) {

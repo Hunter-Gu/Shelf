@@ -4,9 +4,7 @@ import { workspaceName } from "./workspace-name"
 
 describe("workspaceName", () => {
   it("formats names with and without an emoji", () => {
-    expect(workspaceName.format("Read", "🧠")).toBe(
-      "[🧠] Read (Shelf)"
-    )
+    expect(workspaceName.format("Read", "🧠")).toBe("[🧠] Read (Shelf)")
     expect(workspaceName.format("Read")).toBe("Read (Shelf)")
   })
 
@@ -56,7 +54,9 @@ describe("workspaceName", () => {
   it("disambiguates a taken name by counting up", () => {
     expect(workspaceName.disambiguate("Read", ["Home"])).toBe("Read")
     expect(workspaceName.disambiguate("Read", ["read"])).toBe("Read 2")
-    expect(workspaceName.disambiguate("Read", ["Read", "Read 2"])).toBe("Read 3")
+    expect(workspaceName.disambiguate("Read", ["Read", "Read 2"])).toBe(
+      "Read 3"
+    )
     expect(workspaceName.disambiguate("Home", ["Home"])).toBe("Home 2")
   })
 

@@ -9,14 +9,22 @@ import {
   PINS_FOLDER_TITLE
 } from "./pin-folder"
 
-function makeTree(otherBookmarksChildren: RootTree["children"][1]["children"]): RootTree {
+function makeTree(
+  otherBookmarksChildren: RootTree["children"][1]["children"]
+): RootTree {
   return {
     id: "0",
     parentId: "",
     index: 0,
     title: "root",
     children: [
-      { id: "1", parentId: "0", index: 0, title: "Bookmarks Bar", children: [] },
+      {
+        id: "1",
+        parentId: "0",
+        index: 0,
+        title: "Bookmarks Bar",
+        children: []
+      },
       {
         id: "2",
         parentId: "0",
@@ -32,7 +40,13 @@ describe("findSpecialFolder", () => {
   it("finds a special folder by exact title under Other Bookmarks", () => {
     const tree = makeTree([
       { id: "10", parentId: "2", index: 0, title: "Some Folder", children: [] },
-      { id: "11", parentId: "2", index: 1, title: PINS_FOLDER_TITLE, children: [] }
+      {
+        id: "11",
+        parentId: "2",
+        index: 1,
+        title: PINS_FOLDER_TITLE,
+        children: []
+      }
     ])
 
     const folder = findSpecialFolder(tree, PINS_FOLDER_TITLE)
@@ -46,7 +60,13 @@ describe("findSpecialFolder", () => {
 
   it("ignores a bookmark that happens to share the title", () => {
     const tree = makeTree([
-      { id: "12", parentId: "2", index: 0, title: PINS_FOLDER_TITLE, url: "https://example.com" }
+      {
+        id: "12",
+        parentId: "2",
+        index: 0,
+        title: PINS_FOLDER_TITLE,
+        url: "https://example.com"
+      }
     ])
     expect(findSpecialFolder(tree, PINS_FOLDER_TITLE)).toBeNull()
   })
@@ -69,9 +89,27 @@ describe("collectFolderUrls", () => {
       index: 0,
       title: PINS_FOLDER_TITLE,
       children: [
-        { id: "20", parentId: "11", index: 0, title: "A", url: "https://a.example" },
-        { id: "21", parentId: "11", index: 1, title: "B", url: "https://b.example" },
-        { id: "22", parentId: "11", index: 2, title: "nested folder", children: [] }
+        {
+          id: "20",
+          parentId: "11",
+          index: 0,
+          title: "A",
+          url: "https://a.example"
+        },
+        {
+          id: "21",
+          parentId: "11",
+          index: 1,
+          title: "B",
+          url: "https://b.example"
+        },
+        {
+          id: "22",
+          parentId: "11",
+          index: 2,
+          title: "nested folder",
+          children: []
+        }
       ]
     }
     expect(collectFolderUrls(folder)).toEqual(

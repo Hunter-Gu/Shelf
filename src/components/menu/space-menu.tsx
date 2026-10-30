@@ -1,5 +1,4 @@
-import { AnimatePresence } from "framer-motion"
-import { useState, type RefObject } from "react"
+import { useState } from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { useSetEditableId } from "~/context/editable-context"
@@ -9,16 +8,15 @@ import { tabManager } from "~/tabs/actions"
 import { WorkspaceType, type Workspace } from "~/workspace-model"
 
 import { isFolder, type Bookmark, type Folder } from "../../bookmark-model"
-import { DeleteConfirmChip } from "../delete-confirm-chip"
+import { DeleteConfirmDialog } from "../delete-confirm-dialog"
 import { Menu, type MenuItems } from "./menu"
 
 type MenuItemProps = {
   onEdit?: (workspace: Workspace) => void
   item: Pick<Folder, "id" | "title" | "children">
-  anchorRef: RefObject<HTMLElement | null>
 }
 
-export function SpaceMenu({ item, onEdit, anchorRef }: MenuItemProps) {
+export function SpaceMenu({ item, onEdit }: MenuItemProps) {
   const { bookmarks, workspace } = useAppContext()
   const { create } = bookmarks
   const { currentWorkspace: currentSpace, remove } = workspace
@@ -93,17 +91,13 @@ export function SpaceMenu({ item, onEdit, anchorRef }: MenuItemProps) {
   return (
     <>
       <Menu items={menuItems} />
-      <AnimatePresence>
-        {isConfirmingDelete && (
-          <DeleteConfirmChip
-            key="confirm-delete"
-            label={`Delete "${currentSpace.title}"`}
-            anchorRef={anchorRef}
-            onConfirm={handleDelete}
-            onCancel={() => setConfirmingDelete(false)}
-          />
-        )}
-      </AnimatePresence>
+      <DeleteConfirmDialog
+        isOpen={isConfirmingDelete}
+        folder={item}
+        name={currentSpace.title}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </>
   )
 }

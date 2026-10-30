@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "wxt/browser"
 
-import { toBaseFolder, toWorkspaceParentId, type RootTree } from "~/bookmark-model"
+import {
+  toBaseFolder,
+  toWorkspaceParentId,
+  type RootTree
+} from "~/bookmark-model"
 import { adoptWorkspaceFolders } from "~/workspace-model/adopt-workspace-folders"
 import { proofWorkspaces } from "~/workspace-model/proof-workspaces"
 import { renameLegacyTitles } from "~/workspace-model/rename-legacy-titles"
@@ -145,12 +149,14 @@ export function useWorkspaces({
       initializingRef.current = true
 
       try {
-        const saved = await workspaceStorage.getValue().catch((error: unknown) => {
-          // Never let a bad stored value hang the app in "not ready" forever
-          // — fall back to re-deriving workspaces from the bookmark tree below.
-          console.error("Failed to read workspace storage", error)
-          return []
-        })
+        const saved = await workspaceStorage
+          .getValue()
+          .catch((error: unknown) => {
+            // Never let a bad stored value hang the app in "not ready" forever
+            // — fall back to re-deriving workspaces from the bookmark tree below.
+            console.error("Failed to read workspace storage", error)
+            return []
+          })
         const savedCurrentId = await currentWorkspaceStorage
           .getValue()
           .catch(() => "")
@@ -201,7 +207,17 @@ export function useWorkspaces({
     }
 
     const current = workspacesRef.current
-    const next = proofWorkspaces(currentTree, current)
+    // Adopting here too, not just at startup, lets folders that arrive while
+    // the panel is open — an Arc import, another device's sync — show up as
+    // spaces straight away.
+    const next = await adoptWorkspaceFolders(
+      currentTree,
+      proofWorkspaces(currentTree, current),
+      moveBookmark
+    )
+    // A create or update that landed while this awaited wins; the tree change
+    // it causes runs this again.
+    if (workspacesRef.current !== current) return
     if (sameWorkspaces(current, next)) return
 
     workspacesRef.current = next
@@ -261,7 +277,9 @@ export function useWorkspaces({
           changed = createWorkspace({ ...changed, id: folder.id })
           // Home's id changes here, so the remembered active workspace has to
           // follow it or the panel reopens on a different space.
-          const activeId = await currentWorkspaceStorage.getValue().catch(() => "")
+          const activeId = await currentWorkspaceStorage
+            .getValue()
+            .catch(() => "")
           if (activeId === id) {
             void currentWorkspaceStorage.setValue(folder.id).catch(() => {})
           }

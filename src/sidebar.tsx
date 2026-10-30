@@ -1,7 +1,13 @@
 import { TextInput } from "@astryxdesign/core/TextInput"
 import { cn } from "common/lib/utils"
 import { ChevronDownIcon, ChevronRightIcon } from "lucide-react"
-import { useMemo, useRef, type CSSProperties, type RefObject } from "react"
+import {
+  useMemo,
+  useRef,
+  type ComponentProps,
+  type CSSProperties,
+  type RefObject
+} from "react"
 
 import { useAppContext } from "~/app/app-context"
 import { collectTreeUrls, filterBookmarksByUrl } from "~/bookmark-model"
@@ -18,8 +24,10 @@ import { SpaceMenu } from "~/components/menu/space-menu"
 import { PinHint } from "~/components/pin-hint"
 import { FavoritesStrip } from "~/components/pin-strip/favorites-strip"
 import { PinnedStrip } from "~/components/pin-strip/pinned-strip"
+import { SaveSuggestion } from "~/components/save-suggestion"
 import { useFocusSearchShortcut } from "~/hooks/use-focus-search-shortcut"
 import { useSearch } from "~/hooks/use-search"
+import { useSaveSuggestion } from "~/save-suggestion/use-save-suggestion"
 import { WorkspaceType, type Workspace } from "~/workspace-model"
 
 const TitleContainer = clsx.div(
@@ -80,12 +88,14 @@ function SearchAndFavorites({
 
 function WorkspaceTitle({
   workspaceTree,
-  onEdit
+  onEdit,
+  onSaved
 }: {
   workspaceTree: ReturnType<
     ReturnType<typeof useAppContext>["bookmarks"]["getTreeByWorkspaceId"]
   >
   onEdit?: (workspace: Workspace) => void
+  onSaved?: ComponentProps<typeof BookmarkButton>["onSaved"]
 }) {
   const { pins, workspace } = useAppContext()
   const currentSpace = workspace.currentWorkspace
@@ -173,16 +183,12 @@ function WorkspaceTitle({
         <span>{currentSpace.title}</span>
       </Title>
       <ActionsContainer>
-        <BookmarkButton id={currentSpace.id} />
+        <BookmarkButton id={currentSpace.id} onSaved={onSaved} />
         {workspace.ready && currentSpace.type === WorkspaceType.Normal ? (
           <MoveOutOfSpaceMenu workspaceId={currentSpace.id} />
         ) : null}
         {workspaceTree ? (
-          <SpaceMenu
-            item={workspaceTree}
-            onEdit={onEdit}
-            anchorRef={titleRef}
-          />
+          <SpaceMenu item={workspaceTree} onEdit={onEdit} />
         ) : null}
       </ActionsContainer>
     </TitleContainer>
@@ -196,6 +202,7 @@ export function Sidebar({ onEdit }: SidebarProps) {
   const searchInputRef = useRef<HTMLInputElement>(null)
   useFocusSearchShortcut(searchInputRef)
   const isPinsCollapsed = currentSpace.isPinsCollapsed
+  const saveSuggestion = useSaveSuggestion()
 
   const getWorkspaceTree = (sourceTree: NonNullable<typeof bookmarks.tree>) =>
     bookmarks.getTreeByWorkspaceId({
@@ -228,7 +235,12 @@ export function Sidebar({ onEdit }: SidebarProps) {
           onSearch={handleSearch}
         />
 
-        <WorkspaceTitle workspaceTree={workspaceTree} onEdit={onEdit} />
+        <WorkspaceTitle
+          workspaceTree={workspaceTree}
+          onEdit={onEdit}
+          onSaved={saveSuggestion.offer}
+        />
+        <SaveSuggestion {...saveSuggestion} />
 
         <div
           id="workspace-pinned-bookmarks"

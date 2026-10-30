@@ -57,8 +57,8 @@ describe("filterBookmarksByUrl", () => {
 
   it("preserves the original tree when nothing is filtered", () => {
     expect(filterBookmarksByUrl(tree, new Set())).toBe(tree)
-    expect(filterBookmarksByUrl(tree, new Set(["https://other.example/"]))).toBe(
-      tree
-    )
+    expect(
+      filterBookmarksByUrl(tree, new Set(["https://other.example/"]))
+    ).toBe(tree)
   })
 })
