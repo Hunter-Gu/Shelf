@@ -13,7 +13,7 @@ Thanks for helping make Shelf better. Bug reports, focused feature proposals, do
 Shelf uses pnpm and WXT.
 
 ```bash
-git clone <your-fork-url> Shelf
+git clone https://github.com/<your-username>/Shelf.git
 cd Shelf
 corepack enable
 pnpm install
