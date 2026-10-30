@@ -1,5 +1,4 @@
 import { Button } from "@astryxdesign/core/Button"
-import { UserRoundPenIcon } from "lucide-react"
 
 import { clsx, withClsx } from "../clsx"
 
@@ -20,7 +19,3 @@ export const ActionButtonsContainer = clsx.div(
 export const ConfirmButton = withClsx(Button, "font-semibold")
 
 export const CancelButton = withClsx(Button, "text-black/50 dark:text-white/60")
-
-const EmojiStyle = "w-full h-full"
-export const EmojiText = clsx.span(EmojiStyle)
-export const EmojiPlaceholder = withClsx(UserRoundPenIcon, EmojiStyle)
