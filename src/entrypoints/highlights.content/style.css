@@ -1,0 +1,25 @@
+html[data-shelf-native-highlight]::target-text,
+html[data-shelf-native-highlight] ::target-text {
+  background-color: transparent;
+  color: inherit;
+}
+
+::highlight(shelf-saved-passages-yellow) {
+  background-color: #fff58a;
+  color: #1c1917;
+}
+
+::highlight(shelf-saved-passages-pink) {
+  background-color: #ffb3c6;
+  color: #1c1917;
+}
+
+::highlight(shelf-saved-passages-green) {
+  background-color: #a3f5aa;
+  color: #1c1917;
+}
+
+::highlight(shelf-saved-passages-blue) {
+  background-color: #b4ccff;
+  color: #1c1917;
+}

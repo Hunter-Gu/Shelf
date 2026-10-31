@@ -12,6 +12,7 @@ import {
   type RootTree,
   type SearchState
 } from "~/bookmark-model"
+import { hideHighlights } from "~/selection-bookmarks/hide-highlights"
 import { WorkspaceType, type Workspace } from "~/workspace-model"
 
 type BookmarkChange = Parameters<typeof browser.bookmarks.update>[1]
@@ -19,7 +20,11 @@ type BookmarkCreate = Parameters<typeof browser.bookmarks.create>[0]
 type BookmarkMove = Parameters<typeof browser.bookmarks.move>[1]
 
 export function useBookmarks() {
-  const [tree, setTree] = useState<RootTree | null>(null)
+  const [rawTree, setTree] = useState<RootTree | null>(null)
+  const tree = useMemo(
+    () => (rawTree ? hideHighlights(rawTree) : null),
+    [rawTree]
+  )
   const [searchState, setSearchState] = useState<SearchState | null>(null)
   const [searchText, setSearchText] = useState("")
   const searchRequestRef = useRef(0)

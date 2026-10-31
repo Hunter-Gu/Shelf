@@ -11,6 +11,8 @@ import { browser } from "wxt/browser"
 
 import { useOpenSidePanel } from "~/hooks/use-open-side-panel"
 
+import { PassagesSection } from "./passages-section"
+
 function WelcomeContent() {
   const { state, open } = useOpenSidePanel()
 
@@ -72,6 +74,8 @@ function WelcomeContent() {
             </a>
           </p>
         </div>
+
+        <PassagesSection />
 
         <div className="mt-6 border-t border-black/5 pt-6 text-left dark:border-white/10">
           <p className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-100">

@@ -1,0 +1,116 @@
+:host {
+  all: initial;
+}
+.shelf-theme {
+  color-scheme: light dark;
+  color: var(--color-text-primary);
+  font: 13px/1.4 var(--font-family-body);
+}
+[hidden] {
+  display: none !important;
+}
+.panel {
+  position: fixed;
+  box-sizing: border-box;
+  padding: 3px 5px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: var(--color-background-popover);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-low);
+  pointer-events: auto;
+  user-select: none;
+  max-width: calc(100vw - 16px);
+}
+.panel::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: var(--arrow-left, 50%);
+  width: 6px;
+  height: 6px;
+  background: var(--color-background-popover);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  transform: rotate(45deg);
+}
+.panel.below::after {
+  top: -4px;
+  bottom: auto;
+  transform: rotate(225deg);
+}
+.highlight-actions {
+  padding: 0;
+}
+.swatch {
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: #292524;
+}
+[aria-pressed="true"] .swatch {
+  outline: 1px solid var(--color-icon-secondary);
+  outline-offset: 2px;
+}
+.error {
+  max-width: 240px;
+  margin: 6px 2px 2px;
+  color: var(--color-error);
+  overflow-wrap: anywhere;
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  color: var(--color-success);
+  font-size: 12px;
+}
+.status span {
+  max-width: min(300px, calc(100vw - 50px));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.destination-trigger {
+  max-width: 160px;
+}
+.destination-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.destination-content {
+  pointer-events: auto;
+  max-height: min(340px, calc(100vh - 32px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.destination-content-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.destination-content-layout p {
+  margin: 0;
+  font-size: 12px;
+}
+
+/* Keep indentation in the child groups, with expand buttons at the trailing edge. */
+.destination-tree .astryx-tree-list-item {
+  margin-left: 0 !important;
+}
+.destination-tree [role="group"] {
+  padding-left: 16px;
+}
+.destination-tree .astryx-tree-list-chevron {
+  order: 1;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}

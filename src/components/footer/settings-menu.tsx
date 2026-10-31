@@ -1,6 +1,7 @@
 import {
   ArrowRightLeft,
   FolderInput,
+  Highlighter,
   Keyboard,
   MessageSquare,
   Settings
@@ -14,6 +15,11 @@ const FEEDBACK_URL = "https://usecarrel.app/support"
 const openTab = (url: string) => void browser.tabs.create({ url })
 
 const items: MenuItems = [
+  {
+    label: "Text selection bookmarks…",
+    icon: <Highlighter size={16} />,
+    onClick: () => openTab(chrome.runtime.getURL("/selection-settings.html"))
+  },
   {
     label: "Turn folders into spaces…",
     icon: <FolderInput size={16} />,

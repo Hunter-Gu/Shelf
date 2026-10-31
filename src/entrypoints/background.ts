@@ -2,6 +2,7 @@ import { browser } from "wxt/browser"
 import { defineBackground } from "wxt/utils/define-background"
 
 import { FOCUS_SEARCH_MESSAGE, focusSearchOnOpenStorage } from "~/focus-search"
+import { registerSelectionBookmarks } from "~/selection-bookmarks/background"
 
 const FILLED_ICON = {
   16: "icon/16.png",
@@ -43,6 +44,8 @@ async function refreshActiveTabIcons() {
 const UNINSTALL_URL = "https://usecarrel.app/shelf/uninstalled"
 
 export default defineBackground(() => {
+  registerSelectionBookmarks()
+
   void browser.sidePanel.setPanelBehavior({
     openPanelOnActionClick: true
   })

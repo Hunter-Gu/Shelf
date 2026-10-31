@@ -34,7 +34,14 @@ export default defineConfig({
         description: "Open Shelf and focus search"
       }
     },
-    permissions: ["bookmarks", "favicon", "storage", "tabs", "tabGroups"]
+    permissions: [
+      "bookmarks",
+      "contextMenus",
+      "favicon",
+      "storage",
+      "tabs",
+      "tabGroups"
+    ]
   },
   vite: () => ({
     plugins: [tailwindcss()]

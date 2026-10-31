@@ -5,7 +5,7 @@
 const SHELF_TITLE_PATTERN =
   /^(?:\[([^\]]*)\]\s*)?(.*?)\s*\(Shelf(?:\|([^|)]+))?\)\s*$/
 
-export type ShelfRole = "Home" | "Pins" | "Favorites"
+export type ShelfRole = "Home" | "Pins" | "Favorites" | "Highlights"
 
 export function parseShelfTitle(folderTitle: string) {
   const match = SHELF_TITLE_PATTERN.exec(folderTitle)

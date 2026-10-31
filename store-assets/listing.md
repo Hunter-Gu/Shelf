@@ -26,6 +26,7 @@ WHAT YOU GET
 • Drag and drop to rearrange bookmarks and folders, including across spaces.
 • Instant search across all your bookmarks. Press Ctrl+Shift+K (⌘+Shift+K on Mac) to open Shelf straight into search.
 • Save the page you're on in one click, and Shelf offers to move it into the folder that already holds that site's bookmarks.
+• Save passages, not just pages: select text and pick a color, and it stays highlighted when you come back. Click a highlight to recolor or remove it.
 • Open a whole space as a Chrome tab group.
 • Already have bookmark folders? Turn several into spaces at once, renaming them and picking an emoji as you go.
 
@@ -37,11 +38,11 @@ Bring your Arc sidebar over in one step: open Settings → Import from Arc and p
 
 HOW SHELF CHANGES YOUR BOOKMARKS
 
-Shelf adds a few folders to keep your spaces: each space is a folder in the Bookmarks Bar named like "Work (Shelf)", and pinned links and favorites live in "Pins (Shelf|Pins)" and "Favorites (Shelf|Favorites)" under Other Bookmarks. Rename or delete them in Chrome's bookmark manager like any folder.
+Shelf adds a few folders to keep your spaces: each space is a folder in the Bookmarks Bar named like "Work (Shelf)", pinned links and favorites live in "Pins (Shelf|Pins)" and "Favorites (Shelf|Favorites)", and saved passages in "Highlights (Shelf|Highlights)", all under Other Bookmarks. Rename or delete them in Chrome's bookmark manager like any folder.
 
 PRIVACY
 
-Shelf needs no account and sends nothing anywhere while you use it. It only uses Chrome's bookmark, storage, tab and tab-group APIs on your device. When you remove it, Chrome opens a short page asking why; answering is optional and anonymous.
+Shelf needs no account and sends nothing anywhere while you use it. It reads web pages only to find the passages you saved and show them highlighted, on your device. When you remove it, Chrome opens a short page asking why; answering is optional and anonymous.
 
 OPEN SOURCE
 
@@ -62,7 +63,8 @@ Shelf is made by Carrel (usecarrel.app). It is not affiliated with Arc or The Br
 ## Privacy practices tab
 
 **Single purpose:** Show and organize the user's Chrome bookmarks in the side
-panel, grouped into spaces with pinned links and favorites.
+panel, grouped into spaces with pinned links and favorites, including passages
+of pages saved as bookmarks.
 
 **Permission justifications:**
 
@@ -78,10 +80,16 @@ panel, grouped into spaces with pinned links and favorites.
 - `favicon` — Shows each bookmark's site icon from Chrome's local favicon
   cache, without requesting it from the network.
 - `sidePanel` — Shelf's interface is a Chrome side panel.
+- `contextMenus` — Adds "Save selected text to Shelf" to the right-click menu
+  for selected text, with the user's spaces and folders to save into.
+- Host permissions (`http://*/*`, `https://*/*`, from the content script) —
+  When the user selects text, shows a small panel to save it as a bookmark,
+  and when a page is visited again, finds the saved passages in the page and
+  highlights them. Page text is matched on the device and never sent anywhere.
 
 **Remote code:** No. All code is included in the package.
 
-**Data usage:** Collects none of the listed categories. Bookmarks are read and
-changed only on the device and are never sent to a server. Tick the three
+**Data usage:** Collects none of the listed categories. Bookmarks and page text
+are read and changed only on the device and are never sent to a server. Tick the three
 certifications (no selling or transfer, no unrelated use, no creditworthiness
 use).
