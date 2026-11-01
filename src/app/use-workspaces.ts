@@ -74,6 +74,11 @@ export function useWorkspaces({
     createWorkspace({ id: "", title: "", logo: "" })
   )
   const [ready, setReady] = useState(false)
+  useEffect(() => {
+    if (!ready || !currentWorkspace.id) return
+    void currentWorkspaceStorage.setValue(currentWorkspace.id).catch(() => {})
+  }, [ready, currentWorkspace.id])
+
   const workspacesRef = useRef(workspaces)
   const treeRef = useRef(tree)
   const initializedRef = useRef(false)
@@ -455,7 +460,6 @@ export function useWorkspaces({
     const next = workspacesRef.current.find((workspace) => workspace.id === id)
     if (next) {
       setCurrentWorkspace(next)
-      void currentWorkspaceStorage.setValue(id).catch(() => {})
     }
   }, [])
 

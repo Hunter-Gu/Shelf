@@ -29,6 +29,7 @@ Shelf manages bookmarks, not open tabs.
 - **Spaces for every context.** Work, research, side projects, travel — switch from the dock at the bottom of the panel.
 - **Turn folders you already have into spaces.** Pick several at once from Settings → Turn folders into spaces, renaming them and choosing an emoji as you go.
 - **Saves land next to their site.** After you save a page, Shelf offers to move it into the folder that already holds that site's bookmarks.
+- **Save passages, not just pages.** Select text and pick a color to save it with its page; Shelf highlights it whenever you come back, and you can click a highlight to recolor or remove it. Change the color or turn it off in Settings → Text selection bookmarks.
 - **Favorites** that stay visible at the top, and **pins** for what matters right now, without moving bookmarks out of their folders.
 - **Goes to tabs you already have open.** Clicking a bookmark that's open in a tab switches to it; Cmd/Ctrl-click opens a new one.
 - **Search everything.** `Ctrl+Shift+K` (`Command+Shift+K` on macOS) opens Shelf straight into search.
@@ -49,18 +50,21 @@ Arc keeps the file at `~/Library/Application Support/Arc/StorableSidebar.json` o
 
 Shelf never keeps your bookmarks anywhere but Chrome. It recognizes its own folders by a marker at the end of their names:
 
-| Folder                                       | Name                           | Where           |
-| -------------------------------------------- | ------------------------------ | --------------- |
-| A space                                      | `[emoji] Name (Shelf)`         | Bookmarks Bar   |
-| Home, once you rename it or give it an emoji | `[emoji] Name (Shelf\|Home)`   | Bookmarks Bar   |
-| Pinned links                                 | `Pins (Shelf\|Pins)`           | Other Bookmarks |
-| Favorites                                    | `Favorites (Shelf\|Favorites)` | Other Bookmarks |
+| Folder                                       | Name                             | Where           |
+| -------------------------------------------- | -------------------------------- | --------------- |
+| A space                                      | `[emoji] Name (Shelf)`           | Bookmarks Bar   |
+| Home, once you rename it or give it an emoji | `[emoji] Name (Shelf\|Home)`     | Bookmarks Bar   |
+| Pinned links                                 | `Pins (Shelf\|Pins)`             | Other Bookmarks |
+| Favorites                                    | `Favorites (Shelf\|Favorites)`   | Other Bookmarks |
+| Saved passages                               | `Highlights (Shelf\|Highlights)` | Other Bookmarks |
 
 Rename or delete these like any folder. If you reinstall Shelf, folders that still end in `(Shelf)` come back as spaces. Space order, colors and a few interface preferences live in Chrome's sync storage; the space you have open stays on the device.
 
+Saved passages are bookmarks in the Highlights folder, in a subfolder per color, hidden from Shelf's lists and search; the page they belong to is saved like any other bookmark. Removing a passage bookmark in Chrome's bookmark manager removes its highlight.
+
 ## Privacy
 
-Shelf sends nothing anywhere while you use it. It talks only to Chrome's bookmark, storage, tab and tab-group APIs on your device. When you remove it, Chrome opens a short page on usecarrel.app asking why; answering is optional and anonymous.
+Shelf sends nothing anywhere while you use it. Shelf reads web pages only to find your saved passages and show them highlighted, on your device. When you remove it, Chrome opens a short page on usecarrel.app asking why; answering is optional and anonymous.
 
 ## Screenshots
 
@@ -107,19 +111,22 @@ Load `.output/chrome-mv3-dev` as an unpacked extension. WXT rebuilds as files ch
 - `src/entrypoints/welcome`, `src/entrypoints/import-arc` — the pages opened after install and for the Arc import.
 - `src/app` — hooks that keep React state in step with Chrome's APIs.
 - `src/bookmark-model`, `src/workspace-model`, `src/pin-model`, `src/arc-import` — domain logic, with unit tests.
+- `src/selection-bookmarks`, `src/entrypoints/highlights.content` — saved passage bookmarks and their in-page highlights.
 - `src/shelf-title.ts` — the `(Shelf)` folder-name format.
 - `store-assets` — store listing text and artwork.
 
 ## Permissions
 
-| Permission  | Why it is needed                                              |
-| ----------- | ------------------------------------------------------------- |
-| `bookmarks` | Read, create, rename, move and remove bookmarks and folders   |
-| `storage`   | Keep space order, colors and interface preferences            |
-| `tabs`      | Open bookmarks, switch to open tabs, and check the active tab |
-| `tabGroups` | Open a space as a tab group                                   |
-| `favicon`   | Show site icons from Chrome's local cache                     |
-| `sidePanel` | Show Shelf in Chrome's side panel                             |
+| Permission                  | Why it is needed                                              |
+| --------------------------- | ------------------------------------------------------------- |
+| `bookmarks`                 | Read, create, rename, move and remove bookmarks and folders   |
+| `contextMenus`              | Save selected web-page text from Chrome's right-click menu    |
+| `storage`                   | Keep space order, colors and interface preferences            |
+| `tabs`                      | Open bookmarks, switch to open tabs, and check the active tab |
+| `tabGroups`                 | Open a space as a tab group                                   |
+| `favicon`                   | Show site icons from Chrome's local cache                     |
+| `sidePanel`                 | Show Shelf in Chrome's side panel                             |
+| Website access (HTTP/HTTPS) | Show saved passages highlighted on the pages they came from   |
 
 ## Contributing
 
