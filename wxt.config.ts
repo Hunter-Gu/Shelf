@@ -9,7 +9,7 @@ export default defineConfig({
   },
   modules: ["@wxt-dev/module-react"],
   manifest: {
-    name: "Shelf – Arc-Style Bookmark Manager",
+    name: "Shelf – Arc-Style Bookmark Sidebar",
     description:
       "Arc-style bookmarks in Chrome's side panel: spaces, pinned links and favorites, kept as your own Chrome bookmarks. Open source.",
     minimum_chrome_version: "116",
