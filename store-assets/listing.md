@@ -3,7 +3,7 @@
 The name and summary come from the manifest (`wxt.config.ts`); the rest is
 pasted into the developer dashboard.
 
-**Name** (manifest, max 75): Shelf – Arc-Style Bookmark Manager
+**Name** (manifest, max 75): Shelf – Arc-Style Bookmark Sidebar
 
 **Summary** (manifest, max 132): Arc-style bookmarks in Chrome's side panel:
 spaces, pinned links and favorites, kept as your own Chrome bookmarks. Open
