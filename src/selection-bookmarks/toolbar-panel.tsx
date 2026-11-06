@@ -2,7 +2,7 @@ import { Divider } from "@astryxdesign/core/Divider"
 import { IconButton } from "@astryxdesign/core/IconButton"
 import { ToggleButton } from "@astryxdesign/core/ToggleButton"
 import { Toolbar } from "@astryxdesign/core/Toolbar"
-import { Check, Trash2 } from "lucide-react"
+import { Check, Trash2, X } from "lucide-react"
 import {
   useCallback,
   useImperativeHandle,
@@ -46,8 +46,15 @@ type Props = {
   onColor: (color: HighlightColor) => void
   onRemove: () => void
   onDestination: () => void
+  onDismiss: () => void
 }
-export function ToolbarPanel({ ref, onColor, onRemove, onDestination }: Props) {
+export function ToolbarPanel({
+  ref,
+  onColor,
+  onRemove,
+  onDestination,
+  onDismiss
+}: Props) {
   const [preferences, setPreferences] = useState(DEFAULT_SELECTION_PREFERENCES)
   const [view, setView] = useState({
     visible: false,
@@ -175,22 +182,35 @@ export function ToolbarPanel({ ref, onColor, onRemove, onDestination }: Props) {
                   onColor={onColor}
                 />
               ))}
+              <Divider
+                orientation="vertical"
+                style={{ height: 20, alignSelf: "center" }}
+              />
               {view.color && (
-                <>
-                  <Divider
-                    orientation="vertical"
-                    style={{ height: 20, alignSelf: "center" }}
-                  />
-                  <IconButton
-                    label="Remove highlight"
-                    icon={<Trash2 size={14} />}
-                    variant="ghost"
-                    size="sm"
-                    isDisabled={view.busy}
-                    {...removeAction}
-                  />
-                </>
+                <IconButton
+                  label="Remove highlight"
+                  icon={<Trash2 size={14} />}
+                  variant="ghost"
+                  size="sm"
+                  isDisabled={view.busy}
+                  {...removeAction}
+                />
               )}
+              <IconButton
+                label="Close"
+                icon={<X size={14} />}
+                variant="ghost"
+                size="sm"
+                isDisabled={view.busy}
+                // Waits for click rather than pointerdown: hiding the panel
+                // earlier would land the mousedown on the page beneath it,
+                // which clears the selection this button has to keep.
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onDismiss()
+                }}
+              />
             </>
           }
         />

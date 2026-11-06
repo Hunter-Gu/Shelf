@@ -74,6 +74,10 @@ export function installHighlightToolbar(
   let busy = false
   let failed = false
   let enabled = true
+  // The selection stays live after a dismissal, so without this the next
+  // selectionchange or pointerup would bring the toolbar straight back.
+  let dismissedText = ""
+  const selectedText = () => window.getSelection()?.toString().trim() ?? ""
   const reset = () => {
     clearTimeout(pending)
     clearTimeout(statusTimer)
@@ -84,6 +88,11 @@ export function installHighlightToolbar(
   }
   const close = () => {
     if (!busy) reset()
+  }
+  const dismiss = () => {
+    if (busy) return
+    dismissedText = selectedText()
+    reset()
   }
   const mutate = async (action: Action) => {
     if (busy) return
@@ -141,7 +150,8 @@ export function installHighlightToolbar(
     () => void mutate({ kind: "remove" }),
     () => {
       if (target?.kind === "highlight") void mutate({ kind: "move" })
-    }
+    },
+    dismiss
   )
 
   const updateSelection = () => {
@@ -178,6 +188,7 @@ export function installHighlightToolbar(
     const rect = selectionRect(selection)
     if (rect.bottom <= 0 || rect.top >= window.innerHeight) return close()
     const text = selection.toString().trim()
+    if (text === dismissedText) return
     const sameSelection =
       target?.url === location.href &&
       (target.kind === "selection" ? target.text : target.selectedText) === text
@@ -214,7 +225,12 @@ export function installHighlightToolbar(
     clearTimeout(pending)
     pending = setTimeout(updateSelection, 150)
   }
-  ctx.addEventListener(document, "selectionchange", scheduleSelection)
+  ctx.addEventListener(document, "selectionchange", () => {
+    // Checked on every change, not after the debounce, so that clearing the
+    // selection and reselecting the same text counts as a new selection.
+    if (selectedText() !== dismissedText) dismissedText = ""
+    scheduleSelection()
+  })
   ctx.addEventListener(
     document,
     "pointerdown",
@@ -291,7 +307,7 @@ export function installHighlightToolbar(
     { capture: true }
   )
   ctx.addEventListener(document, "keydown", (event) => {
-    if (event.key === "Escape") close()
+    if (event.key === "Escape") dismiss()
   })
   ctx.addEventListener(
     document,

@@ -16,7 +16,8 @@ export type ToolbarRect = Pick<DOMRect, "left" | "right" | "top" | "bottom">
 function mountToolbar(
   onColor: (color: HighlightColor) => void,
   onRemove: () => void,
-  onDestination: () => void
+  onDestination: () => void,
+  onDismiss: () => void
 ) {
   const host = document.createElement("shelf-highlight-toolbar")
   host.style.cssText =
@@ -46,6 +47,7 @@ function mountToolbar(
           onColor={onColor}
           onRemove={onRemove}
           onDestination={onDestination}
+          onDismiss={onDismiss}
         />
       </ShadowTheme>
     )
@@ -60,14 +62,15 @@ function mountToolbar(
 export function createToolbarView(
   onColor: (color: HighlightColor) => void,
   onRemove: () => void,
-  onDestination: () => void
+  onDestination: () => void,
+  onDismiss: () => void
 ) {
   let mounted: ReturnType<typeof mountToolbar> | null = null
   let preferences: SelectionPreferences | undefined
   const panel = () => mounted?.toolbar.current
   const mount = () => {
     if (!mounted) {
-      mounted = mountToolbar(onColor, onRemove, onDestination)
+      mounted = mountToolbar(onColor, onRemove, onDestination, onDismiss)
       if (preferences) panel()?.setPreferences(preferences)
     }
     return panel()
